@@ -1,0 +1,8 @@
+__pycache__
+.qt_for_python
+/build
+/dist
+/output
+/romfs
+settings.txt
+log.txt

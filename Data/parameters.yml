@@ -1,0 +1,450 @@
+---
+Music:
+  - BGM_Mission_Stage_Alterna_01
+  - BGM_Mission_Stage_Alterna_C01
+  - BGM_Mission_Stage_Alterna_02
+  - BGM_Mission_Stage_Alterna_C02
+  - BGM_Mission_Stage_Alterna_03
+  - BGM_Mission_Stage_Alterna_C03
+  - BGM_Mission_Stage_Alterna_04
+  - BGM_Mission_Stage_Alterna_C04
+  - BGM_Mission_Stage_Alterna_C05
+  - BGM_Mission_Stage_Alterna_C06
+  - BGM_Mission_Stage_Alterna_C07
+  - BGM_Mission_Boss_Fuuka
+  - BGM_Mission_Boss_Mantaro
+  - BGM_Mission_Boss_Takowasa
+  - BGM_Mission_Boss_Utsuho
+  - BGM_Mission_Stage_Crater_01
+  # - BGM_Mission_Stage_Rocket_01
+  # - BGM_Mission_Stage_Rocket_02
+  # - BGM_Mission_Stage_Rocket_03
+  # - BGM_Mission_Stage_Rocket_04
+  # - BGM_Mission_Staffroll
+  # - BGM_Mission_Demo_SurimiTheme
+  # - BGM_Mission_DemoScene_D3_03
+  # - BGM_Mission_DemoScene_D1_01
+  # - BGM_Mission_Boss_Surimi03
+  - BGM_Mission_Boss_Kumasan02
+  - BGM_Mission_Boss_Kumasan01
+  # - BGM_LobbyVersus_Holiday_Main_01
+  # - BGM_LobbyVersus_Fes_02
+  # - BGM_LobbyVersus_03_Fsodr
+  # - BGM_BGM_Versus_Fes_Thunder_04
+  # - BGM_Blitz_ABXY_01
+  # - BGM_Blitz_ABXY_02
+  # - BGM_Blitz_CurrentRip_01
+  # - BGM_Blitz_CurrentRip_02
+  # - BGM_Blitz_FromBottom_01
+  # - BGM_Blitz_FromBottom_02
+  # - BGM_Blitz_FromBottom_03
+  # - BGM_Blitz_Gasshokukin_01
+  # - BGM_Blitz_Gasshokukin_02
+  # - BGM_Blitz_SashiMori_01
+  # - BGM_Blitz_SashiMori_02
+  # - BGM_Blitz_WetFloor_01
+  # - BGM_Blitz_WetFloor_02
+  # - BGM_Blitz_WetFloor_03
+  # - BGM_Blitz_WetFloor_04
+  # - BGM_Blitz_WetFloor_05
+
+Colors:
+  # - Work/Gyml/HeroYellow.game__gfx__parameter__TeamColorDataSet.gyml
+  - HeroYellow
+  - HeroGreen
+  - HeroOrange
+  - HeroBlue
+  - HeroLightBlue
+  - HeroSoda
+  - HeroBossManta
+  - HeroBossUtsuho
+  - HeroBossFuuka
+  - GreenPurple
+  - LimegreenPurple
+  - OrangeBlue
+  - OrangePurple
+  - PinkGreen
+  - TriColorDefault
+  - TriColorSameTeamMatch
+  - TurquoisePink
+  - TurquoiseRed
+  - YellowBlue
+  - YellowPurple
+
+Main_Weapons:
+  # - Work/Gyml/Shooter_Normal_Msn.spl__WeaponInfoMain.gyml
+  - Blaster_Bear_Coop
+  - Blaster_LightLong_00   
+  # - Blaster_LightLong_Coop 
+  - Blaster_LightLong_Msn  
+  - Blaster_LightShort_00  
+  - Blaster_LightShort_01  
+  # - Blaster_LightShort_Coop
+  - Blaster_LightShort_Msn 
+  - Blaster_Light_00       
+  - Blaster_Light_01       
+  # - Blaster_Light_Coop     
+  - Blaster_Light_Msn      
+  - Blaster_Long_00        
+  # - Blaster_Long_Coop      
+  - Blaster_Long_Msn       
+  - Blaster_Middle_00      
+  # - Blaster_Middle_Coop    
+  - Blaster_Middle_Msn     
+  # - Blaster_RivalLv1_00    
+  # - Blaster_RivalLv2_00    
+  - Blaster_Short_00       
+  - Blaster_Short_01       
+  # - Blaster_Short_Coop
+  - Blaster_Short_Msn
+  - Brush_Mini_00
+  - Brush_Mini_01
+  # - Brush_Mini_Coop
+  - Brush_Mini_Msn
+  - Brush_Normal_00
+  # - Brush_Normal_Coop
+  - Brush_Normal_Msn
+  # - Brush_RivalLv1_00
+  # - Brush_RivalLv2_00
+  - Charger_Bear_Coop
+  - Charger_Keeper_00
+  # - Charger_Keeper_Coop
+  - Charger_Keeper_Msn
+  - Charger_Light_00
+  # - Charger_Light_Coop
+  - Charger_Light_Msn
+  - Charger_LongScope_00
+  - Charger_LongScope_Msn
+  - Charger_Long_00
+  # - Charger_Long_00_AMB
+  # - Charger_Long_Coop
+  - Charger_Long_Msn
+  - Charger_NormalScope_00
+  - Charger_NormalScope_01
+  - Charger_NormalScope_Msn
+  - Charger_Normal_00
+  - Charger_Normal_01
+  # - Charger_Normal_Coop
+  - Charger_Normal_Msn
+  - Charger_Pencil_00
+  # - Charger_Pencil_Coop
+  - Charger_Quick_00
+  # - Charger_Quick_Coop
+  - Charger_Quick_Msn
+  - Free
+  - Maneuver_Dual_00
+  # - Maneuver_Dual_Coop
+  - Maneuver_Dual_Msn
+  - Maneuver_Gallon_00
+  # - Maneuver_Gallon_Coop
+  - Maneuver_Gallon_Msn
+  - Maneuver_Normal_00
+  # - Maneuver_Normal_Coop
+  - Maneuver_Normal_Msn
+  # - Maneuver_RivalLv1_00
+  # - Maneuver_RivalLv2_00
+  - Maneuver_Short_00
+  - Maneuver_Short_01
+  # - Maneuver_Short_Coop
+  - Maneuver_Short_Msn
+  - Maneuver_Stepper_00
+  # - Maneuver_Stepper_Coop
+  - Maneuver_Stepper_Msn
+  - Roller_Compact_00
+  - Roller_Compact_01
+  # - Roller_Compact_Coop
+  - Roller_Compact_Msn
+  - Roller_Heavy_00
+  # - Roller_Heavy_Coop
+  - Roller_Heavy_Msn
+  - Roller_Hunter_00
+  # - Roller_Hunter_Coop
+  - Roller_Hunter_Msn
+  - Roller_Normal_00
+  - Roller_Normal_01
+  # - Roller_Normal_Coop
+  - Roller_Normal_Msn
+  # - Roller_RivalLv1_00
+  # - Roller_RivalLv2_00
+  - Roller_Wide_00
+  # - Roller_Wide_Coop
+  - Saber_Bear_Coop
+  - Saber_Lite_00
+  # - Saber_Lite_Coop
+  - Saber_Normal_00
+  # - Saber_Normal_Coop
+  - Saber_Normal_Msn
+  - Shelter_Bear_Coop
+  - Shelter_Compact_00
+  # - Shelter_Compact_Coop
+  - Shelter_Compact_Msn
+  - Shelter_Normal_00
+  # - Shelter_Normal_Coop
+  - Shelter_Normal_Msn
+  # - Shelter_RivalLv1_00
+  # - Shelter_RivalLv2_00
+  - Shelter_Wide_00
+  # - Shelter_Wide_Coop
+  - Shelter_Wide_Msn
+  - Shooter_Blaze_00
+  - Shooter_Blaze_01
+  # - Shooter_Blaze_Coop
+  - Shooter_Blaze_Msn
+  - Shooter_Expert_00
+  - Shooter_Expert_01
+  # - Shooter_Expert_Coop
+  - Shooter_Expert_Msn
+  - Shooter_First_00
+  - Shooter_First_01
+  # - Shooter_First_Coop
+  - Shooter_First_Msn
+  - Shooter_Flash_00
+  # - Shooter_Flash_Coop
+  - Shooter_Flash_Msn
+  - Shooter_Gravity_00
+  # - Shooter_Gravity_Coop
+  - Shooter_Gravity_Msn
+  - Shooter_Heavy_00
+  - Shooter_Heavy_01
+  # - Shooter_Heavy_Coop
+  - Shooter_Heavy_Msn
+  - Shooter_Long_00
+  - Shooter_Long_01
+  # - Shooter_Long_Coop
+  - Shooter_Long_Msn
+  # - Shooter_MissionLv1_00
+  # - Shooter_MissionLv2_00
+  # - Shooter_MissionLv3_00
+  - Shooter_Normal_00
+  # - Shooter_Normal_00_AMB_1
+  # - Shooter_Normal_00_AMB_2
+  - Shooter_Normal_01
+  # - Shooter_Normal_01_AMB_1
+  # - Shooter_Normal_Coop
+  - Shooter_Normal_H
+  - Shooter_Normal_Msn
+  - Shooter_Precision_00
+  - Shooter_Precision_01
+  # - Shooter_Precision_Coop
+  - Shooter_Precision_Msn
+  - Shooter_QuickLong_00
+  # - Shooter_QuickLong_Coop
+  - Shooter_QuickMiddle_00
+  - Shooter_QuickMiddle_01
+  # - Shooter_QuickMiddle_Coop
+  - Shooter_QuickMiddle_Msn
+  # - Shooter_RivalLv1_00
+  # - Shooter_RivalLv2_00
+  - Shooter_Short_00
+  - Shooter_Short_01
+  # - Shooter_Short_Coop
+  - Shooter_Short_Msn
+  - Shooter_TripleMiddle_00
+  # - Shooter_TripleMiddle_Coop
+  - Shooter_TripleMiddle_Msn
+  - Shooter_TripleQuick_00
+  - Shooter_TripleQuick_01
+  # - Shooter_TripleQuick_Coop
+  - Shooter_TripleQuick_Msn
+  - Slosher_Bathtub_00
+  # - Slosher_Bathtub_Coop
+  - Slosher_Bathtub_Msn
+  - Slosher_Bear_Coop
+  - Slosher_Diffusion_00
+  - Slosher_Diffusion_01
+  # - Slosher_Diffusion_Coop
+  - Slosher_Diffusion_Msn
+  - Slosher_Launcher_00
+  # - Slosher_Launcher_Coop
+  - Slosher_Launcher_Msn
+  # - Slosher_RivalLv1_00
+  # - Slosher_RivalLv2_00
+  - Slosher_Strong_00
+  - Slosher_Strong_01
+  # - Slosher_Strong_Coop
+  - Slosher_Strong_Msn
+  - Slosher_Washtub_00
+  # - Slosher_Washtub_Coop
+  - Slosher_Washtub_Msn
+  - Spinner_Downpour_00
+  # - Spinner_Downpour_Coop
+  - Spinner_Downpour_Msn
+  - Spinner_Hyper_00
+  # - Spinner_Hyper_Coop
+  - Spinner_Hyper_Msn
+  - Spinner_Quick_00
+  - Spinner_Quick_01
+  # - Spinner_Quick_Coop
+  - Spinner_Quick_Msn
+  - Spinner_Serein_00
+  # - Spinner_Serein_Coop
+  - Spinner_Serein_Msn
+  - Spinner_Standard_00
+  # - Spinner_Standard_Coop
+  - Spinner_Standard_Msn
+  - Stringer_Bear_Coop
+  - Stringer_Normal_00
+  # - Stringer_Normal_Coop
+  - Stringer_Normal_Msn
+  - Stringer_Short_00
+  # - Stringer_Short_Coop
+
+Sub_Weapons:
+  # - Work/Gyml/Bomb_Splash_Mission.spl__WeaponInfoSub.gyml
+  - Beacon
+  # - Bomb_Curling
+  # - Bomb_Curling_Hero
+  - Bomb_Curling_Mission
+  # - Bomb_Curling_Rival
+  - Bomb_Fizzy
+  # - Bomb_Quick
+  # - Bomb_Quick_Hero
+  - Bomb_Quick_Mission
+  # - Bomb_Quick_Rival
+  # - Bomb_Robot
+  - Bomb_Robot_Mission
+  # - Bomb_Robot_Rival
+  # - Bomb_Splash
+  # - Bomb_Splash_Big_Coop
+  # - Bomb_Splash_Coop
+  # - Bomb_Splash_Hero
+  - Bomb_Splash_Mission
+  # - Bomb_Splash_Rival
+  # - Bomb_Suction
+  - Bomb_Suction_Mission
+  - Bomb_Torpedo
+  # - LineMarker
+  - LineMarker_Mission
+  - PointSensor
+  - PoisonMist
+  - SalmonBuddy
+  - Shield
+  - Sprinkler
+  # - Trap
+  - Trap_Mission
+
+Special_Weapons:
+  # - Work/Gyml/SpSuperHook_Mission.spl__WeaponInfoSpecial.gyml
+  # - SpBlower
+  - SpBlower_Mission
+  # - SpCastle # kraken
+  # - SpChariot
+  # - SpChariot_Coop
+  - SpChariot_Mission
+  # - SpEnergyStand
+  # - SpFirework
+  - SpGachihoko # rainmaker
+  # - SpGreatBarrier
+  # - SpGreatBarrier_Rival
+  # - SpIkuraShoot
+  # - SpInkStorm
+  - SpInkStorm_Mission
+  # - SpInkStorm_Rival
+  # - SpJetpack
+  # - SpJetpack_Coop
+  - SpJetpack_Mission
+  # - SpJetpack_Rival
+  # - SpMicroLaser
+  # - SpMicroLaser_Coop
+  - SpMicroLaser_Mission
+  # - SpMultiMissile
+  - SpMultiMissile_Mission
+  # - SpMultiMissile_Rival
+  # - SpNiceBall
+  # - SpNiceBall_Coop
+  # - SpShockSonar
+  # - SpShockSonar_Coop
+  - SpShockSonar_Mission
+  # - SpShockSonar_Rival
+  # - SpSkewer
+  # - SpSkewer_Coop
+  - SpSkewer_Mission
+  # - SpSuperHook
+  - SpSuperHook_Mission
+  - SpSuperLanding
+  # - SpSuperLanding_Coop
+  # - SpSuperLanding_Rival
+  # - SpTripleTornado
+  # - SpTripleTornado_Coop
+  - SpTripleTornado_Mission
+  # - SpUltraShot
+  # - SpUltraShot_Coop
+  - SpUltraShot_Mission
+  # - SpUltraStamp
+  - SpUltraStamp_Mission
+
+Alterna_Missions:
+  - Msn_A01_01
+  - Msn_A01_01C
+  - Msn_A01_02
+  - Msn_A01_02C
+  - Msn_A01_03
+  - Msn_A01_03C
+  - Msn_A01_04
+  - Msn_A01_04C
+  - Msn_A01_05C
+  - Msn_A01_06C
+  - Msn_A02_01
+  - Msn_A02_01C
+  - Msn_A02_02
+  - Msn_A02_02C
+  - Msn_A02_03
+  - Msn_A02_03C
+  - Msn_A02_04C
+  - Msn_A02_05C
+  - Msn_MorayKing
+  - Msn_A03_01
+  - Msn_A03_01C
+  - Msn_A03_02
+  - Msn_A03_02C
+  - Msn_A03_03
+  - Msn_A03_03C
+  - Msn_A03_04C
+  - Msn_A04_01
+  - Msn_A04_01C
+  - Msn_A04_02
+  - Msn_A04_02C
+  - Msn_A04_03
+  - Msn_A04_03C
+  - Msn_A04_04C
+  - Msn_A04_05C
+  - Msn_A04_06C
+  - Msn_A04_07C
+  - Msn_A04_08C
+  - Msn_A04_09C
+  - Msn_SharkKing
+  - Msn_A05_01
+  - Msn_A05_01C
+  - Msn_A05_02
+  - Msn_A05_02C
+  - Msn_A05_03
+  - Msn_A05_03C
+  - Msn_A05_04
+  - Msn_A05_04C
+  - Msn_A05_05C
+  - Msn_A05_06C
+  - Msn_A05_07C
+  - Msn_A05_08C
+  - Msn_A05_09C
+  - Msn_A06_01
+  - Msn_A06_01C
+  - Msn_A06_02
+  - Msn_A06_02C
+  - Msn_A06_03
+  - Msn_A06_03C
+  - Msn_A06_04C
+  - Msn_A06_05C
+  - Msn_A06_06C
+  - Msn_A06_07C
+  - Msn_A06_08C
+  - Msn_A06_09C
+  - Msn_MantaKing
+  - Msn_ExStage
+
+Crater_Missions:
+  - Msn_C_01
+  - Msn_C_02
+  - Msn_C_03
+  - Msn_C_04
+
+...
