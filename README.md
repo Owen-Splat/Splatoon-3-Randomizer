@@ -1,4 +1,4 @@
-# Splatoon3-Randomizer
+# Splatoon-3-Randomizer
 A randomizer for Splatoon 3 Hero Mode. Currently still very early in development.
 
 This release version allows for shuffling levels, weapons, ink color, and music. Grizzco weapons are included, as well as being able to use the Rainmaker! There is also the option to add a "Enemy ink is lava" challenge to every level
