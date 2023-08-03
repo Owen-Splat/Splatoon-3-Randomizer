@@ -24,7 +24,7 @@ import os
 import platform
 import shutil
 
-base_name = "Splatoon 3 Randomizer"
+base_name = "Splatoon3_Randomizer"
 
 import struct
 if (struct.calcsize("P") * 8) == 64:
