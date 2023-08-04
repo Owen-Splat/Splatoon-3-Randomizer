@@ -5,6 +5,7 @@ import copy
 import random
 import traceback
 
+import Tools.event_tools as event_tools
 import Tools.zs_tools as zs_tools
 import oead
 
@@ -18,7 +19,7 @@ class ModsProcess(QtCore.QThread):
     progress_update = QtCore.Signal(int)
     is_done = QtCore.Signal()
     error = QtCore.Signal(str)
-
+    
     
     def __init__(self, rom_path, out_dir, seed, settings, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -171,8 +172,8 @@ class ModsProcess(QtCore.QThread):
                     e['SupplyWeaponType'] = 'Normal'
                     if main_weapon == 'Free' and sub_weapon == 'Free':
                         e['SupplyWeaponType'] = 'Special'
-                    elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission'):
-                        if random.random() < 0.2: # 1/5 chance for special
+                    elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission', 'SpChariot_Mission'):
+                        if random.random() < 0.125: # 1/8 chance for special
                             e['SupplyWeaponType'] = 'Special'
                     if special_weapon == 'SpSuperHook_Mission':
                         e['SupplyWeaponType'] = 'MainAndSpecial'
@@ -190,7 +191,18 @@ class ModsProcess(QtCore.QThread):
                     bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
                 
                 if 'SceneSpecificBgm' in bgm_data.info and '_R_' not in msn:
-                    new_bgm = random.choice(PARAMS['Music'])
+                    bgms = list(copy.deepcopy(PARAMS['Music']))
+                    if 'King' in msn: # shuffle boss music within bosses
+                        bgms.extend(('BGM_Mission_Boss_Fuuka',
+                                    'BGM_Mission_Boss_Mantaro',
+                                    'BGM_Mission_Boss_Takowasa',
+                                    'BGM_Mission_Boss_Utsuho'))
+                    elif '_R_' in msn: # shuffle rocket music within rocket
+                        bgms.extend(('BGM_Mission_Stage_Rocket_01',
+                                    'BGM_Mission_Stage_Rocket_02',
+                                    'BGM_Mission_Stage_Rocket_03',
+                                    'BGM_Mission_Stage_Rocket_04'))
+                    new_bgm = random.choice(bgms)
                     bgm_data.info['SceneSpecificBgm'] = new_bgm
                     # if 'Rocket' in new_bgm:
                     #     bgm_data.info['MainController'] = {}
@@ -198,31 +210,81 @@ class ModsProcess(QtCore.QThread):
                     #         'ClassName': 'spl__BgmMissionRocketSceneBridge',
                     #         'SLinkUserName': 'BgmMissionRocketSceneBridge'
                     #     }
-                    if '_Boss_' in new_bgm:
-                        bgm_data.info['MainController'] = {
-                            'ClassName': 'spl__BgmMissionBoss',
-                            'SLinkUserName': 'BgmMissionBoss'
-                        }
-                    elif 'Kumasan' in new_bgm:
-                        bgm_data.info['MainController'] = {
-                            'ClassName': 'spl__BgmMissionLastBoss',
-                            'SLinkUserName': 'BgmMissionLastBoss'
-                        }
-                        bgm_data.info['SceneBridgeController'] = {
-                            'ClassName': 'spl__BgmMissionSceneBridge',
-                            'SLinkUserName': 'BgmMissionSceneBridge'
-                        }
-                    else:
-                        bgm_data.info['MainController'] = {
-                            'ClassName': 'spl__BgmMissionStage',
-                            'SLinkUserName': 'BgmMissionStage'
-                        }
-                        bgm_data.info['SceneBridgeController'] = {
-                            'ClassName': '',
-                            'SLinkUserName': ''
-                        }
+                    # if '_Boss_' in new_bgm:
+                    #     bgm_data.info['MainController'] = {
+                    #         'ClassName': 'spl__BgmMissionBoss',
+                    #         'SLinkUserName': 'BgmMissionBoss'
+                    #     }
+                    # elif 'Kumasan' in new_bgm:
+                    #     bgm_data.info['MainController'] = {
+                    #         'ClassName': 'spl__BgmMissionLastBoss',
+                    #         'SLinkUserName': 'BgmMissionLastBoss'
+                    #     }
+                    #     bgm_data.info['SceneBridgeController'] = {
+                    #         'ClassName': 'spl__BgmMissionSceneBridge',
+                    #         'SLinkUserName': 'BgmMissionSceneBridge'
+                    #     }
+                    # else:
+                    #     bgm_data.info['MainController'] = {
+                    #         'ClassName': 'spl__BgmMissionStage',
+                    #         'SLinkUserName': 'BgmMissionStage'
+                    #     }
+                    #     bgm_data.info['SceneBridgeController'] = {
+                    #         'ClassName': '',
+                    #         'SLinkUserName': ''
+                    #     }
                     zs_data.writer.files[info_file] = bgm_data.repack()
+            
+            if self.settings['remove-cutscenes']:
+                # make certain flowcharts empty so that cutscenes don't play
+                # edit others to just cut to the end
+                if msn == 'BigWorld':
+                    zs_data.writer.files['Event/EventFlow/Mission_IntroduceComrade.bfevfl'] = oead.Bytes()
+                    zs_data.writer.files['Event/EventFlow/Mission_IntroduceTrinity.bfevfl'] = oead.Bytes()
+                    # zs_data.writer.files['Event/EventFlow/Mission_BigWorldFirst.bfevfl'] = oead.Bytes() - keep cool wake up cutscene
+                    zs_data.writer.files['Event/EventFlow/Mission_BigWorldTutorial.bfevfl'] = oead.Bytes()
+                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_0.bfevfl'] = oead.Bytes()
+                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_1.bfevfl'] = oead.Bytes()
+                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_2.bfevfl'] = oead.Bytes()
 
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint0', 'Event49')
+                    zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'] = event_tools.writeFlow(flow)
+
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint0', 'Event12')
+                    zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'] = event_tools.writeFlow(flow)
+                
+                elif msn == 'SmallWorld':
+                    # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] - INFINITE LOADING SCREEN
+                    zs_data.writer.files['Event/EventFlow/Mission_SecondStageClear.bfevfl'] = oead.Bytes()
+                    zs_data.writer.files['Event/EventFlow/Mission_ThirdStageClear.bfevfl'] = oead.Bytes()
+
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint0', 'Event46')
+                    zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'] = event_tools.writeFlow(flow)
+                
+                elif msn == 'Msn_RailKing':
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint0', 'Event34')
+                    zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'] = event_tools.writeFlow(flow)
+                
+                elif msn == 'LaunchPadWorld':
+                    # not enough time to look into lol
+                    # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'])
+                    # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
+                    # zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'] = oead.Bytes()
+
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint1', 'Event36')
+                    zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'] = event_tools.writeFlow(flow)
+
+                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'])
+                    event_tools.insertEventAfter(flow.flowchart, 'EntryPoint1', 'Event92')
+                    zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'] = event_tools.writeFlow(flow)
+                else:
+                    zs_data.writer.files['Event/EventFlow/Mission_BigWorldStageFirst.bfevfl'] = oead.Bytes()
+            
             with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
                 self.progress_value += 1

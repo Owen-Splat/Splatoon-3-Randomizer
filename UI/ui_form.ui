@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>780</width>
-    <height>350</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>780</width>
-    <height>350</height>
+    <height>400</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
       <x>10</x>
       <y>10</y>
       <width>760</width>
-      <height>244</height>
+      <height>294</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -363,7 +363,7 @@
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Makes every level kill you if you touch enemy ink. Getting armor prevents this</string>
+       <string>Makes every level kill you if you touch enemy ink. Getting armor prevents this. Might have issues with randomized ink colors</string>
       </property>
       <property name="text">
        <string>Enemy Ink Is Lava</string>
@@ -468,13 +468,70 @@
        <bool>false</bool>
       </property>
      </widget>
+     <widget class="QCheckBox" name="cutsceneCheck">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>223</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string>Removes long cutscenes and dialogue. Currently about half done</string>
+      </property>
+      <property name="text">
+       <string>Remove Cutscenes</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="collectCheck">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>560</x>
+        <y>223</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string>Randomizes the contents of the collectables. Not currently implemented</string>
+      </property>
+      <property name="text">
+       <string>Collectables</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="oozeCheck">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>223</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string>Randomizes the cost of fuzzy ooze. Not currently implemented</string>
+      </property>
+      <property name="text">
+       <string>Fuzzy Ooze</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QPushButton" name="randomizeButton">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>300</y>
+      <y>350</y>
       <width>721</width>
       <height>41</height>
      </rect>
@@ -505,7 +562,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>260</y>
+      <y>310</y>
       <width>721</width>
       <height>23</height>
      </rect>

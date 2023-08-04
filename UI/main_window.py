@@ -38,10 +38,11 @@ class MainWindow(QtWidgets.QMainWindow):
             for item in desc_items:
                 item.setChecked(True)
             self.ui.lavaCheck.setChecked(False)
+            self.ui.cutsceneCheck.setChecked(False)
         else:
             self.loadSettings()
         
-        self.setFixedSize(780, 350)
+        self.setFixedSize(780, 400)
         self.setWindowTitle(f'{self.windowTitle()} v{VERSION}')
         self.show()
 
@@ -70,7 +71,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'Grizzco_Weapons': self.ui.grizzcoCheck.isChecked(),
             '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
-            'Music': self.ui.musicCheck.isChecked()
+            'Music': self.ui.musicCheck.isChecked(),
+            'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked()
         }
         
         with open(SETTINGS_PATH, 'w') as settingsFile:
@@ -135,6 +137,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.musicCheck.setChecked(SETTINGS['Music'])
         except(KeyError, TypeError):
             self.ui.musicCheck.setChecked(True)
+        
+        # cutscenes
+        try:
+            self.ui.cutsceneCheck.setChecked(SETTINGS['Remove_Cutscenes'])
+        except(KeyError, TypeError):
+            self.ui.cutsceneCheck.setChecked(False)
     
     
     
@@ -203,7 +211,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'grizzco': self.ui.grizzcoCheck.isChecked(),
             '1HKO': self.ui.lavaCheck.isChecked(),
             'ink-color': self.ui.inkCheck.isChecked(),
-            'music': self.ui.musicCheck.isChecked()
+            'music': self.ui.musicCheck.isChecked(),
+            'remove-cutscenes': self.ui.cutsceneCheck.isChecked()
         }
         
         self.progress_window = ProgressWindow(rom_path, outdir, seed, settings)

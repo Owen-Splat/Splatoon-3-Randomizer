@@ -11,10 +11,10 @@ Music:
   - BGM_Mission_Stage_Alterna_C05
   - BGM_Mission_Stage_Alterna_C06
   - BGM_Mission_Stage_Alterna_C07
-  - BGM_Mission_Boss_Fuuka
-  - BGM_Mission_Boss_Mantaro
-  - BGM_Mission_Boss_Takowasa
-  - BGM_Mission_Boss_Utsuho
+  # - BGM_Mission_Boss_Fuuka
+  # - BGM_Mission_Boss_Mantaro
+  # - BGM_Mission_Boss_Takowasa
+  # - BGM_Mission_Boss_Utsuho
   - BGM_Mission_Stage_Crater_01
   # - BGM_Mission_Stage_Rocket_01
   # - BGM_Mission_Stage_Rocket_02
@@ -25,8 +25,8 @@ Music:
   # - BGM_Mission_DemoScene_D3_03
   # - BGM_Mission_DemoScene_D1_01
   # - BGM_Mission_Boss_Surimi03
-  - BGM_Mission_Boss_Kumasan02
-  - BGM_Mission_Boss_Kumasan01
+  # - BGM_Mission_Boss_Kumasan02
+  # - BGM_Mission_Boss_Kumasan01
   # - BGM_LobbyVersus_Holiday_Main_01
   # - BGM_LobbyVersus_Fes_02
   # - BGM_LobbyVersus_03_Fsodr
@@ -331,7 +331,7 @@ Special_Weapons:
   # - SpCastle # kraken
   # - SpChariot
   # - SpChariot_Coop
-  # - SpChariot_Mission
+  - SpChariot_Mission # crab
   # - SpEnergyStand
   # - SpFirework
   - SpGachihoko # rainmaker
