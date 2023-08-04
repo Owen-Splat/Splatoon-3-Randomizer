@@ -322,15 +322,16 @@ Sub_Weapons:
   - Sprinkler
   # - Trap
   - Trap_Mission
+  - Free
 
 Special_Weapons:
   # - Work/Gyml/SpSuperHook_Mission.spl__WeaponInfoSpecial.gyml
   # - SpBlower
-  - SpBlower_Mission
+  # - SpBlower_Mission
   # - SpCastle # kraken
   # - SpChariot
   # - SpChariot_Coop
-  - SpChariot_Mission
+  # - SpChariot_Mission
   # - SpEnergyStand
   # - SpFirework
   - SpGachihoko # rainmaker
@@ -338,7 +339,7 @@ Special_Weapons:
   # - SpGreatBarrier_Rival
   # - SpIkuraShoot
   # - SpInkStorm
-  - SpInkStorm_Mission
+  # - SpInkStorm_Mission
   # - SpInkStorm_Rival
   # - SpJetpack
   # - SpJetpack_Coop
@@ -346,19 +347,19 @@ Special_Weapons:
   # - SpJetpack_Rival
   # - SpMicroLaser
   # - SpMicroLaser_Coop
-  - SpMicroLaser_Mission
+  # - SpMicroLaser_Mission
   # - SpMultiMissile
-  - SpMultiMissile_Mission
+  # - SpMultiMissile_Mission
   # - SpMultiMissile_Rival
   # - SpNiceBall
   # - SpNiceBall_Coop
   # - SpShockSonar
   # - SpShockSonar_Coop
-  - SpShockSonar_Mission
+  # - SpShockSonar_Mission
   # - SpShockSonar_Rival
   # - SpSkewer
   # - SpSkewer_Coop
-  - SpSkewer_Mission
+  # - SpSkewer_Mission
   # - SpSuperHook
   - SpSuperHook_Mission
   - SpSuperLanding
@@ -366,10 +367,10 @@ Special_Weapons:
   # - SpSuperLanding_Rival
   # - SpTripleTornado
   # - SpTripleTornado_Coop
-  - SpTripleTornado_Mission
+  # - SpTripleTornado_Mission
   # - SpUltraShot
   # - SpUltraShot_Coop
-  - SpUltraShot_Mission
+  # - SpUltraShot_Mission
   # - SpUltraStamp
   - SpUltraStamp_Mission
 

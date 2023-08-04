@@ -70,9 +70,9 @@ class ModsProcess(QtCore.QThread):
             for msn in PARAMS['Crater_Missions']:
                 crater_levels_dict[msn] = crater_levels.pop(0)
         
-        mains = copy.deepcopy(PARAMS['Main_Weapons'])
+        main_weapons_list = copy.deepcopy(PARAMS['Main_Weapons'])
         if not self.settings['grizzco']:
-            mains = [m for m in PARAMS['Main_Weapons'] if not m.endswith('Bear_Coop')]
+            main_weapons_list = [m for m in PARAMS['Main_Weapons'] if not m.endswith('Bear_Coop')]
         
         missions = [f for f in os.listdir(f'{self.rom_path}/Pack/Scene') if f.startswith('Msn_')
                     or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
@@ -137,41 +137,45 @@ class ModsProcess(QtCore.QThread):
                         mission_data.info['OctaSupplyWeaponInfoArray'].append(
                             mission_data.info['OctaSupplyWeaponInfoArray'][0])
                 
+                mains = ['']
                 for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
-                    try:
-                        e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
-                        
-                        if i == 0 and self.settings['beatable']:
-                            e['SupplyWeaponType'] = 'Hero'
-                            continue
-                        
-                        main_weapon = random.choice(mains)
-                        e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
-                        
-                        # sub
-                        if self.settings['beatable']:
-                            sub_weapon = None
+                    e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
+                    
+                    if i == 0 and self.settings['beatable']: # leave first option as vanilla
+                        continue
+                    
+                    main_weapon = ''
+                    while main_weapon in mains:
+                        main_weapon = random.choice(main_weapons_list)
+                    mains.append(main_weapon)
+                    e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+                    
+                    # sub
+                    if self.settings['beatable'] and 'SubWeapon' in e:
+                        sub_weapon = e['SubWeapon']
+                    else:
+                        sub_weapon = random.choice(PARAMS['Sub_Weapons'])
+                        if sub_weapon == 'Free':
+                            e['SubWeapon'] = ''
                         else:
-                            sub_weapon = random.choice(PARAMS['Sub_Weapons'])
                             e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
-                        
-                        # special
-                        if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook', 'SpJetpack')):
-                            special_weapon = e['SpecialWeapon']
-                        else:
-                            special_weapon = random.choice(PARAMS['Special_Weapons'])
-                            e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
-                        
-                        e['SupplyWeaponType'] = 'Normal'
-                        if main_weapon == 'Free' and sub_weapon == None:
+                    
+                    # special
+                    if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook_Mission', 'SpJetpack_Mission')):
+                        special_weapon = e['SpecialWeapon']
+                        continue
+                    else:
+                        special_weapon = random.choice(PARAMS['Special_Weapons'])
+                        e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
+                    
+                    e['SupplyWeaponType'] = 'Normal'
+                    if main_weapon == 'Free' and sub_weapon == 'Free':
+                        e['SupplyWeaponType'] = 'Special'
+                    elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission'):
+                        if random.random() < 0.2: # 1/5 chance for special
                             e['SupplyWeaponType'] = 'Special'
-                        if special_weapon == 'SpSuperHook':
-                            e['SupplyWeaponType'] = 'MainAndSpecial'
-                        if special_weapon in ('SpJetpack', 'SpGachihoko', 'SpCastle'):
-                            e['SupplyWeaponType'] = 'Special'
-
-                    except KeyError:
-                        pass
+                    if special_weapon == 'SpSuperHook_Mission':
+                        e['SupplyWeaponType'] = 'MainAndSpecial'
             
             zs_data.writer.files[info_file] = mission_data.repack()
 

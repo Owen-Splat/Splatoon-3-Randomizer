@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.loadSettings()
         
         self.setFixedSize(780, 350)
-        self.setWindowTitle(f'{self.windowTitle()} v0.1')
+        self.setWindowTitle(f'{self.windowTitle()} v{VERSION}')
         self.show()
 
 
@@ -166,21 +166,24 @@ class MainWindow(QtWidgets.QMainWindow):
     # Randomize Button Clicked
     def randomizeButton_Clicked(self):
         rom_path = self.ui.lineEdit.text()
-
+        
         if not os.path.exists(rom_path):
             self.showUserError('RomFS path does not exist!')
             return
         
-        if rom_path.lower().endswith('romfs'):
+        # get the right folder
+        folders = [f.lower() for f in os.listdir(rom_path)]
+        if 'pack' in folders:
             pass
-        elif os.path.exists(os.path.join(rom_path, 'RomFS')):
-            rom_path = os.path.join(rom_path, 'RomFS')
+        elif 'romfs' in folders:
+            rom_path = os.path.join(rom_path, 'romfs')
         else:
             self.showUserError('RomFS path is not valid!')
             return
         
+        # validate that the user actually has the romfs files
         if not os.path.isfile(f'{rom_path}/Pack/Scene/Msn_A01_01.pack.zs'):
-            self.showUserError('RomFS path is not valid!')
+            self.showUserError('Missing RomFS files!')
             return
         
         if not os.path.exists(self.ui.lineEdit_2.text()):

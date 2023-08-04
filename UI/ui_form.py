@@ -220,7 +220,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(whatsthis)
         self.kettleCheck.setText(QCoreApplication.translate("MainWindow", u"Kettles", None))
 #if QT_CONFIG(whatsthis)
-        self.beatableCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Ensures that every level is beatable by making the first option give the Hero Shot, as well as keeping default sub weapons", None))
+        self.beatableCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Ensures that every level is beatable by keeping the first option vanilla", None))
 #endif // QT_CONFIG(whatsthis)
         self.beatableCheck.setText(QCoreApplication.translate("MainWindow", u"Ensure Beatable", None))
 #if QT_CONFIG(whatsthis)

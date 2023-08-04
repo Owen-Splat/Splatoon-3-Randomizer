@@ -299,7 +299,7 @@
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Ensures that every level is beatable by making the first option give the Hero Shot, as well as keeping default sub weapons</string>
+       <string>Ensures that every level is beatable by keeping the first option vanilla</string>
       </property>
       <property name="text">
        <string>Ensure Beatable</string>
