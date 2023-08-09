@@ -4,5 +4,6 @@ __pycache__
 /dist
 /output
 /romfs
+/UI/upd_ui_form.ui
 settings.txt
 log.txt

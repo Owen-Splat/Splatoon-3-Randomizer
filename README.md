@@ -5,7 +5,7 @@ This release version allows for shuffling levels, weapons, ink color, and music.
 
 Please note that while most things are functional, this randomizer is still very early in development and lacks proper logic. There is a definite possibilty in levels being unbeatable. There is a setting that at least tries to prevent this
 
-In order to run the randomizer, you must have the RomFS of the game extracted and on the device you're running this program from. This can be extracted through tools like [Hactool](https://github.com/SciresM/hactool) or [nxdumptool] from the Homebrew App Store. The RomFS is the component of the game package with all of the data files (i.e. non-executable files). Currently, only the `Pack/Scene` folder is required.
+In order to run the randomizer, you must have the RomFS of the game extracted and on the device you're running this program from. This can be extracted on pc through Yuzu or Ryujinx, or nxdumptool from the Homebrew App Store. The RomFS is the component of the game package with all of the data files (i.e. non-executable files)
 
 ## How to run:
 
@@ -38,6 +38,6 @@ The randomizer does not provide a second copy of the game to use, but rather mak
 
 Switch: On your SD card for your homebrew setup, navigate to the `Atmosphere/contents` folder and create a new directory named `0100C2500FC20000`. Copy and paste the `Romfs` folder from the randomizer output into this new folder. That is, the folder structure here should look like `Atmosphere/contents/0100C2500FC20000/Romfs/...`. After this, relaunch CFW and simply start up Link's Awakening to play the randomizer!
 
-Emulator: Open up the mods folder and create a new directory named `0100C2500FC20000`. Enter it and create a new folder named whatever you want. Inside that should be the `Romfs` folder from the randomizer output. It should look something like `%ModsDir%/0100C2500FC20000/LASRando/Romfs/...`
+Emulator: Open up the mods folder and create a new directory named `0100C2500FC20000`. Enter it and create a new folder named whatever you want. Inside that should be the `Romfs` folder from the randomizer output. It should look something like `%ModsDir%/0100C2500FC20000/S3Rando/Romfs/...`
 
 Applying this mod will not in any way affect your save data, so don't delete anything you don't want deleted. If you want to go back to the original game after, either manually clear the files out, or you can launch the game holding L

@@ -57,7 +57,7 @@ class ProgressWindow(QtWidgets.QMainWindow):
 
     def modsDone(self):
         if self.mods_error:
-            self.ui.label.setText("Error detected! Please check that your romfs are valid!")
+            self.ui.label.setText("Error detected! Check the created log.txt for more info")
             if os.path.exists(self.out_dir): # delete files if user canceled
                 shutil.rmtree(self.out_dir, ignore_errors=True)
             self.done = True

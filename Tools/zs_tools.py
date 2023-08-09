@@ -121,7 +121,11 @@ class SARC:
 
 
 class BYAML:
-	def __init__(self, data):
+	def __init__(self, data, compressed=False):
+		self.compressed = compressed
+		if self.compressed:
+			data = oead.Bytes(zs_decompress(data))
+		
 		data[0x2:0x4] = (4).to_bytes(2, 'little')
 		self.info = oead.byml.from_binary(data)
 
@@ -155,7 +159,12 @@ class BYAML:
 		# txt_yml = str(yaml.dump(self.root_node.pairs, encoding='utf-8', allow_unicode=True), 'utf-8')
 		# txt_yml = txt_yml.replace('"', '')
 		# byml = oead.byml.from_text(txt_yml)
-		return oead.byml.to_binary(self.info, False, 4) # BYAML version 4 is the highest this library supports, but still works
+		data = oead.byml.to_binary(self.info, False, 4) # BYAML version 4 is the highest this library supports, but still works
+
+		if self.compressed:
+			data = zs_compress(data)
+		
+		return data
 
 
 

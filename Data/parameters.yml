@@ -288,6 +288,7 @@ Main_Weapons:
   - Stringer_Normal_Msn
   - Stringer_Short_00
   # - Stringer_Short_Coop
+  - Hero
 
 Sub_Weapons:
   # - Work/Gyml/Bomb_Splash_Mission.spl__WeaponInfoSub.gyml
@@ -313,8 +314,8 @@ Sub_Weapons:
   # - Bomb_Suction
   - Bomb_Suction_Mission
   - Bomb_Torpedo
-  # - LineMarker
-  - LineMarker_Mission
+  - LineMarker # use updated angle shooter for multiplayer
+  # - LineMarker_Mission
   - PointSensor
   - PoisonMist
   - SalmonBuddy

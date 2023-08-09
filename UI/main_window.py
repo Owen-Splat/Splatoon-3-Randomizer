@@ -25,10 +25,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        # randomizer settings connections
         self.ui.browseButton1.clicked.connect(self.romBrowse)
         self.ui.browseButton2.clicked.connect(self.outBrowse)
         self.ui.seedButton.clicked.connect(self.generateSeed)
         self.ui.randomizeButton.clicked.connect(self.randomizeButton_Clicked)
+        
+        # # extra settings connections
+        # self.ui.colorButton.clicked.connect(self.pickCustomColor)
         
         desc_items = self.ui.tab.findChildren(QtWidgets.QCheckBox)
         for item in desc_items:
@@ -219,7 +223,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_window.setFixedSize(472, 125)
         self.progress_window.setWindowTitle(f"{seed}")
         self.progress_window.show()
-    
+
+
+
+    # def pickCustomColor(self):
+    #     dlg = QtWidgets.QColorDialog()
+    #     if dlg.exec_():
+    #         self.ui.colorButton.setStyleSheet(f'background-color: {dlg.currentColor().name()};')
+
 
 
     def showUserError(self, msg):
