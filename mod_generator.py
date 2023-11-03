@@ -2,6 +2,7 @@ from PySide6 import QtCore
 
 import os
 import copy
+import time
 import random
 import traceback
 
@@ -17,8 +18,9 @@ from randomizer_data import PARAMS
 class ModsProcess(QtCore.QThread):
     
     progress_update = QtCore.Signal(int)
-    is_done = QtCore.Signal()
+    status_update = QtCore.Signal(str)
     error = QtCore.Signal(str)
+    is_done = QtCore.Signal()
     
     
     def __init__(self, rom_path, out_dir, seed, settings, parent=None):
@@ -28,14 +30,18 @@ class ModsProcess(QtCore.QThread):
         random.seed(seed)
         self.settings = settings
         self.progress_value = 0
-        self.thread_active = True    
+        self.thread_active = True
+        self.levels = {}
+        # self.alterna_levels = {}
+        # self.crater_levels = {}
 
 
 
     # automatically called when this thread is started
     def run(self):
         try:
-            self.randomizeLevels()
+            if self.settings['kettles']: self.randomizeKettles()
+            self.editLevels()
             if self.thread_active:
                 os.mkdir(f'{self.out_dir}/0100C2500FC20000')
         
@@ -47,40 +53,58 @@ class ModsProcess(QtCore.QThread):
             self.is_done.emit()
 
 
-    # iterate through all level files and randomize the level data
-    def randomizeLevels(self):
-        # with open(f'{self.rom_path}/RSDB/MissionMapInfo.Product.400.rstbl.byml.zs', 'rb') as f:
-        #     ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
-        
-        os.makedirs(f'{self.out_dir}/romfs/Pack/Scene')
-        # os.makedirs(f'{self.out_dir}/romfs/RSDB')
 
-        if self.settings['kettles']:
-            levels_dict = {}
-            crater_levels_dict = {}
-            levels = copy.deepcopy(PARAMS['Alterna_Missions'])
-            crater_levels = copy.deepcopy(PARAMS['Crater_Missions'])
-            random.shuffle(levels)
-            random.shuffle(crater_levels)
+    def randomizeKettles(self):
+        time.sleep(1)
+        self.status_update.emit('Randomizing kettles...')
+
+        self.levels['Msn_ExStage'] = 'Msn_ExStage' # restrict After Alterna to vanilla for now to avoid confusion
+        levels: list = copy.deepcopy(PARAMS['Missions'])
+        random.shuffle(levels)
+        for msn in PARAMS['Missions']:
+            new_level = ''
+            valid_placement = False
+
+            while not valid_placement:
+                new_level = random.choice(levels)
+                if new_level.endswith('King'): # restrict Alterna bosses to be in Alterna, no more than 1 per site
+                    if msn.startswith('Msn_C'):
+                        continue
+                    else:
+                        site = msn[6]
+                        bosses = [k for k,v in self.levels.items() if v.endswith('King')]
+                        existing_bosses = [b for b in bosses if b[6] == site]
+                        if existing_bosses:
+                            continue
+                
+                valid_placement = True
             
-            for msn in PARAMS['Alterna_Missions']:
-                if msn in ('Msn_A01_01', 'Msn_ExStage'):
-                    new_level = ''
-                    while new_level in ('', 'Msn_ExStage') or new_level.endswith('King'):
-                        new_level = random.choice(levels)
-                    levels_dict[msn] = new_level
-                    levels.remove(new_level)
-                else:
-                    levels_dict[msn] = levels.pop(0)
-            for msn in PARAMS['Crater_Missions']:
-                crater_levels_dict[msn] = crater_levels.pop(0)
+            levels.remove(new_level)
+            self.levels[msn] = new_level
+            self.progress_value += 1
+            self.progress_update.emit(self.progress_value)
+
+            # since there is no logic currently, this happens pretty much instantly
+            # so we add some delay to give a sense of progression, makes users happy :)
+            # this can just be removed when actual logic is written
+            time.sleep(0.01)
+
+
+
+    # iterate through all level files and randomize the level data
+    def editLevels(self):
+        time.sleep(1)
+        self.status_update.emit('Editing levels...')
+        os.makedirs(f'{self.out_dir}/romfs/Pack/Scene')
         
-        main_weapons_list = copy.deepcopy(PARAMS['Main_Weapons'])
-        if not self.settings['grizzco']:
-            main_weapons_list = [m for m in PARAMS['Main_Weapons'] if not m.endswith('Bear_Coop')]
+        valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[7]) <= self.settings['season']]
+        main_weapons_list = []
+        for season in valid_seasons:
+            for weapon in PARAMS['Main_Weapons'][season]:
+                main_weapons_list.append(weapon)
         
         missions = [f for f in os.listdir(f'{self.rom_path}/Pack/Scene') if f.startswith('Msn_')
-                    or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')] # , 'StaffRoll')]
+                    or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02', 'StaffRoll')]
         for m in missions:
             if not self.thread_active:
                 break
@@ -90,48 +114,29 @@ class ModsProcess(QtCore.QThread):
             with open(f'{self.rom_path}/Pack/Scene/{m}', 'rb') as f:
                 zs_data = zs_tools.SARC(f.read())
             
-            # if msn == 'StaffRoll' and self.settings['remove-cutscenes']:
-            #     flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'])
-            #     zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'] =\
-            #         self.skipCutscene(flow, 'Event58', 'Event52')
-            #     with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
-            #         f.write(zs_data.repack())
-            #         self.progress_value += 1
-            #         self.progress_update.emit(self.progress_value)
-            #     continue
-            # elif msn == 'StaffRoll' and not self.settings['remove-cutscenes']:
-            #     self.progress_value += 1
-            #     self.progress_update.emit(self.progress_value)
-            #     continue
+            if self.settings['backgrounds'] and msn[4] != 'C':
+                self.randomizeBackground(zs_data)
             
-            # shuffle kettles
-            if self.settings['kettles'] and msn in ('BigWorld', 'SmallWorld'):
-                if msn == 'BigWorld':
-                    world_levels_dict = levels_dict
-                else:
-                    world_levels_dict = crater_levels_dict
-                banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
-                for act in banc.info['Actors']:
-                    if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
-                        scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
-                        act['spl__MissionGatewayBancParam']['ChangeSceneName'] = world_levels_dict[scene]
-                zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
+            if msn == 'StaffRoll':
+                self.fastCredits(m, zs_data)
+                continue
             
+            if msn in ('BigWorld', 'SmallWorld'):
+                self.editHubs(msn, zs_data)
+                        
             # mission info
             info_file = f'SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml'
             mission_data = zs_tools.BYAML(zs_data.writer.files[info_file])
             
-            # make 1-1 and AA have no entrance fee so they can be played immediately
-            if self.settings['kettles'] and msn in (levels_dict['Msn_A01_01'], levels_dict['Msn_ExStage']):
-                if 'Admission' in mission_data.info:
-                    mission_data.info['Admission'] = oead.S32(0)
+            if self.settings['kettles']:
+                self.fixMissionCompatibility(msn, mission_data)
             
             if self.settings['ink-color']:
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{random.choice(PARAMS['Colors'])}.game__gfx__parameter__TeamColorDataSet.gyml"
             
             if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
-                mission_data.info['MapType'] = 'ChallengeStage'
+                # mission_data.info['MapType'] = 'ChallengeStage'
                 if 'ChallengeParamArray' in mission_data.info:
                     has_sudden_death = False
                     for i in range(len(mission_data.info['ChallengeParamArray'])):
@@ -316,6 +321,67 @@ class ModsProcess(QtCore.QThread):
         #     f.write(ui_missions_data.repack())
         #     self.progress_value += 1
         #     self.progress_update.emit(self.progress_value)
+
+
+
+    def randomizeBackground(self, zs_data):
+        renders = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('RenderingMission.bgyml')]
+        if renders:
+            render_data = zs_tools.BYAML(zs_data.writer.files[renders[0]])
+            sky = random.choice(PARAMS['Backgrounds'])
+            render_data.info['Lighting']['SkySphere']['ActorName'] = f'Work/Actor/{sky}.engine__actor__ActorParam.gyml'
+            zs_data.writer.files[renders[0]] = render_data.repack()
+
+
+
+    def fastCredits(self, m, zs_data):
+        if self.settings['remove-cutscenes']:
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'] =\
+                self.skipCutscene(flow, 'Event58', 'Event52')
+            with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
+                f.write(zs_data.repack())
+        
+        self.progress_value += 1
+        self.progress_update.emit(self.progress_value)
+
+
+
+    def editHubs(self, msn, zs_data):
+        # changes the ChangeSceneName parameters of kettles to the randomized levels
+        if self.settings['kettles']:
+            banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
+            for act in banc.info['Actors']:
+                if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
+                    scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
+                    act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
+            zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
+
+
+
+    def fixMissionCompatibility(self, msn, mission_data):
+        freebies = (
+            self.levels['Msn_A01_01'],
+            self.levels['Msn_ExStage'],
+            self.levels['Msn_C_01'],
+            self.levels['Msn_C_02'],
+            self.levels['Msn_C_03'],
+            self.levels['Msn_C_04']
+        )
+
+        # remove admission fee for levels that should be free
+        if msn in freebies and 'Admission' in mission_data.info:
+            mission_data.info['Admission'] = oead.S32(0)
+        
+        # make alterna and crater levels have the correct MapType
+        try:
+            stage = [k for k,v in self.levels.items() if v == msn][0]
+            if stage[4] == 'A':
+                mission_data.info['MapType'] = 'ChallengeStage'
+            elif stage[4] == 'C':
+                mission_data.info['MapType'] = 'SmallWorldStage'
+        except IndexError:
+            pass # this just means that the stage is not a mission, or is After Alterna. we can ignore this case
 
 
 

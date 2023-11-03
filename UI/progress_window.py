@@ -21,8 +21,10 @@ class ProgressWindow(QtWidgets.QMainWindow):
         self.seed : str = seed
         self.settings = copy.deepcopy(settings)
         
-        self.num_of_mod_tasks = 84
-                
+        self.num_of_mod_tasks = 85
+        if self.settings['kettles']:
+            self.num_of_mod_tasks += 69
+        
         self.done = False
         self.cancel = False
 
@@ -33,18 +35,23 @@ class ProgressWindow(QtWidgets.QMainWindow):
             shutil.rmtree(self.out_dir, ignore_errors=True)
         
         self.ui.progressBar.setMaximum(self.num_of_mod_tasks)
-        self.ui.label.setText(f'Randomizing levels...')
         self.mods_process = ModsProcess(self.rom_path, f'{self.out_dir}', self.seed, self.settings)
         self.mods_process.setParent(self)
         self.mods_process.progress_update.connect(self.updateProgress)
-        self.mods_process.is_done.connect(self.modsDone)
+        self.mods_process.status_update.connect(self.updateStatus)
         self.mods_process.error.connect(self.modsError)
+        self.mods_process.is_done.connect(self.modsDone)
         self.mods_process.start() # start the modgenerator
     
 
     # receives the int signal as a parameter named progress
     def updateProgress(self, progress):
         self.ui.progressBar.setValue(progress)
+    
+
+    # receives the string signal as a parameter named status
+    def updateStatus(self, status):
+        self.ui.label.setText(status)
     
 
     def modsError(self, er_message=str):

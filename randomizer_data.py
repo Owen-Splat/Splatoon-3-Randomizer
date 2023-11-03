@@ -10,8 +10,8 @@ with open(os.path.join(DATA_PATH, 'seeds.yml'), 'r') as f:
 with open(os.path.join(DATA_PATH, 'parameters.yml'), 'r') as f:
     PARAMS = yaml.safe_load(f)
 
-# with open(os.path.join(DATA_PATH, 'mission_data.yml'), 'r') as f:
-#     MISSIONS_INFO = yaml.safe_load(f)
+# with open(os.path.join(DATA_PATH, 'logic.yml'), 'r') as f:
+#     LOGIC = yaml.safe_load(f)
 
 with open(os.path.join(ROOT_PATH, 'version.txt'), 'r') as f:
     VERSION = f.read()

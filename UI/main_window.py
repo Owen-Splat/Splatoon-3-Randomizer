@@ -30,10 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.browseButton2.clicked.connect(self.outBrowse)
         self.ui.seedButton.clicked.connect(self.generateSeed)
         self.ui.randomizeButton.clicked.connect(self.randomizeButton_Clicked)
-        
-        # # extra settings connections
-        # self.ui.colorButton.clicked.connect(self.pickCustomColor)
-        
+                
         desc_items = self.ui.tab.findChildren(QtWidgets.QCheckBox)
         for item in desc_items:
             item.installEventFilter(self)
@@ -42,7 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for item in desc_items:
                 item.setChecked(True)
             self.ui.lavaCheck.setChecked(False)
-            self.ui.cutsceneCheck.setChecked(False)
+            self.ui.backgroundCheck.setChecked(False)
         else:
             self.loadSettings()
         
@@ -72,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'Seed': self.ui.lineEdit_3.text(),
             'Kettles': self.ui.kettleCheck.isChecked(),
             'Beatable': self.ui.beatableCheck.isChecked(),
-            'Grizzco_Weapons': self.ui.grizzcoCheck.isChecked(),
+            'Backgrounds': self.ui.backgroundCheck.isChecked(),
             '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
             'Music': self.ui.musicCheck.isChecked(),
@@ -118,11 +115,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except(KeyError, TypeError):
             self.ui.beatableCheck.setChecked(True)
         
-        # grizzco weapons
+        # backgrounds
         try:
-            self.ui.grizzcoCheck.setChecked(SETTINGS['Grizzco_Weapons'])
+            self.ui.backgroundCheck.setChecked(SETTINGS['Backgrounds'])
         except(KeyError, TypeError):
-            self.ui.grizzcoCheck.setChecked(True)
+            self.ui.backgroundCheck.setChecked(True)
         
         # enemy ink is lava challenge
         try:
@@ -189,15 +186,20 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
         elif 'romfs' in folders:
             rom_path = os.path.join(rom_path, 'romfs')
+            self.ui.lineEdit.setText(rom_path)
         else:
             self.showUserError('RomFS path is not valid!')
             return
         
-        # validate that the user actually has the romfs files
-        if not os.path.isfile(f'{rom_path}/Pack/Scene/Msn_A01_01.pack.zs'):
-            self.showUserError('Missing RomFS files!')
+        # validate the romfs by checking for the ActorInfo file, which contains the game version in the name
+        # the game version will be used to determine which main weapons can be added to the pool
+        try:
+            info_file = [f for f in os.listdir(f'{rom_path}/RSDB') if f.startswith('ActorInfo')][0]
+            version = info_file.split('.')[2]
+        except (IndexError, TypeError, FileNotFoundError):
+            self.showUserError('Could not validate RomFS!')
             return
-        
+
         if not os.path.exists(self.ui.lineEdit_2.text()):
             self.showUserError('Output path does not exist!')
             return
@@ -210,13 +212,14 @@ class MainWindow(QtWidgets.QMainWindow):
         outdir = f"{self.ui.lineEdit_2.text()}/{seed}"
         
         settings = {
+            'season': int(version[0]), # major version marker is the season, 1.0.0 was season 1, 2.0.0 was season 2, etc
             'kettles': self.ui.kettleCheck.isChecked(),
             'beatable': self.ui.beatableCheck.isChecked(),
-            'grizzco': self.ui.grizzcoCheck.isChecked(),
+            'backgrounds': self.ui.backgroundCheck.isChecked(),
             '1HKO': self.ui.lavaCheck.isChecked(),
             'ink-color': self.ui.inkCheck.isChecked(),
             'music': self.ui.musicCheck.isChecked(),
-            'remove-cutscenes': self.ui.cutsceneCheck.isChecked()
+            'remove-cutscenes': self.ui.cutsceneCheck.isChecked(),
         }
         
         self.progress_window = ProgressWindow(rom_path, outdir, seed, settings)

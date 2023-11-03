@@ -292,22 +292,6 @@
      <widget class="QCheckBox" name="beatableCheck">
       <property name="geometry">
        <rect>
-        <x>560</x>
-        <y>123</y>
-        <width>151</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="whatsThis">
-       <string>Ensures that every level is beatable by keeping the first option vanilla</string>
-      </property>
-      <property name="text">
-       <string>Ensure Beatable</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="grizzcoCheck">
-      <property name="geometry">
-       <rect>
         <x>320</x>
         <y>123</y>
         <width>151</width>
@@ -315,10 +299,26 @@
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Adds the Grizzco weapons into the random weapon selection</string>
+       <string>Ensures that every level is beatable by keeping the first option vanilla. Every level is given 3 choices regardless</string>
       </property>
       <property name="text">
-       <string>Grizzco Weapons</string>
+       <string>Ensure Beatable</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="backgroundCheck">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>173</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string>Randomizes the background in each level</string>
+      </property>
+      <property name="text">
+       <string>Backgrounds</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="inkCheck">
@@ -356,8 +356,8 @@
      <widget class="QCheckBox" name="lavaCheck">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>173</y>
+        <x>560</x>
+        <y>123</y>
         <width>151</width>
         <height>20</height>
        </rect>
