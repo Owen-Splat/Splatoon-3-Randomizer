@@ -114,8 +114,8 @@ class ModsProcess(QtCore.QThread):
             with open(f'{self.rom_path}/Pack/Scene/{m}', 'rb') as f:
                 zs_data = zs_tools.SARC(f.read())
             
-            if self.settings['backgrounds'] and msn[4] != 'C':
-                self.randomizeBackground(zs_data)
+            if self.settings['backgrounds']:
+                self.randomizeBackground(msn, zs_data)
             
             if msn == 'StaffRoll':
                 self.fastCredits(m, zs_data)
@@ -136,19 +136,7 @@ class ModsProcess(QtCore.QThread):
                     f"Work/Gyml/{random.choice(PARAMS['Colors'])}.game__gfx__parameter__TeamColorDataSet.gyml"
             
             if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
-                # mission_data.info['MapType'] = 'ChallengeStage'
-                if 'ChallengeParamArray' in mission_data.info:
-                    has_sudden_death = False
-                    for i in range(len(mission_data.info['ChallengeParamArray'])):
-                        try:
-                            if mission_data.info['ChallengeParamArray'][i]['Type'] == 'DamageSuddenDeath':
-                                has_sudden_death = True
-                        except KeyError:
-                            break
-                    if not has_sudden_death:
-                        mission_data.info['ChallengeParamArray'].append({'Type': 'DamageSuddenDeath'})
-                else:
-                    mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
+                self.addChallenges(mission_data)
             
             if 'OctaSupplyWeaponInfoArray' not in mission_data.info:
                 has_weapons = False
@@ -156,162 +144,17 @@ class ModsProcess(QtCore.QThread):
                 has_weapons = True
             
             if has_weapons:
-                if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
-                    while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
-                        mission_data.info['OctaSupplyWeaponInfoArray'].append(
-                            mission_data.info['OctaSupplyWeaponInfoArray'][0])
-                
-                mains = ['']
-                for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
-                    e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
-                    
-                    if i == 0 and self.settings['beatable']: # leave first option as vanilla
-                        continue
-                    
-                    main_weapon = ''
-                    while main_weapon in mains:
-                        main_weapon = random.choice(main_weapons_list)
-                    mains.append(main_weapon)
-                    e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
-                    if main_weapon == 'Hero':
-                        e['SupplyWeaponType'] = 'Hero'
-                        continue
-                    
-                    # sub
-                    sub_weapon = random.choice(PARAMS['Sub_Weapons'])
-                    if sub_weapon == 'Free':
-                        e['SubWeapon'] = ''
-                    else:
-                        e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
-                    
-                    # special
-                    if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook_Mission', 'SpJetpack_Mission')):
-                        if i == 0:
-                            continue
-                    
-                    special_weapon = random.choice(PARAMS['Special_Weapons'])
-                    e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
-                    
-                    e['SupplyWeaponType'] = 'Normal'
-                    if main_weapon == 'Free' and sub_weapon == 'Free':
-                        e['SupplyWeaponType'] = 'Special'
-                    elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission', 'SpChariot_Mission'):
-                        if random.random() < 0.125: # 1/8 chance for special
-                            e['SupplyWeaponType'] = 'Special'
-                    elif special_weapon == 'SpSuperHook_Mission':
-                        if random.random() < 0.125:
-                            e['SupplyWeaponType'] = 'MainAndSpecial'
+                self.randomizeWeapons(mission_data, main_weapons_list)
             
-                # mission_ui = [i for i in ui_missions_data.info if i['__RowId'] == msn][0]
-                # mission_ui['OctaSupplyWeaponInfoArray'] = mission_data.info['OctaSupplyWeaponInfoArray']
-
             zs_data.writer.files[info_file] = mission_data.repack()
-
+            
             # scene bgm
             if self.settings['music']:
-                try:
-                    info_file = f'SceneComponent/SceneBgm/{msn}.spl__SceneBgmParam.bgyml'
-                    bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
-                except KeyError:
-                    # special case where Msn_EX02's SceneBgm isn't named properly like the others
-                    info_file = f'SceneComponent/SceneBgm/Msn_A01_01.spl__SceneBgmParam.bgyml'
-                    bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
-                
-                if 'SceneSpecificBgm' in bgm_data.info and '_R_' not in msn:
-                    bgms = list(copy.deepcopy(PARAMS['Music']))
-                    if 'King' in msn: # shuffle boss music within bosses
-                        bgms = ('BGM_Mission_Boss_Fuuka',
-                                'BGM_Mission_Boss_Mantaro',
-                                'BGM_Mission_Boss_Takowasa',
-                                'BGM_Mission_Boss_Utsuho')
-                    elif '_R_' in msn: # shuffle rocket music within rocket
-                        bgms = ('BGM_Mission_Stage_Rocket_01',
-                                'BGM_Mission_Stage_Rocket_02',
-                                'BGM_Mission_Stage_Rocket_03',
-                                'BGM_Mission_Stage_Rocket_04')
-                    new_bgm = random.choice(bgms)
-                    bgm_data.info['SceneSpecificBgm'] = new_bgm
-                    # if 'Rocket' in new_bgm:
-                    #     bgm_data.info['MainController'] = {}
-                    #     bgm_data.info['SceneBridgeController'] = {
-                    #         'ClassName': 'spl__BgmMissionRocketSceneBridge',
-                    #         'SLinkUserName': 'BgmMissionRocketSceneBridge'
-                    #     }
-                    # if '_Boss_' in new_bgm:
-                    #     bgm_data.info['MainController'] = {
-                    #         'ClassName': 'spl__BgmMissionBoss',
-                    #         'SLinkUserName': 'BgmMissionBoss'
-                    #     }
-                    # elif 'Kumasan' in new_bgm:
-                    #     bgm_data.info['MainController'] = {
-                    #         'ClassName': 'spl__BgmMissionLastBoss',
-                    #         'SLinkUserName': 'BgmMissionLastBoss'
-                    #     }
-                    #     bgm_data.info['SceneBridgeController'] = {
-                    #         'ClassName': 'spl__BgmMissionSceneBridge',
-                    #         'SLinkUserName': 'BgmMissionSceneBridge'
-                    #     }
-                    # else:
-                    #     bgm_data.info['MainController'] = {
-                    #         'ClassName': 'spl__BgmMissionStage',
-                    #         'SLinkUserName': 'BgmMissionStage'
-                    #     }
-                    #     bgm_data.info['SceneBridgeController'] = {
-                    #         'ClassName': '',
-                    #         'SLinkUserName': ''
-                    #     }
-                    zs_data.writer.files[info_file] = bgm_data.repack()
+                self.randomizeMusic(msn, zs_data)
             
             if self.settings['remove-cutscenes']:
-                # make certain flowcharts empty so that cutscenes don't play
-                # edit others to just cut to the end
-                if msn == 'BigWorld':
-                    zs_data.writer.files['Event/EventFlow/Mission_IntroduceComrade.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_IntroduceTrinity.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_BigWorldFirst.bfevfl'] = oead.Bytes() # - keep cool wake up cutscene
-                    zs_data.writer.files['Event/EventFlow/Mission_BigWorldTutorial.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_0.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_1.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_2.bfevfl'] = oead.Bytes()
-                    
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint0', 'Event49')
-                    
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint0', 'Event12')
-                
-                elif msn == 'SmallWorld':
-                    # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] - INFINITE LOADING SCREEN
-                    zs_data.writer.files['Event/EventFlow/Mission_SecondStageClear.bfevfl'] = oead.Bytes()
-                    zs_data.writer.files['Event/EventFlow/Mission_ThirdStageClear.bfevfl'] = oead.Bytes()
-                    
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint0', 'Event46')
-                
-                elif msn == 'Msn_RailKing':
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint0', 'Event34')
-                
-                elif msn == 'LaunchPadWorld':
-                    # not enough time to look into lol
-                    # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'])
-                    # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
-                    # zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'] = oead.Bytes()
-                    
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint1', 'Event36')
-                    
-                    flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'])
-                    zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'] =\
-                        self.skipCutscene(flow, 'EntryPoint1', 'Event92')
-                else:
-                    zs_data.writer.files['Event/EventFlow/Mission_BigWorldStageFirst.bfevfl'] = oead.Bytes()
-            
+                self.removeCutscenes(msn, zs_data)
+                        
             with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
                 self.progress_value += 1
@@ -324,7 +167,10 @@ class ModsProcess(QtCore.QThread):
 
 
 
-    def randomizeBackground(self, zs_data):
+    def randomizeBackground(self, msn, zs_data):
+        if msn[4] == 'C' or 'King' in msn or 'Boss' in msn:
+            return
+        
         renders = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('RenderingMission.bgyml')]
         if renders:
             render_data = zs_tools.BYAML(zs_data.writer.files[renders[0]])
@@ -360,6 +206,9 @@ class ModsProcess(QtCore.QThread):
 
 
     def fixMissionCompatibility(self, msn, mission_data):
+        if 'King' in msn or 'Boss' in msn:
+            return
+        
         freebies = (
             self.levels['Msn_A01_01'],
             self.levels['Msn_ExStage'],
@@ -385,9 +234,184 @@ class ModsProcess(QtCore.QThread):
 
 
 
+    def addChallenges(self, mission_data):
+        if 'ChallengeParamArray' in mission_data.info:
+            has_sudden_death = False
+            for i in range(len(mission_data.info['ChallengeParamArray'])):
+                try:
+                    if mission_data.info['ChallengeParamArray'][i]['Type'] == 'DamageSuddenDeath':
+                        has_sudden_death = True
+                except KeyError:
+                    break
+            if not has_sudden_death:
+                mission_data.info['ChallengeParamArray'].append({'Type': 'DamageSuddenDeath'})
+        else:
+            mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
+
+
+
+    def randomizeWeapons(self, mission_data, main_weapons_list):
+        if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
+            while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
+                mission_data.info['OctaSupplyWeaponInfoArray'].append(
+                    mission_data.info['OctaSupplyWeaponInfoArray'][0])
+        
+        mains = ['']
+        for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
+            e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
+            
+            if i == 0 and self.settings['beatable']: # leave first option as vanilla
+                continue
+            
+            main_weapon = ''
+            while main_weapon in mains:
+                main_weapon = random.choice(main_weapons_list)
+            mains.append(main_weapon)
+            e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+            if main_weapon == 'Hero':
+                e['SupplyWeaponType'] = 'Hero'
+                continue
+            
+            # sub
+            sub_weapon = random.choice(PARAMS['Sub_Weapons'])
+            if sub_weapon == 'Free':
+                e['SubWeapon'] = ''
+            else:
+                e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
+            
+            # special
+            if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook_Mission', 'SpJetpack_Mission')):
+                if i == 0:
+                    continue
+            
+            special_weapon = random.choice(PARAMS['Special_Weapons'])
+            e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
+            
+            e['SupplyWeaponType'] = 'Normal'
+            if main_weapon == 'Free' and sub_weapon == 'Free':
+                e['SupplyWeaponType'] = 'Special'
+            elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission', 'SpChariot_Mission'):
+                if random.random() < 0.125: # 1/8 chance for special
+                    e['SupplyWeaponType'] = 'Special'
+            elif special_weapon == 'SpSuperHook_Mission':
+                if random.random() < 0.125:
+                    e['SupplyWeaponType'] = 'MainAndSpecial'
+
+
+
+    def randomizeMusic(self, msn, zs_data):
+        try:
+            info_file = f'SceneComponent/SceneBgm/{msn}.spl__SceneBgmParam.bgyml'
+            bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
+        except KeyError:
+            # special case where Msn_EX02's SceneBgm isn't named properly like the others
+            info_file = f'SceneComponent/SceneBgm/Msn_A01_01.spl__SceneBgmParam.bgyml'
+            bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
+        
+        if 'SceneSpecificBgm' in bgm_data.info and '_R_' not in msn:
+            bgms = list(copy.deepcopy(PARAMS['Music']))
+            if 'King' in msn: # shuffle boss music within bosses
+                bgms = ('BGM_Mission_Boss_Fuuka',
+                        'BGM_Mission_Boss_Mantaro',
+                        'BGM_Mission_Boss_Takowasa',
+                        'BGM_Mission_Boss_Utsuho')
+            elif '_R_' in msn: # shuffle rocket music within rocket
+                bgms = ('BGM_Mission_Stage_Rocket_01',
+                        'BGM_Mission_Stage_Rocket_02',
+                        'BGM_Mission_Stage_Rocket_03',
+                        'BGM_Mission_Stage_Rocket_04')
+            new_bgm = random.choice(bgms)
+            bgm_data.info['SceneSpecificBgm'] = new_bgm
+            # if 'Rocket' in new_bgm:
+            #     bgm_data.info['MainController'] = {}
+            #     bgm_data.info['SceneBridgeController'] = {
+            #         'ClassName': 'spl__BgmMissionRocketSceneBridge',
+            #         'SLinkUserName': 'BgmMissionRocketSceneBridge'
+            #     }
+            # if '_Boss_' in new_bgm:
+            #     bgm_data.info['MainController'] = {
+            #         'ClassName': 'spl__BgmMissionBoss',
+            #         'SLinkUserName': 'BgmMissionBoss'
+            #     }
+            # elif 'Kumasan' in new_bgm:
+            #     bgm_data.info['MainController'] = {
+            #         'ClassName': 'spl__BgmMissionLastBoss',
+            #         'SLinkUserName': 'BgmMissionLastBoss'
+            #     }
+            #     bgm_data.info['SceneBridgeController'] = {
+            #         'ClassName': 'spl__BgmMissionSceneBridge',
+            #         'SLinkUserName': 'BgmMissionSceneBridge'
+            #     }
+            # else:
+            #     bgm_data.info['MainController'] = {
+            #         'ClassName': 'spl__BgmMissionStage',
+            #         'SLinkUserName': 'BgmMissionStage'
+            #     }
+            #     bgm_data.info['SceneBridgeController'] = {
+            #         'ClassName': '',
+            #         'SLinkUserName': ''
+            #     }
+            zs_data.writer.files[info_file] = bgm_data.repack()
+
+
+
     def skipCutscene(self, flow, before, after):
         event_tools.insertEventAfter(flow.flowchart, before, after)
         return event_tools.writeFlow(flow)
+
+
+
+    def removeCutscenes(self, msn, zs_data):
+        # event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
+
+        # make certain flowcharts empty so that cutscenes don't play
+        # edit others to just cut to the end
+        if msn == 'BigWorld':
+            zs_data.writer.files['Event/EventFlow/Mission_IntroduceComrade.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_IntroduceTrinity.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_BigWorldFirst.bfevfl'] = oead.Bytes() # - keep cool wake up cutscene
+            zs_data.writer.files['Event/EventFlow/Mission_BigWorldTutorial.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_0.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_1.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_2.bfevfl'] = oead.Bytes()
+            
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint0', 'Event49')
+            
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint0', 'Event12')
+        
+        elif msn == 'SmallWorld':
+            # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] - INFINITE LOADING SCREEN
+            zs_data.writer.files['Event/EventFlow/Mission_SecondStageClear.bfevfl'] = oead.Bytes()
+            zs_data.writer.files['Event/EventFlow/Mission_ThirdStageClear.bfevfl'] = oead.Bytes()
+            
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint0', 'Event46')
+        
+        elif msn == 'Msn_RailKing':
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint0', 'Event34')
+        
+        elif msn == 'LaunchPadWorld':
+            # not enough time to look into lol
+            # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'])
+            # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
+            # zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'] = oead.Bytes()
+            
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint1', 'Event36')
+            
+            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'])
+            zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'] =\
+                self.skipCutscene(flow, 'EntryPoint1', 'Event92')
+        else:
+            zs_data.writer.files['Event/EventFlow/Mission_BigWorldStageFirst.bfevfl'] = oead.Bytes()
 
 
 
