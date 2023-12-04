@@ -25,15 +25,14 @@
 
 
 import os
+import sys
 import appdirs
-import platform
 
 
-# this is for bundling files into a single exe with pyinstaller
-try:
-    from sys import _MEIPASS
-    ROOT_PATH = _MEIPASS
-    if platform.system() == 'Darwin':
+if getattr(sys, "frozen", False):
+    RUNNING_FROM_SOURCE = False
+    ROOT_PATH = os.path.dirname(sys.executable)
+    if sys.platform == 'darwin': # mac
         userdata_path = appdirs.user_data_dir('randomizer', 'Splatoon 3 Randomizer')
         if not os.path.isdir(userdata_path):
             os.mkdir(userdata_path)
@@ -42,8 +41,9 @@ try:
     else:
         SETTINGS_PATH = os.path.join('.', 'settings.txt')
         LOGS_PATH = os.path.join('.', 'log.txt')
-except ImportError:
-    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+else:
+    RUNNING_FROM_SOURCE = True
+    ROOT_PATH = os.path.dirname(__file__)
     SETTINGS_PATH = os.path.join(ROOT_PATH, 'settings.txt')
     LOGS_PATH = os.path.join(ROOT_PATH, 'log.txt')
 

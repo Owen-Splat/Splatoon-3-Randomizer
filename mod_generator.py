@@ -14,9 +14,7 @@ from randomizer_data import PARAMS
 
 
 
-
 class ModsProcess(QtCore.QThread):
-    
     progress_update = QtCore.Signal(int)
     status_update = QtCore.Signal(str)
     error = QtCore.Signal(str)
@@ -36,7 +34,6 @@ class ModsProcess(QtCore.QThread):
         # self.crater_levels = {}
 
 
-
     # automatically called when this thread is started
     def run(self):
         try:
@@ -53,12 +50,20 @@ class ModsProcess(QtCore.QThread):
             self.is_done.emit()
 
 
-
     def randomizeKettles(self):
         time.sleep(1)
         self.status_update.emit('Randomizing kettles...')
 
         self.levels['Msn_ExStage'] = 'Msn_ExStage' # restrict After Alterna to vanilla for now to avoid confusion
+
+        # C-1 needs to be vanilla to allow the player to use Smallfry
+        # C-1 -> C-4 all need to be beaten for the Octavio ooze
+        # tried to add a kettle inside ooze for Octavio, kettle won't show up for some reason
+        self.levels['Msn_C_01'] = 'Msn_C_01'
+        self.levels['Msn_C_02'] = 'Msn_C_02'
+        self.levels['Msn_C_03'] = 'Msn_C_03'
+        self.levels['Msn_C_04'] = 'Msn_C_04'
+
         levels: list = copy.deepcopy(PARAMS['Missions'])
         random.shuffle(levels)
         for msn in PARAMS['Missions']:
@@ -90,10 +95,9 @@ class ModsProcess(QtCore.QThread):
             time.sleep(0.01)
 
 
-
     # iterate through all level files and randomize the level data
     def editLevels(self):
-        time.sleep(1)
+        time.sleep(0.5)
         self.status_update.emit('Editing levels...')
         os.makedirs(f'{self.out_dir}/romfs/Pack/Scene')
         
@@ -166,7 +170,6 @@ class ModsProcess(QtCore.QThread):
         #     self.progress_update.emit(self.progress_value)
 
 
-
     def randomizeBackground(self, msn, zs_data):
         if msn[4] == 'C' or 'King' in msn or 'Boss' in msn:
             return
@@ -177,7 +180,6 @@ class ModsProcess(QtCore.QThread):
             sky = random.choice(PARAMS['Backgrounds'])
             render_data.info['Lighting']['SkySphere']['ActorName'] = f'Work/Actor/{sky}.engine__actor__ActorParam.gyml'
             zs_data.writer.files[renders[0]] = render_data.repack()
-
 
 
     def fastCredits(self, m, zs_data):
@@ -192,17 +194,34 @@ class ModsProcess(QtCore.QThread):
         self.progress_update.emit(self.progress_value)
 
 
-
     def editHubs(self, msn, zs_data):
         # changes the ChangeSceneName parameters of kettles to the randomized levels
+        # C-1 needs to be vanilla for now to allow the player to use Smallfry
+        # Octavio ooze hard checks each Crater level, so we make it always eatable and hide a kettle for Octavio
         if self.settings['kettles']:
             banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
             for act in banc.info['Actors']:
                 if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
                     scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
                     act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
+                
+                # if msn == 'SmallWorld' and act['Name'] == 'KebaInkCore_Big':
+                #     act['spl__KebaInkCoreBancParam']['IsSmallWorldLast'] = False
+            
+            # if msn == 'SmallWorld':
+            #     octavio_kettle = self.parseHash([k for k in banc.info['Actors'] if k['Name'] == 'MissionGateway'][0])
+            #     octavio_kettle['Translate'] = [oead.F32(90.0), oead.F32(750.0), oead.F32(-550.0)]
+            #     octavio_kettle['Rotate'] = [oead.F32(0.0), oead.F32(-90.0), oead.F32(0.0)]
+            #     octavio_kettle['spl__MissionGatewayBancParam']['ChangeSceneName'] = 'Msn_RailKing'
+            #     # del octavio_kettle['Links']
+            #     # del octavio_kettle['spl__MissionGatewayBancParam']['ToPlayerFrontDirLocator']
+            #     octavio_kettle['InstanceID'] = '3b86df9c-698f-78bd-1f67-920257ae3e4d'
+            #     octavio_kettle['Hash'] = oead.U64(11439329979319687813)
+            #     octavio_kettle['Phive']['Placement']['ID'] = oead.U64(11439329979319687813)
+            #     octavio_kettle['SRTHash'] = oead.U32(2335531337)
+            #     banc.info['Actors'].append(oead.byml.Hash(octavio_kettle))
+            
             zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
-
 
 
     def fixMissionCompatibility(self, msn, mission_data):
@@ -222,16 +241,15 @@ class ModsProcess(QtCore.QThread):
         if msn in freebies and 'Admission' in mission_data.info:
             mission_data.info['Admission'] = oead.S32(0)
         
-        # make alterna and crater levels have the correct MapType
-        try:
-            stage = [k for k,v in self.levels.items() if v == msn][0]
-            if stage[4] == 'A':
-                mission_data.info['MapType'] = 'ChallengeStage'
-            elif stage[4] == 'C':
-                mission_data.info['MapType'] = 'SmallWorldStage'
-        except IndexError:
-            pass # this just means that the stage is not a mission, or is After Alterna. we can ignore this case
-
+        # # make alterna and crater levels have the correct MapType
+        # try:
+        #     stage = [k for k,v in self.levels.items() if v == msn][0]
+        #     if stage[4] == 'A':
+        #         mission_data.info['MapType'] = 'ChallengeStage'
+        #     elif stage[4] == 'C':
+        #         mission_data.info['MapType'] = 'SmallWorldStage'
+        # except IndexError:
+        #     pass # this just means that the stage is not a mission, or is After Alterna. we can ignore this case
 
 
     def addChallenges(self, mission_data):
@@ -247,7 +265,6 @@ class ModsProcess(QtCore.QThread):
                 mission_data.info['ChallengeParamArray'].append({'Type': 'DamageSuddenDeath'})
         else:
             mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
-
 
 
     def randomizeWeapons(self, mission_data, main_weapons_list):
@@ -296,7 +313,6 @@ class ModsProcess(QtCore.QThread):
             elif special_weapon == 'SpSuperHook_Mission':
                 if random.random() < 0.125:
                     e['SupplyWeaponType'] = 'MainAndSpecial'
-
 
 
     def randomizeMusic(self, msn, zs_data):
@@ -354,11 +370,9 @@ class ModsProcess(QtCore.QThread):
             zs_data.writer.files[info_file] = bgm_data.repack()
 
 
-
     def skipCutscene(self, flow, before, after):
         event_tools.insertEventAfter(flow.flowchart, before, after)
         return event_tools.writeFlow(flow)
-
 
 
     def removeCutscenes(self, msn, zs_data):
@@ -384,9 +398,13 @@ class ModsProcess(QtCore.QThread):
                 self.skipCutscene(flow, 'EntryPoint0', 'Event12')
         
         elif msn == 'SmallWorld':
-            # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] - INFINITE LOADING SCREEN
             zs_data.writer.files['Event/EventFlow/Mission_SecondStageClear.bfevfl'] = oead.Bytes()
             zs_data.writer.files['Event/EventFlow/Mission_ThirdStageClear.bfevfl'] = oead.Bytes()
+
+            # INFINITE LOADING SCREEN
+            # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'])
+            # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] =\
+            #     self.skipCutscene(flow, 'EntryPoint0', 'Event46')
             
             flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'])
             zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'] =\
@@ -413,6 +431,31 @@ class ModsProcess(QtCore.QThread):
         else:
             zs_data.writer.files['Event/EventFlow/Mission_BigWorldStageFirst.bfevfl'] = oead.Bytes()
 
+
+    def parseHash(self, struct, k=None):
+        result = {}
+        for k,v in dict(struct).items():
+            if isinstance(v, oead.byml.Hash):
+                result[k] = self.parseHash(v)
+            elif isinstance(v, oead.byml.Array):
+                result[k] = self.parseArray(v)
+            else:
+                result[k] = v
+
+        return result
+
+
+    def parseArray(self, l):
+        result = []
+        for s in list(l):
+            if isinstance(s, oead.byml.Hash):
+                result.append(self.parseHash(s))
+            elif isinstance(s, oead.byml.Array):
+                result.append(self.parseArray(s))
+            else:
+                result.append(s)
+        
+        return result
 
 
     # STOP THREAD

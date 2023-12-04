@@ -3,18 +3,14 @@ from randomizer_paths import *
 import yaml
 import os
 
+VERSION = "0.1.2"
+
 with open(os.path.join(DATA_PATH, 'seeds.yml'), 'r') as f:
     seed_info = yaml.safe_load(f)
     ADJECTIVES = seed_info['Adjectives']
     CHARACTERS = seed_info['Characters']
 with open(os.path.join(DATA_PATH, 'parameters.yml'), 'r') as f:
     PARAMS = yaml.safe_load(f)
-
-# with open(os.path.join(DATA_PATH, 'logic.yml'), 'r') as f:
-#     LOGIC = yaml.safe_load(f)
-
-with open(os.path.join(ROOT_PATH, 'version.txt'), 'r') as f:
-    VERSION = f.read()
 
 try:
     with open(SETTINGS_PATH, 'r') as f:
