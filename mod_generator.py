@@ -30,23 +30,20 @@ class ModsProcess(QtCore.QThread):
         self.progress_value = 0
         self.thread_active = True
         self.levels = {}
-        # self.alterna_levels = {}
-        # self.crater_levels = {}
 
 
     # automatically called when this thread is started
     def run(self):
         try:
-            if self.settings['kettles']: self.randomizeKettles()
+            if self.settings['kettles']:
+                self.randomizeKettles()
             self.editLevels()
-            if self.thread_active:
-                os.mkdir(f'{self.out_dir}/0100C2500FC20000')
         
         except Exception:
             er = traceback.format_exc()
             self.error.emit(er)
         
-        finally: # tell the GUI that this thread has finished
+        finally:
             self.is_done.emit()
 
 
@@ -67,20 +64,23 @@ class ModsProcess(QtCore.QThread):
         levels: list = copy.deepcopy(PARAMS['Missions'])
         random.shuffle(levels)
         for msn in PARAMS['Missions']:
+            if not self.thread_active:
+                break
+
             new_level = ''
             valid_placement = False
 
             while not valid_placement:
                 new_level = random.choice(levels)
-                if new_level.endswith('King'): # restrict Alterna bosses to be in Alterna, no more than 1 per site
-                    if msn.startswith('Msn_C'):
-                        continue
-                    else:
-                        site = msn[6]
-                        bosses = [k for k,v in self.levels.items() if v.endswith('King')]
-                        existing_bosses = [b for b in bosses if b[6] == site]
-                        if existing_bosses:
-                            continue
+                # if new_level.endswith('King'): # restrict Alterna bosses to be in Alterna, no more than 1 per site
+                #     if msn.startswith('Msn_C'):
+                #         continue
+                #     else:
+                #         site = msn[6]
+                #         bosses = [k for k,v in self.levels.items() if v.endswith('King')]
+                #         existing_bosses = [b for b in bosses if b[6] == site]
+                #         if existing_bosses:
+                #             continue
                 
                 valid_placement = True
             
@@ -99,9 +99,9 @@ class ModsProcess(QtCore.QThread):
     def editLevels(self):
         time.sleep(0.5)
         self.status_update.emit('Editing levels...')
-        os.makedirs(f'{self.out_dir}/romfs/Pack/Scene')
+        os.makedirs(f'{self.out_dir}/Pack/Scene')
         
-        valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[7]) <= self.settings['season']]
+        valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= self.settings['season']]
         main_weapons_list = []
         for season in valid_seasons:
             for weapon in PARAMS['Main_Weapons'][season]:
@@ -159,12 +159,12 @@ class ModsProcess(QtCore.QThread):
             if self.settings['remove-cutscenes']:
                 self.removeCutscenes(msn, zs_data)
                         
-            with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
+            with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
                 self.progress_value += 1
                 self.progress_update.emit(self.progress_value)
         
-        # with open(f'{self.out_dir}/romfs/RSDB/MissionMapInfo.Product.400.rstbl.byml.zs', 'wb') as f:
+        # with open(f'{self.out_dir}/RSDB/MissionMapInfo.Product.400.rstbl.byml.zs', 'wb') as f:
         #     f.write(ui_missions_data.repack())
         #     self.progress_value += 1
         #     self.progress_update.emit(self.progress_value)
@@ -187,7 +187,7 @@ class ModsProcess(QtCore.QThread):
             flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'])
             zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'] =\
                 self.skipCutscene(flow, 'Event58', 'Event52')
-            with open(f'{self.out_dir}/romfs/Pack/Scene/{m}', 'wb') as f:
+            with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
         
         self.progress_value += 1
@@ -196,31 +196,13 @@ class ModsProcess(QtCore.QThread):
 
     def editHubs(self, msn, zs_data):
         # changes the ChangeSceneName parameters of kettles to the randomized levels
-        # C-1 needs to be vanilla for now to allow the player to use Smallfry
-        # Octavio ooze hard checks each Crater level, so we make it always eatable and hide a kettle for Octavio
         if self.settings['kettles']:
             banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
             for act in banc.info['Actors']:
                 if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
                     scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
                     act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
-                
-                # if msn == 'SmallWorld' and act['Name'] == 'KebaInkCore_Big':
-                #     act['spl__KebaInkCoreBancParam']['IsSmallWorldLast'] = False
-            
-            # if msn == 'SmallWorld':
-            #     octavio_kettle = self.parseHash([k for k in banc.info['Actors'] if k['Name'] == 'MissionGateway'][0])
-            #     octavio_kettle['Translate'] = [oead.F32(90.0), oead.F32(750.0), oead.F32(-550.0)]
-            #     octavio_kettle['Rotate'] = [oead.F32(0.0), oead.F32(-90.0), oead.F32(0.0)]
-            #     octavio_kettle['spl__MissionGatewayBancParam']['ChangeSceneName'] = 'Msn_RailKing'
-            #     # del octavio_kettle['Links']
-            #     # del octavio_kettle['spl__MissionGatewayBancParam']['ToPlayerFrontDirLocator']
-            #     octavio_kettle['InstanceID'] = '3b86df9c-698f-78bd-1f67-920257ae3e4d'
-            #     octavio_kettle['Hash'] = oead.U64(11439329979319687813)
-            #     octavio_kettle['Phive']['Placement']['ID'] = oead.U64(11439329979319687813)
-            #     octavio_kettle['SRTHash'] = oead.U32(2335531337)
-            #     banc.info['Actors'].append(oead.byml.Hash(octavio_kettle))
-            
+                        
             zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
 
@@ -278,7 +260,22 @@ class ModsProcess(QtCore.QThread):
             e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
             
             if i == 0 and self.settings['beatable']: # leave first option as vanilla
-                continue
+                try:
+                    if e['SupplyWeaponType'] == 'Hero':
+                        mains.append('Hero')
+                        continue
+                    else:
+                        main_weapon = str(e['WeaponMain'])
+                        if main_weapon == '':
+                            mains.append('Hero')
+                            continue
+                        main_weapon = main_weapon.split('/')[2]
+                        main_weapon = main_weapon.split('.')[0]
+                        mains.append(main_weapon)
+                        continue
+                except KeyError:
+                    mains.append('Hero')
+                    continue
             
             main_weapon = ''
             while main_weapon in mains:

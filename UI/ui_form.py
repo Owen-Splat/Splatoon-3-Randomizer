@@ -16,9 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QLabel,
-    QLineEdit, QMainWindow, QPushButton, QSizePolicy,
-    QTabWidget, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFrame,
+    QLabel, QLineEdit, QMainWindow, QPushButton,
+    QSizePolicy, QSpinBox, QTabWidget, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -175,17 +175,17 @@ class Ui_MainWindow(object):
         self.cutsceneCheck.setGeometry(QRect(40, 223, 151, 20))
         self.collectCheck = QCheckBox(self.tab)
         self.collectCheck.setObjectName(u"collectCheck")
-        self.collectCheck.setEnabled(False)
+        self.collectCheck.setEnabled(True)
         self.collectCheck.setGeometry(QRect(560, 223, 151, 20))
         self.oozeCheck = QCheckBox(self.tab)
         self.oozeCheck.setObjectName(u"oozeCheck")
-        self.oozeCheck.setEnabled(False)
+        self.oozeCheck.setEnabled(True)
         self.oozeCheck.setGeometry(QRect(320, 223, 151, 20))
         self.oozeCheck.setCheckable(True)
         self.tabWidget.addTab(self.tab, "")
         self.randomizeButton = QPushButton(self.centralwidget)
         self.randomizeButton.setObjectName(u"randomizeButton")
-        self.randomizeButton.setGeometry(QRect(30, 350, 721, 41))
+        self.randomizeButton.setGeometry(QRect(480, 350, 261, 41))
         font2 = QFont()
         font2.setPointSize(11)
         font2.setBold(False)
@@ -195,8 +195,22 @@ class Ui_MainWindow(object):
         self.randomizeButton.setFlat(False)
         self.explainLabel = QLabel(self.centralwidget)
         self.explainLabel.setObjectName(u"explainLabel")
-        self.explainLabel.setGeometry(QRect(30, 310, 721, 23))
+        self.explainLabel.setGeometry(QRect(20, 310, 731, 23))
         self.explainLabel.setStyleSheet(u"color: rgb(80, 80, 80);")
+        self.seasonSpinBox = QSpinBox(self.centralwidget)
+        self.seasonSpinBox.setObjectName(u"seasonSpinBox")
+        self.seasonSpinBox.setGeometry(QRect(30, 350, 111, 41))
+        font3 = QFont()
+        font3.setPointSize(11)
+        self.seasonSpinBox.setFont(font3)
+        self.seasonSpinBox.setMinimum(1)
+        self.seasonSpinBox.setMaximum(6)
+        self.platformComboBox = QComboBox(self.centralwidget)
+        self.platformComboBox.addItem("")
+        self.platformComboBox.addItem("")
+        self.platformComboBox.setObjectName(u"platformComboBox")
+        self.platformComboBox.setGeometry(QRect(230, 350, 161, 41))
+        self.platformComboBox.setFont(font3)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -258,15 +272,19 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(whatsthis)
         self.cutsceneCheck.setText(QCoreApplication.translate("MainWindow", u"Remove Cutscenes", None))
 #if QT_CONFIG(whatsthis)
-        self.collectCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Randomizes the contents of the collectables. Not currently implemented", None))
+        self.collectCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Randomizes the contents of the collectables", None))
 #endif // QT_CONFIG(whatsthis)
         self.collectCheck.setText(QCoreApplication.translate("MainWindow", u"Collectables", None))
 #if QT_CONFIG(whatsthis)
-        self.oozeCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Randomizes the cost of fuzzy ooze. Not currently implemented", None))
+        self.oozeCheck.setWhatsThis(QCoreApplication.translate("MainWindow", u"Randomizes the cost of fuzzy ooze in Alterna. Crater ooze is left vanilla", None))
 #endif // QT_CONFIG(whatsthis)
-        self.oozeCheck.setText(QCoreApplication.translate("MainWindow", u"Fuzzy Ooze", None))
+        self.oozeCheck.setText(QCoreApplication.translate("MainWindow", u"Fuzzy Ooze Cost", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Randomizer Settings", None))
         self.randomizeButton.setText(QCoreApplication.translate("MainWindow", u"Randomize", None))
         self.explainLabel.setText(QCoreApplication.translate("MainWindow", u"Hover over an option to see what it does", None))
+        self.seasonSpinBox.setPrefix(QCoreApplication.translate("MainWindow", u" Season:  ", None))
+        self.platformComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Platform: Console", None))
+        self.platformComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Platform: Emulator", None))
+
     # retranslateUi
 

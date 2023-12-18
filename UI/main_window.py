@@ -48,7 +48,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
 
-
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.Type.HoverEnter:
             self.ui.explainLabel.setText(source.whatsThis())
@@ -61,12 +60,13 @@ class MainWindow(QtWidgets.QMainWindow):
         return QtWidgets.QWidget.eventFilter(self, source, event)
 
 
-
     def saveSettings(self):
         settings_dict = {
             'Romfs_Folder': self.ui.lineEdit.text(),
             'Output_Folder': self.ui.lineEdit_2.text(),
             'Seed': self.ui.lineEdit_3.text(),
+            'Platform': self.ui.platformComboBox.currentText(),
+            'Season': self.ui.seasonSpinBox.value(),
             'Kettles': self.ui.kettleCheck.isChecked(),
             'Beatable': self.ui.beatableCheck.isChecked(),
             'Backgrounds': self.ui.backgroundCheck.isChecked(),
@@ -80,87 +80,83 @@ class MainWindow(QtWidgets.QMainWindow):
             yaml.dump(settings_dict, settingsFile, Dumper=MyDumper, sort_keys=False)
 
 
-
     def loadSettings(self):
-        # romfs folder
         try:
             if os.path.exists(SETTINGS['Romfs_Folder']):
                 self.ui.lineEdit.setText(SETTINGS['Romfs_Folder'])
         except (KeyError, TypeError):
             pass
         
-        # output folder
         try:
             if os.path.exists(SETTINGS['Output_Folder']):
                 self.ui.lineEdit_2.setText(SETTINGS['Output_Folder'])
         except (KeyError, TypeError):
             pass
         
-        # seed
         try:
             if SETTINGS['Seed'] != "":
                 self.ui.lineEdit_3.setText(SETTINGS['Seed'])
         except (KeyError, TypeError):
             pass
 
-        # kettles
+        try:
+            self.ui.platformComboBox.setCurrentIndex(1 if str(SETTINGS['Platform']).lower().strip() == 'emulator' else 0)
+        except (KeyError, TypeError):
+            pass
+
+        try:
+            self.ui.seasonSpinBox.setValue(int(SETTINGS['Season']))
+        except (KeyError, TypeError, ValueError):
+            pass
+
         try:
             self.ui.kettleCheck.setChecked(SETTINGS['Kettles'])
         except(KeyError, TypeError):
             self.ui.kettleCheck.setChecked(True)
         
-        # beatable
         try:
             self.ui.beatableCheck.setChecked(SETTINGS['Beatable'])
         except(KeyError, TypeError):
             self.ui.beatableCheck.setChecked(True)
         
-        # backgrounds
         try:
             self.ui.backgroundCheck.setChecked(SETTINGS['Backgrounds'])
         except(KeyError, TypeError):
             self.ui.backgroundCheck.setChecked(True)
         
-        # enemy ink is lava challenge
         try:
             self.ui.lavaCheck.setChecked(SETTINGS['1HKO'])
         except(KeyError, TypeError):
             self.ui.lavaCheck.setChecked(False)
 
-        # ink color
         try:
             self.ui.inkCheck.setChecked(SETTINGS['Ink_Color'])
         except(KeyError, TypeError):
             self.ui.inkCheck.setChecked(True)
 
-        # music
         try:
             self.ui.musicCheck.setChecked(SETTINGS['Music'])
         except(KeyError, TypeError):
             self.ui.musicCheck.setChecked(True)
         
-        # cutscenes
         try:
             self.ui.cutsceneCheck.setChecked(SETTINGS['Remove_Cutscenes'])
         except(KeyError, TypeError):
             self.ui.cutsceneCheck.setChecked(False)
     
     
-    
     # RomFS Folder Browse
     def romBrowse(self):
-        folderpath = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
-        if folderpath != "":
-            self.ui.lineEdit.setText(folderpath)
-    
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if os.path.exists(folder_path):
+            self.ui.lineEdit.setText(folder_path)
     
     
     # Output Folder Browse
     def outBrowse(self):
-        folderpath = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
-        if folderpath != "":
-            self.ui.lineEdit_2.setText(folderpath)
-    
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if os.path.exists(folder_path):
+            self.ui.lineEdit_2.setText(folder_path)
     
     
     # Generate New Seed
@@ -169,7 +165,6 @@ class MainWindow(QtWidgets.QMainWindow):
         adj2 = random.choice(ADJECTIVES)
         char = random.choice(CHARACTERS)
         self.ui.lineEdit_3.setText(adj1 + adj2 + char)
-    
     
     
     # Randomize Button Clicked
@@ -191,13 +186,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.showUserError('RomFS path is not valid!')
             return
         
-        # validate the romfs by checking for the ActorInfo file, which contains the game version in the name
-        # the game version will be used to determine which main weapons can be added to the pool
+        # validate the romfs by checking how many missions the user has in their romfs
         try:
-            info_file = [f for f in os.listdir(f'{rom_path}/RSDB') if f.startswith('ActorInfo')][0]
-            version = info_file.split('.')[2]
-        except (IndexError, TypeError, FileNotFoundError):
-            self.showUserError('Could not validate RomFS!')
+            level_files = [f for f in os.listdir(f'{rom_path}/Pack/Scene') if f.startswith('Msn_')]
+            if len(level_files) < 69:
+                self.showUserError('Could not find all level files')
+                return
+        except FileNotFoundError as e:
+            self.showUserError(f'Could not validate RomFS:\n\n{e}')
             return
 
         if not os.path.exists(self.ui.lineEdit_2.text()):
@@ -210,9 +206,12 @@ class MainWindow(QtWidgets.QMainWindow):
             seed = str(random.getrandbits(32))
         
         outdir = f"{self.ui.lineEdit_2.text()}/{seed}"
+        if self.ui.platformComboBox.currentText() == 'Platform: Console':
+            outdir += '/atmosphere/contents/0100C2500FC20000'
+        outdir += '/romfs'
         
         settings = {
-            'season': int(version[0]), # major version marker is the season, 1.0.0 was season 1, 2.0.0 was season 2, etc
+            'season': self.ui.seasonSpinBox.value(),
             'kettles': self.ui.kettleCheck.isChecked(),
             'beatable': self.ui.beatableCheck.isChecked(),
             'backgrounds': self.ui.backgroundCheck.isChecked(),
@@ -228,12 +227,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_window.show()
 
 
-
     # def pickCustomColor(self):
     #     dlg = QtWidgets.QColorDialog()
     #     if dlg.exec_():
     #         self.ui.colorButton.setStyleSheet(f'background-color: {dlg.currentColor().name()};')
-
 
 
     def showUserError(self, msg):
@@ -241,7 +238,6 @@ class MainWindow(QtWidgets.QMainWindow):
         message.setWindowTitle('Error')
         message.setText(msg)
         message.exec()
-
 
 
     def closeEvent(self, event):

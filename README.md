@@ -38,8 +38,8 @@ The randomizer does not provide a second copy of the game to use, but rather mak
 
 (See also: [Switch game modding](https://nh-server.github.io/switch-guide/extras/game_modding/))
 
-Switch: On your SD card for your homebrew setup, navigate to the `Atmosphere/contents` folder and drag in the `0100C2500FC20000` folder from the output. Copy and paste the `Romfs` folder from the randomizer output into this new folder. The folder structure here should look like `Atmosphere/contents/0100C2500FC20000/Romfs/...`. After this, simply start up Splatoon 3 while in CFW and enjoy the randomizer!
+Switch: Set the platform to Console and generate the seed. Simply drag the `atmosphere` folder to the root of your SD card. The folder structure here should look like `atmosphere/contents/0100C2500FC20000/romfs/...`. After this, simply start up Splatoon 3 while in CFW and enjoy the randomizer!
 
-Emulator: Open up the mods folder and drag in the `0100C2500FC20000` folder from the output, provided it does not already exist. Enter it and create a new folder named whatever you want. Inside that should be the `Romfs` folder from the randomizer output. It should look something like `%ModsDir%/0100C2500FC20000/S3Rando/Romfs/...`
+Emulator: Set the platform to Emulator and generate the seed. Simply drag the seed folder into the Splatoon 3 mods directory. You can right click the game in the emulator to find it. Then just start up the game with the mod enabled and enjoy the randomizer!
 
 Applying this mod will not in any way affect your save data, so don't delete anything you don't want deleted. If you want to go back to the original game after, either manually clear the files out, or you can launch the game holding L

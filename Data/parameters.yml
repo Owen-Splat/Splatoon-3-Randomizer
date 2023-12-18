@@ -63,8 +63,8 @@ Colors:
   - OrangeBlue
   - OrangePurple
   - PinkGreen
-  - TriColorDefault
-  - TriColorSameTeamMatch
+  # - TriColorDefault
+  # - TriColorSameTeamMatch
   - TurquoisePink
   - TurquoiseRed
   - YellowBlue
@@ -132,7 +132,6 @@ Main_Weapons:
     - Charger_Normal_Msn
     - Charger_Quick_00
     - Charger_Quick_Msn
-    - Free
     - Maneuver_Dual_00
     - Maneuver_Dual_Msn
     - Maneuver_Gallon_00

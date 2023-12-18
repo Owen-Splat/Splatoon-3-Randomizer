@@ -43,7 +43,7 @@ if getattr(sys, "frozen", False):
         LOGS_PATH = os.path.join('.', 'log.txt')
 else:
     RUNNING_FROM_SOURCE = True
-    ROOT_PATH = os.path.dirname(__file__)
+    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
     SETTINGS_PATH = os.path.join(ROOT_PATH, 'settings.txt')
     LOGS_PATH = os.path.join(ROOT_PATH, 'log.txt')
 

@@ -16,8 +16,8 @@ import signal
 signal.signal(signal.SIGINT, interruptHandler)
 
 
-# Test if code is being ran from a build, and if not, set app id so the custom taskbar icon will show while running from source
-if not RUNNING_FROM_SOURCE:
+# Set app id so the custom taskbar icon will show while running from source
+if RUNNING_FROM_SOURCE:
     from ctypes import windll
     try:
         windll.shell32.SetCurrentProcessExplicitAppUserModelID("Splatoon_3_Randomizer")

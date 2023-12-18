@@ -486,7 +486,7 @@
      </widget>
      <widget class="QCheckBox" name="collectCheck">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -497,7 +497,7 @@
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Randomizes the contents of the collectables. Not currently implemented</string>
+       <string>Randomizes the contents of the collectables</string>
       </property>
       <property name="text">
        <string>Collectables</string>
@@ -505,7 +505,7 @@
      </widget>
      <widget class="QCheckBox" name="oozeCheck">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -516,10 +516,10 @@
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Randomizes the cost of fuzzy ooze. Not currently implemented</string>
+       <string>Randomizes the cost of fuzzy ooze in Alterna. Crater ooze is left vanilla</string>
       </property>
       <property name="text">
-       <string>Fuzzy Ooze</string>
+       <string>Fuzzy Ooze Cost</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -530,9 +530,9 @@
    <widget class="QPushButton" name="randomizeButton">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>480</x>
       <y>350</y>
-      <width>721</width>
+      <width>261</width>
       <height>41</height>
      </rect>
     </property>
@@ -561,9 +561,9 @@
    <widget class="QLabel" name="explainLabel">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>310</y>
-      <width>721</width>
+      <width>731</width>
       <height>23</height>
      </rect>
     </property>
@@ -573,6 +573,55 @@
     <property name="text">
      <string>Hover over an option to see what it does</string>
     </property>
+   </widget>
+   <widget class="QSpinBox" name="seasonSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>350</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="prefix">
+     <string> Season:  </string>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>6</number>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="platformComboBox">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>350</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>Platform: Console</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Platform: Emulator</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <action name="actionEnglish">
