@@ -90,12 +90,24 @@ Backgrounds:
   - Sky_MsnLastBossFinal
   - Sky_PlazaDay
   - Sky_Daytime00
+  - Sky_Daytime01
+  - Sky_Daytime02
+  - Sky_Daytime03
+  - Sky_Daytime04
+  - Sky_Daytime05
+  - Sky_Daytime06
+  - Sky_Daytime07
+  - Sky_Sunset00
   - Sky_Sunset02
-  - Sky_SunsetBigRun_00
+  - Sky_Sunset04
+  - Sky_Sunset06
   - Sky_Dark00
+  # - Sky_Night00
   - Sky_Nighttime03
   - Sky_Space00
   - Sky_Space02
+  - Sky_Cirrus00
+  - Sky_Cloudy00
   
 
 Main_Weapons:
@@ -311,7 +323,7 @@ Special_Weapons:
   - SpSuperLanding
   - SpUltraStamp_Mission
 
-Missions:
+Alterna_Missions:
   - Msn_A01_01
   - Msn_A01_01C
   - Msn_A01_02
@@ -377,5 +389,12 @@ Missions:
   - Msn_A06_08C
   - Msn_A06_09C
   - Msn_MantaKing
+  - Msn_ExStage
+
+Crater_Missions:
+  - Msn_C_01
+  - Msn_C_02
+  - Msn_C_03
+  - Msn_C_04
 
 ...

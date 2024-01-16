@@ -32,6 +32,11 @@ class ModsProcess(QtCore.QThread):
         self.levels = {}
 
 
+    def updateProgress(self):
+        self.progress_value += 1
+        self.progress_update.emit(self.progress_value)
+
+
     # automatically called when this thread is started
     def run(self):
         try:
@@ -44,6 +49,8 @@ class ModsProcess(QtCore.QThread):
             self.error.emit(er)
         
         finally:
+            for lvl in self.levels:
+                print(lvl, self.levels[lvl])
             self.is_done.emit()
 
 
@@ -51,47 +58,56 @@ class ModsProcess(QtCore.QThread):
         time.sleep(1)
         self.status_update.emit('Randomizing kettles...')
 
-        self.levels['Msn_ExStage'] = 'Msn_ExStage' # restrict After Alterna to vanilla for now to avoid confusion
+        # restrict After Alterna to vanilla for now to avoid confusion
+        self.levels['Msn_ExStage'] = 'Msn_ExStage'
 
         # C-1 needs to be vanilla to allow the player to use Smallfry
         # C-1 -> C-4 all need to be beaten for the Octavio ooze
-        # tried to add a kettle inside ooze for Octavio, kettle won't show up for some reason
+        # So all Crater levels need to stay in the Crater, and C-1 stays vanilla
         self.levels['Msn_C_01'] = 'Msn_C_01'
-        self.levels['Msn_C_02'] = 'Msn_C_02'
-        self.levels['Msn_C_03'] = 'Msn_C_03'
-        self.levels['Msn_C_04'] = 'Msn_C_04'
 
-        levels: list = copy.deepcopy(PARAMS['Missions'])
-        random.shuffle(levels)
-        for msn in PARAMS['Missions']:
+        c_levels: list = copy.deepcopy(PARAMS['Crater_Missions'])
+        a_levels: list = copy.deepcopy(PARAMS['Alterna_Missions'])
+        b_levels = [b for b in a_levels if b.endswith('King')]
+        random.shuffle(c_levels)
+        random.shuffle(a_levels)
+        random.shuffle(b_levels)
+
+        for msn in PARAMS['Crater_Missions']:
             if not self.thread_active:
                 break
-
-            new_level = ''
-            valid_placement = False
-
-            while not valid_placement:
-                new_level = random.choice(levels)
-                # if new_level.endswith('King'): # restrict Alterna bosses to be in Alterna, no more than 1 per site
-                #     if msn.startswith('Msn_C'):
-                #         continue
-                #     else:
-                #         site = msn[6]
-                #         bosses = [k for k,v in self.levels.items() if v.endswith('King')]
-                #         existing_bosses = [b for b in bosses if b[6] == site]
-                #         if existing_bosses:
-                #             continue
-                
-                valid_placement = True
-            
-            levels.remove(new_level)
+            if msn in self.levels:
+                continue
+            new_level = random.choice(c_levels)
+            c_levels.remove(new_level)
             self.levels[msn] = new_level
-            self.progress_value += 1
-            self.progress_update.emit(self.progress_value)
-
-            # since there is no logic currently, this happens pretty much instantly
-            # so we add some delay to give a sense of progression, makes users happy :)
-            # this can just be removed when actual logic is written
+            self.updateProgress()
+            time.sleep(0.01)
+        
+        boss_sites = []
+        while b_levels:
+            new_level = random.choice(a_levels)
+            if new_level in self.levels or new_level[6] in boss_sites:
+                continue
+            try:
+                boss_sites.append(int(new_level[6]))
+                boss = b_levels.pop()
+                a_levels.remove(boss)
+                self.levels[new_level] = boss
+                self.updateProgress()
+                time.sleep(0.01)
+            except TypeError:
+                continue
+        
+        for msn in PARAMS['Alterna_Missions']:
+            if not self.thread_active:
+                break
+            if msn in self.levels:
+                continue
+            new_level = random.choice(a_levels)
+            a_levels.remove(new_level)
+            self.levels[msn] = new_level
+            self.updateProgress()
             time.sleep(0.01)
 
 
@@ -157,12 +173,11 @@ class ModsProcess(QtCore.QThread):
                 self.randomizeMusic(msn, zs_data)
             
             if self.settings['remove-cutscenes']:
-                self.removeCutscenes(msn, zs_data)
+                self.removeCutscenes(zs_data)
                         
             with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
-                self.progress_value += 1
-                self.progress_update.emit(self.progress_value)
+                self.updateProgress()
         
         # with open(f'{self.out_dir}/RSDB/MissionMapInfo.Product.400.rstbl.byml.zs', 'wb') as f:
         #     f.write(ui_missions_data.repack())
@@ -190,8 +205,7 @@ class ModsProcess(QtCore.QThread):
             with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
         
-        self.progress_value += 1
-        self.progress_update.emit(self.progress_value)
+        self.updateProgress()
 
 
     def editHubs(self, msn, zs_data):
@@ -372,61 +386,61 @@ class ModsProcess(QtCore.QThread):
         return event_tools.writeFlow(flow)
 
 
-    def removeCutscenes(self, msn, zs_data):
-        # event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
+    def removeCutscenes(self, zs_data):
+        """Lots of levels contain the same data embedded in them, in which the first one loaded is cached.
+        So we edit every instance of the cutscene data we want to speed up or skip"""
 
-        # make certain flowcharts empty so that cutscenes don't play
-        # edit others to just cut to the end
-        if msn == 'BigWorld':
-            zs_data.writer.files['Event/EventFlow/Mission_IntroduceComrade.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_IntroduceTrinity.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_BigWorldFirst.bfevfl'] = oead.Bytes() # - keep cool wake up cutscene
-            zs_data.writer.files['Event/EventFlow/Mission_BigWorldTutorial.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_0.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_1.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_AfterClearBossStage_2.bfevfl'] = oead.Bytes()
-            
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_TreasureMarge.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint0', 'Event49')
-            
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_DestroyLaunchPadKebaInk.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint0', 'Event12')
-        
-        elif msn == 'SmallWorld':
-            zs_data.writer.files['Event/EventFlow/Mission_SecondStageClear.bfevfl'] = oead.Bytes()
-            zs_data.writer.files['Event/EventFlow/Mission_ThirdStageClear.bfevfl'] = oead.Bytes()
-
-            # INFINITE LOADING SCREEN
-            # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'])
-            # zs_data.writer.files['Event/EventFlow/Mission_SmallWorldFirst.bfevfl'] =\
-            #     self.skipCutscene(flow, 'EntryPoint0', 'Event46')
-            
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_AppearSmallWorldBoss.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint0', 'Event46')
-        
-        elif msn == 'Msn_RailKing':
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_SmallWorldBossDefeat.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint0', 'Event34')
-        
-        elif msn == 'LaunchPadWorld':
-            # not enough time to look into lol
-            # flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'])
-            # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
-            # zs_data.writer.files['Event/EventFlow/Mission_TrinityBecomeFriend.bfevfl'] = oead.Bytes()
-            
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_PrevLastBoss.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint1', 'Event36')
-            
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_ReadyForLastBossStage.bfevfl'] =\
-                self.skipCutscene(flow, 'EntryPoint1', 'Event92')
-        else:
-            zs_data.writer.files['Event/EventFlow/Mission_BigWorldStageFirst.bfevfl'] = oead.Bytes()
+        event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
+        for f in event_files:
+            if 'Mission_IntroduceComrade' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_IntroduceTrinity' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_BigWorldFirst' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_BigWorldTutorial' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_AfterClearBossStage_0' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_AfterClearBossStage_1' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_AfterClearBossStage_2' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_TreasureMarge' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event49')
+            if 'Mission_DestroyLaunchPadKebaInk' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event12')
+            if 'Mission_SecondStageClear' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_ThirdStageClear' in f:
+                zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_AppearSmallWorldBoss' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event46')
+            if 'Mission_SmallWorldBossDefeat' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event34')
+            # if 'Mission_TrinityBecomeFriend' in f:
+            #     # not enough time to look into lol
+            #     # flow = event_tools.readFlow(zs_data.writer.files[f])
+            #     # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
+            #     # zs_data.writer.files[f] = oead.Bytes()
+            if 'Mission_PrevLastBoss.' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint1', 'Event36')
+            if 'Mission_ReadyForLastBossStage' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint1', 'Event92')
+            if 'Mission_BigWorldStageFirst' in f:
+                zs_data.writer.files[f] = oead.Bytes()
 
 
     def parseHash(self, struct, k=None):

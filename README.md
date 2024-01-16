@@ -7,7 +7,7 @@ Please note that while most things are functional, this randomizer is still very
 
 In order to run the randomizer, you must have the RomFS of the game extracted and on the device you're running this program from. This can be extracted on pc through Yuzu or Ryujinx, or nxdumptool from the Homebrew App Store. The RomFS is the component of the game package with all of the data files (i.e. non-executable files)
 
-Please dump the actual version that you are playing. The randomizer checks a file to determine version, which determines what weapons to include. If you provide an updated RomFS but play on an older version, the game will provide you with nothing instead of the newer weapons
+The season that you choose to play should match the major version number that you are playing on. For example, if you are playing on version 5.1.0, you should select season 5. If you choose a season higher than your game version, the randomizer will shuffle in weapons that aren't supported by your version, which results in having no weapon in that slot
 
 ## How to run:
 
