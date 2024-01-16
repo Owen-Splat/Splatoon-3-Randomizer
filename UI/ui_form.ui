@@ -499,8 +499,14 @@
       <property name="whatsThis">
        <string>Randomizes the contents of the collectables</string>
       </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(80, 80, 80);</string>
+      </property>
       <property name="text">
        <string>Collectables</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="oozeCheck">

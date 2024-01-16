@@ -49,8 +49,6 @@ class ModsProcess(QtCore.QThread):
             self.error.emit(er)
         
         finally:
-            for lvl in self.levels:
-                print(lvl, self.levels[lvl])
             self.is_done.emit()
 
 
@@ -66,8 +64,8 @@ class ModsProcess(QtCore.QThread):
         # So all Crater levels need to stay in the Crater, and C-1 stays vanilla
         self.levels['Msn_C_01'] = 'Msn_C_01'
 
-        c_levels: list = copy.deepcopy(PARAMS['Crater_Missions'])
-        a_levels: list = copy.deepcopy(PARAMS['Alterna_Missions'])
+        c_levels = [c for c in copy.deepcopy(PARAMS['Crater_Missions']) if c not in self.levels]
+        a_levels = [a for a in copy.deepcopy(PARAMS['Alterna_Missions']) if a not in self.levels]
         b_levels = [b for b in a_levels if b.endswith('King')]
         random.shuffle(c_levels)
         random.shuffle(a_levels)
@@ -209,15 +207,24 @@ class ModsProcess(QtCore.QThread):
 
 
     def editHubs(self, msn, zs_data):
+        banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
+
         # changes the ChangeSceneName parameters of kettles to the randomized levels
         if self.settings['kettles']:
-            banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
             for act in banc.info['Actors']:
                 if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
                     scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
                     act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
-                        
-            zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
+        
+        if msn == 'BigWorld' and self.settings['ooze-costs']:
+            print('reached BigWorld with ooze costs selected')
+            for act in banc.info['Actors']:
+                if act['Name'].startswith('KebaInkCore'):
+                    print('found KebaInkCore')
+                    cost = random.randint(1, 30)
+                    act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] = oead.S32(cost * 100)
+        
+        zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
 
     def fixMissionCompatibility(self, msn, mission_data):

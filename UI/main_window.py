@@ -73,7 +73,9 @@ class MainWindow(QtWidgets.QMainWindow):
             '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
             'Music': self.ui.musicCheck.isChecked(),
-            'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked()
+            'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked(),
+            'Fuzzy_Ooze_Costs': self.ui.oozeCheck.isChecked(),
+            # 'Collectables': self.ui.collectCheck.isChecked(),
         }
         
         with open(SETTINGS_PATH, 'w') as settingsFile:
@@ -143,6 +145,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.cutsceneCheck.setChecked(SETTINGS['Remove_Cutscenes'])
         except(KeyError, TypeError):
             self.ui.cutsceneCheck.setChecked(False)
+        
+        try:
+            self.ui.oozeCheck.setChecked(SETTINGS['Fuzzy_Ooze_Costs'])
+        except(KeyError, TypeError):
+            self.ui.oozeCheck.setChecked(False)
+        
+        # try:
+        #     self.ui.collectCheck.setChecked(SETTINGS['Collectables'])
+        # except(KeyError, TypeError):
+        #     self.ui.collectCheck.setChecked(True)
     
     
     # RomFS Folder Browse
@@ -219,6 +231,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'ink-color': self.ui.inkCheck.isChecked(),
             'music': self.ui.musicCheck.isChecked(),
             'remove-cutscenes': self.ui.cutsceneCheck.isChecked(),
+            'ooze-costs': self.ui.oozeCheck.isChecked(),
+            'collectables': self.ui.collectCheck.isChecked()
         }
         
         self.progress_window = ProgressWindow(rom_path, outdir, seed, settings)
