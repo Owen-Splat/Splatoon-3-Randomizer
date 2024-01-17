@@ -6,3 +6,4 @@ __pycache__
 /romfs
 settings.txt
 log.txt
+test.py

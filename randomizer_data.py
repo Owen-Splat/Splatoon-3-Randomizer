@@ -9,8 +9,12 @@ with open(os.path.join(DATA_PATH, 'seeds.yml'), 'r') as f:
     seed_info = yaml.safe_load(f)
     ADJECTIVES = seed_info['Adjectives']
     CHARACTERS = seed_info['Characters']
+
 with open(os.path.join(DATA_PATH, 'parameters.yml'), 'r') as f:
     PARAMS = yaml.safe_load(f)
+
+with open(os.path.join(DATA_PATH, 'collectables.yml'), 'r') as f:
+    COLLECTABLES = yaml.safe_load(f)
 
 try:
     with open(SETTINGS_PATH, 'r') as f:

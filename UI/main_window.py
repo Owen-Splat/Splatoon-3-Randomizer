@@ -75,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'Music': self.ui.musicCheck.isChecked(),
             'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked(),
             'Fuzzy_Ooze_Costs': self.ui.oozeCheck.isChecked(),
-            # 'Collectables': self.ui.collectCheck.isChecked(),
+            'Collectables': self.ui.collectCheck.isChecked()
         }
         
         with open(SETTINGS_PATH, 'w') as settingsFile:
@@ -151,10 +151,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except(KeyError, TypeError):
             self.ui.oozeCheck.setChecked(False)
         
-        # try:
-        #     self.ui.collectCheck.setChecked(SETTINGS['Collectables'])
-        # except(KeyError, TypeError):
-        #     self.ui.collectCheck.setChecked(True)
+        try:
+            self.ui.collectCheck.setChecked(SETTINGS['Collectables'])
+        except(KeyError, TypeError):
+            self.ui.collectCheck.setChecked(True)
     
     
     # RomFS Folder Browse
