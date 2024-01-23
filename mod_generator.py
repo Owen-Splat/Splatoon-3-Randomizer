@@ -40,9 +40,9 @@ class ModsProcess(QtCore.QThread):
     # automatically called when this thread is started
     def run(self):
         try:
-            if self.settings['kettles']:
-                self.randomizeKettles()
+            self.randomizeKettles()
             self.editLevels()
+            self.updateMissionParameters()
         
         except Exception:
             er = traceback.format_exc()
@@ -53,6 +53,9 @@ class ModsProcess(QtCore.QThread):
 
 
     def randomizeKettles(self):
+        if not self.settings['kettles']:
+            return
+        
         time.sleep(1)
         self.status_update.emit('Randomizing kettles...')
 
@@ -87,15 +90,12 @@ class ModsProcess(QtCore.QThread):
             new_level = random.choice(a_levels)
             if new_level in self.levels or new_level[6] in boss_sites:
                 continue
-            try:
-                boss_sites.append(int(new_level[6]))
-                boss = b_levels.pop()
-                a_levels.remove(boss)
-                self.levels[new_level] = boss
-                self.updateProgress()
-                time.sleep(0.01)
-            except TypeError:
-                continue
+            boss_sites.append(new_level[6])
+            boss = b_levels.pop()
+            a_levels.remove(boss)
+            self.levels[new_level] = boss
+            self.updateProgress()
+            time.sleep(0.01)
         
         for msn in PARAMS['Alterna_Missions']:
             if not self.thread_active:
@@ -114,7 +114,11 @@ class ModsProcess(QtCore.QThread):
         time.sleep(0.5)
         self.status_update.emit('Editing levels...')
         os.makedirs(f'{self.out_dir}/Pack/Scene')
-        
+        os.makedirs(f'{self.out_dir}/RSDB')
+
+        with open(f"{self.rom_path}/RSDB/MissionMapInfo.Product.{self.settings['season']}00.rstbl.byml.zs", 'rb') as f:
+            ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
+
         valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= self.settings['season']]
         main_weapons_list = []
         for season in valid_seasons:
@@ -122,7 +126,7 @@ class ModsProcess(QtCore.QThread):
                 main_weapons_list.append(weapon)
         
         missions = [f for f in os.listdir(f'{self.rom_path}/Pack/Scene') if f.startswith('Msn_')
-                    or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02', 'StaffRoll')]
+                    or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
         for m in missions:
             if not self.thread_active:
                 break
@@ -134,14 +138,13 @@ class ModsProcess(QtCore.QThread):
             
             if self.settings['backgrounds']:
                 self.randomizeBackground(msn, zs_data)
-            
-            if msn == 'StaffRoll':
-                self.fastCredits(m, zs_data)
-                continue
-            
+                        
             if msn in ('BigWorld', 'SmallWorld'):
                 self.editHubs(msn, zs_data)
-                        
+            
+            # if msn.endswith('King'):
+            #     self.changeBossGoals(msn, zs_data)
+            
             # mission info
             info_file = f'SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml'
             mission_data = zs_tools.BYAML(zs_data.writer.files[info_file])
@@ -153,16 +156,12 @@ class ModsProcess(QtCore.QThread):
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{random.choice(PARAMS['Colors'])}.game__gfx__parameter__TeamColorDataSet.gyml"
             
-            if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
-                self.addChallenges(mission_data)
+            # if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
+            #     self.addChallenges(mission_data)
             
-            if 'OctaSupplyWeaponInfoArray' not in mission_data.info:
-                has_weapons = False
-            else:
-                has_weapons = True
-            
+            has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
             if has_weapons:
-                self.randomizeWeapons(mission_data, main_weapons_list)
+                self.randomizeWeapons(mission_data, main_weapons_list, ui_missions_data)
             
             zs_data.writer.files[info_file] = mission_data.repack()
             
@@ -170,17 +169,13 @@ class ModsProcess(QtCore.QThread):
             if self.settings['music']:
                 self.randomizeMusic(msn, zs_data)
             
-            if self.settings['remove-cutscenes']:
-                self.removeCutscenes(zs_data)
-                        
             with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
                 self.updateProgress()
         
-        # with open(f'{self.out_dir}/RSDB/MissionMapInfo.Product.400.rstbl.byml.zs', 'wb') as f:
-        #     f.write(ui_missions_data.repack())
-        #     self.progress_value += 1
-        #     self.progress_update.emit(self.progress_value)
+        with open(f"{self.out_dir}/RSDB/MissionMapInfo.Product.{self.settings['season']}00.rstbl.byml.zs", 'wb') as f:
+            f.write(ui_missions_data.repack())
+            self.updateProgress()
 
 
     def randomizeBackground(self, msn, zs_data):
@@ -193,17 +188,6 @@ class ModsProcess(QtCore.QThread):
             sky = random.choice(PARAMS['Backgrounds'])
             render_data.info['Lighting']['SkySphere']['ActorName'] = f'Work/Actor/{sky}.engine__actor__ActorParam.gyml'
             zs_data.writer.files[renders[0]] = render_data.repack()
-
-
-    def fastCredits(self, m, zs_data):
-        if self.settings['remove-cutscenes']:
-            flow = event_tools.readFlow(zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'])
-            zs_data.writer.files['Event/EventFlow/Mission_StaffRoll.bfevfl'] =\
-                self.skipCutscene(flow, 'Event58', 'Event52')
-            with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
-                f.write(zs_data.repack())
-        
-        self.updateProgress()
 
 
     def editHubs(self, msn, zs_data):
@@ -223,11 +207,10 @@ class ModsProcess(QtCore.QThread):
                     act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] = oead.S32(cost * 100)
         
         if self.settings['collectables']:
-            from randomizer_data import COLLECTABLES
-            item_names = [k for k in COLLECTABLES]
+            item_names = [k for k in PARAMS['Collectables']]
             items = []
             for item in item_names:
-                for i in range(COLLECTABLES[item]['count']):
+                for i in range(PARAMS['Collectables'][item]['count']):
                     items.append({item: i})
             random.shuffle(items)
             for act in banc.info['Actors']:
@@ -237,7 +220,7 @@ class ModsProcess(QtCore.QThread):
                     id = list(new_item.values())[0]
                     act['Gyaml'] = name
                     act['Name'] = name
-                    if COLLECTABLES[name]['needsID']:
+                    if PARAMS['Collectables'][name]['needsID']:
                         act['spl__ItemWithPedestalBancParam'] = {'PlacementID': oead.S32(id)}
                     else:
                         act['spl__ItemWithPedestalBancParam'] = {}
@@ -248,6 +231,18 @@ class ModsProcess(QtCore.QThread):
                             }
         
         zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
+
+
+    # def changeBossGoals(self, msn, zs_data):
+    #     banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
+        
+    #     for act in banc.info['Actors']:
+    #         if act['Name'].startswith('SplMissionStageTreasure'):
+    #             act['Gyaml'] = 'Obj_GoalMissionAlterna'
+    #             act['Name'] = 'Obj_GoalMissionAlterna'
+    #             break # there's only one goal/treasure actor, so no need to continue iterating
+        
+    #     zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
 
     def fixMissionCompatibility(self, msn, mission_data):
@@ -293,7 +288,7 @@ class ModsProcess(QtCore.QThread):
             mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
 
 
-    def randomizeWeapons(self, mission_data, main_weapons_list):
+    def randomizeWeapons(self, mission_data, main_weapons_list, ui_missions_data: zs_tools.BYAML = None):
         if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
             while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
                 mission_data.info['OctaSupplyWeaponInfoArray'].append(
@@ -354,6 +349,11 @@ class ModsProcess(QtCore.QThread):
             elif special_weapon == 'SpSuperHook_Mission':
                 if random.random() < 0.125:
                     e['SupplyWeaponType'] = 'MainAndSpecial'
+        
+        for info in ui_missions_data.info:
+            if 'MapNameLabel' in info:
+                if info['MapNameLabel'] == mission_data.info['MapNameLabel']:
+                    info['OctaSupplyWeaponInfoArray'] = mission_data.info['OctaSupplyWeaponInfoArray']
 
 
     def randomizeMusic(self, msn, zs_data):
@@ -411,92 +411,65 @@ class ModsProcess(QtCore.QThread):
             zs_data.writer.files[info_file] = bgm_data.repack()
 
 
-    def skipCutscene(self, flow, before, after):
-        event_tools.insertEventAfter(flow.flowchart, before, after)
-        return event_tools.writeFlow(flow)
-
-
-    def removeCutscenes(self, zs_data):
-        """Lots of levels contain the same data embedded in them, in which the first one loaded is cached.
-        So we edit every instance of the cutscene data we want to speed up or skip"""
-
-        event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
-        for f in event_files:
-            if 'Mission_IntroduceComrade' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_IntroduceTrinity' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            # if 'Mission_BigWorldFirst' in f:
-            #     zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_BigWorldTutorial' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_AfterClearBossStage_0' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_AfterClearBossStage_1' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_AfterClearBossStage_2' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_TreasureMarge' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint0', 'Event49')
-            if 'Mission_DestroyLaunchPadKebaInk' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint0', 'Event12')
-            if 'Mission_SecondStageClear' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_ThirdStageClear' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_AppearSmallWorldBoss' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint0', 'Event46')
-            if 'Mission_SmallWorldBossDefeat' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint0', 'Event34')
-            # if 'Mission_TrinityBecomeFriend' in f:
-            #     # not enough time to look into lol
-            #     # flow = event_tools.readFlow(zs_data.writer.files[f])
-            #     # event_tools.insertEventAfter(flow.flowchart, 'Event42', 'Event36')
-            #     # zs_data.writer.files[f] = oead.Bytes()
-            if 'Mission_PrevLastBoss.' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint1', 'Event36')
-            if 'Mission_ReadyForLastBossStage' in f:
-                flow = event_tools.readFlow(zs_data.writer.files[f])
-                zs_data.writer.files[f] =\
-                    self.skipCutscene(flow, 'EntryPoint1', 'Event92')
-            if 'Mission_BigWorldStageFirst' in f:
-                zs_data.writer.files[f] = oead.Bytes()
-
-
-    def parseHash(self, struct, k=None):
-        result = {}
-        for k,v in dict(struct).items():
-            if isinstance(v, oead.byml.Hash):
-                result[k] = self.parseHash(v)
-            elif isinstance(v, oead.byml.Array):
-                result[k] = self.parseArray(v)
-            else:
-                result[k] = v
-
-        return result
-
-
-    def parseArray(self, l):
-        result = []
-        for s in list(l):
-            if isinstance(s, oead.byml.Hash):
-                result.append(self.parseHash(s))
-            elif isinstance(s, oead.byml.Array):
-                result.append(self.parseArray(s))
-            else:
-                result.append(s)
+    def updateMissionParameters(self):
+        if not self.settings['kettles'] and not self.settings['gear'] and not self.settings['remove-cutscenes']:
+            return
         
-        return result
+        with open(f'{self.rom_path}/Pack/SingletonParam.pack.zs', 'rb') as f:
+            zs_data = zs_tools.SARC(f.read())
+        
+        # So currently using the map only allows you to jump to kettles that happen to be in their original site
+        # I thought this would fix that, but nope
+
+        # if self.settings['kettles']:
+        #     table_file = 'Gyml/Singleton/spl__MissionStageTable.spl__MissionStageTable.bgyml'
+        #     stage_table = zs_tools.BYAML(zs_data.writer.files[table_file])
+        #     for stage in stage_table.info['Rows']:
+        #         if stage['StageName'].startswith('Msn_A'):
+        #             loc = [i for i in self.levels if self.levels[i] == stage['StageName']][0]
+        #             site_num = loc[6]
+        #             nums = {'r': '2', 'a': '4', 'n': '6', 'S': '1'}
+        #             if site_num in nums:
+        #                 site_num = nums[site_num]
+        #             stage['WorldAreaType'] = 'BigWorld' + site_num
+        #     zs_data.writer.files[table_file] = stage_table.repack()
+        
+        if self.settings['gear']:
+            skills = [s for s in PARAMS['Upgrade_Skills']]
+            random.shuffle(skills)
+            skill_file = 'Gyml/Singleton/spl__MissionConstant.spl__MissionConstant.bgyml'
+            skill_table = zs_tools.BYAML(zs_data.writer.files[skill_file])
+            for skill in skill_table.info['PlayerSkillTree']['SkillIconTable']:
+                new_skill = random.choice(skills)
+                skills.remove(new_skill)
+                skill['SkillType'] = new_skill
+                if new_skill == 'HeroShotUp':
+                    del skill['SkillType']
+            zs_data.writer.files[skill_file] = skill_table.repack()
+        
+        if self.settings['remove-cutscenes']:
+            skip_file = 'Gyml/Singleton/spl__MissionDemoSkipTable.spl__MissionDemoSkipTable.bgyml'
+            skip_table = zs_tools.BYAML(zs_data.writer.files[skip_file])
+            for cutscene in skip_table.info['Rows']:
+                if 'DemoSkipCondition' in cutscene:
+                    cutscene['DemoSkipCondition'] = 'Always'
+                else:
+                    cs_name = cutscene['DemoName'].split('/')[3].split('.')[0]
+                    if cs_name in ('Mission_BigWorldTutorial', 'Mission_BigWorldStageFirst',
+                                   'Mission_SecondStageClear', 'Mission_ThirdStageClear'):
+                        cutscene['DemoSkipCondition'] = 'Always'
+            new_cutscenes = ('Mission_IntroduceComrade', 'Mission_IntroduceTrinity', 'Mission_SmallWorldFirst',
+                             'Mission_AfterClearBossStage_0', 'Mission_AfterClearBossStage_1', 'Mission_AfterClearBossStage_2')
+            for cutscene in new_cutscenes:
+                skip_table.info['Rows'].append({
+                    'DemoName': f'Work/Event/EventSetting/{cutscene}.engine__event__EventSettingParam.gyml',
+                    'DemoSkipCondition': 'Always'
+                })
+            zs_data.writer.files[skip_file] = skip_table.repack()
+        
+        with open(f'{self.out_dir}/Pack/SingletonParam.pack.zs', 'wb') as f:
+            f.write(zs_data.repack())
+        self.updateProgress()
 
 
     # STOP THREAD

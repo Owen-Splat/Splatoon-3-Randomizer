@@ -24,6 +24,8 @@ class ProgressWindow(QtWidgets.QMainWindow):
         self.num_of_mod_tasks = 85
         if self.settings['kettles']:
             self.num_of_mod_tasks += 69
+        if self.settings['gear'] or self.settings['remove-cutscenes']:
+            self.num_of_mod_tasks += 1
         
         self.done = False
         self.cancel = False

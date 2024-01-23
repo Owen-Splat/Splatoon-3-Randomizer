@@ -353,20 +353,20 @@
        <string>Music</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="lavaCheck">
+     <widget class="QCheckBox" name="gearCheck">
       <property name="geometry">
        <rect>
-        <x>560</x>
-        <y>123</y>
+        <x>40</x>
+        <y>223</y>
         <width>151</width>
         <height>20</height>
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Makes every level kill you if you touch enemy ink. Getting armor prevents this. Might have issues with randomized ink colors</string>
+       <string>Randomizes the hero gear upgrades</string>
       </property>
       <property name="text">
-       <string>Enemy Ink Is Lava</string>
+       <string>Hero Gear Upgrades</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_3">
@@ -471,17 +471,17 @@
      <widget class="QCheckBox" name="cutsceneCheck">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>223</y>
+        <x>560</x>
+        <y>123</y>
         <width>151</width>
         <height>20</height>
        </rect>
       </property>
       <property name="whatsThis">
-       <string>Removes long cutscenes and dialogue. Currently about half done</string>
+       <string>Adds a skip option to long cutscenes and dialogue</string>
       </property>
       <property name="text">
-       <string>Remove Cutscenes</string>
+       <string>Skip Cutscenes</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="collectCheck">

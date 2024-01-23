@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if DEFAULTS:
             for item in desc_items:
                 item.setChecked(True)
-            self.ui.lavaCheck.setChecked(False)
+            # self.ui.lavaCheck.setChecked(False)
             self.ui.backgroundCheck.setChecked(False)
         else:
             self.loadSettings()
@@ -70,7 +70,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'Kettles': self.ui.kettleCheck.isChecked(),
             'Beatable': self.ui.beatableCheck.isChecked(),
             'Backgrounds': self.ui.backgroundCheck.isChecked(),
-            '1HKO': self.ui.lavaCheck.isChecked(),
+            'Hero_Gear': self.ui.gearCheck.isChecked(),
+            # '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
             'Music': self.ui.musicCheck.isChecked(),
             'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked(),
@@ -127,9 +128,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.backgroundCheck.setChecked(True)
         
         try:
-            self.ui.lavaCheck.setChecked(SETTINGS['1HKO'])
+            self.ui.gearCheck.setChecked(SETTINGS['Hero_Gear'])
         except(KeyError, TypeError):
-            self.ui.lavaCheck.setChecked(False)
+            self.ui.gearCheck.setChecked(True)
+        
+        # try:
+        #     self.ui.lavaCheck.setChecked(SETTINGS['1HKO'])
+        # except(KeyError, TypeError):
+        #     self.ui.lavaCheck.setChecked(False)
 
         try:
             self.ui.inkCheck.setChecked(SETTINGS['Ink_Color'])
@@ -227,7 +233,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'kettles': self.ui.kettleCheck.isChecked(),
             'beatable': self.ui.beatableCheck.isChecked(),
             'backgrounds': self.ui.backgroundCheck.isChecked(),
-            '1HKO': self.ui.lavaCheck.isChecked(),
+            'gear': self.ui.gearCheck.isChecked(),
+            # '1HKO': self.ui.lavaCheck.isChecked(),
             'ink-color': self.ui.inkCheck.isChecked(),
             'music': self.ui.musicCheck.isChecked(),
             'remove-cutscenes': self.ui.cutsceneCheck.isChecked(),

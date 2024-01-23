@@ -87,7 +87,7 @@ Backgrounds:
   - Sky_MsnBossRailKing00
   - Sky_MsnBossMantaKing
   - Sky_MisWorldLaunchPad
-  - Sky_MsnLastBossFinal
+  # - Sky_MsnLastBossFinal
   - Sky_PlazaDay
   - Sky_Daytime00
   - Sky_Daytime01
@@ -396,5 +396,53 @@ Crater_Missions:
   - Msn_C_02
   - Msn_C_03
   - Msn_C_04
+
+Upgrade_Skills:
+  - SalmonHPUp
+  - SpecialIncreaseUp
+  - SpecialIncreaseUp
+  - OpInkEffect_Reduction
+  - OpInkEffect_Reduction
+  - HeroShotUp
+  - HeroShotUp
+  - InkTankCapacity
+  - InkTankCapacity
+  - ArmorRecoeverTime_Save
+  - ArmorRecoeverTime_Save
+  - SubWeapon1
+  - SubWeapon1
+  - SalmonInkSave
+  - Marker
+  - Marker
+  - SquidMoveSpatter_Reduction
+  - SalmonRespawnTimeSave
+  - SubWeapon2
+  - SubWeapon2
+  - SubWeapon3
+  - SubWeapon3
+  - SalmonAttackUp
+
+Collectables:
+  ItemAncientDocument:
+    count: 24
+    needsID: true
+  ItemCardPack:
+    count: 7
+    needsID: true
+  ItemFoodTicket:
+    count: 7
+    needsID: true
+  ItemGoldenDisk:
+    count: 18
+    needsID: false
+  ItemLockerTreasure:
+    count: 29
+    needsID: true
+  ItemWeaponBuffDocument:
+    count: 18
+    needsID: false
+  ItemIkuraBottle:
+    count: 60
+    needsID: false
 
 ...
