@@ -1,0 +1,24 @@
+v0.2.0
+    - Randomizes backgrounds, fuzzy ooze costs, collectables, and hero gear
+    - Adds seasonal weapons support
+    - Adds an option to choose the output format for console or emulator
+    - The '1HKO' setting has been replaced with the 'Hero Gear Upgrades' setting
+        It will later return as part of a general challenges tab
+    - The 'Remove Cutscenes' setting has been replaced with a 'Skip Cutscenes' setting
+        Instead of manually editing every single cutscene file, the randomizer now just adds a skip option
+    - Bosses will now be limited to one per site
+    - The random weapons now display when standing over the kettle in Alterna
+    - Fixed a bug where C-1 would not be vanilla, which made it impossible to advance past the first level
+------
+v0.1.2
+    - Improvements to weapon randomization
+    - Fixed a bug where kettles would always be randomized even if the setting was unchecked
+------
+v0.1.1
+    - Adds partial support for removing cutscenes
+    - Improvements to weapon randomization
+    - Improvements to music randomization
+------
+v0.1.0 - initial release
+    - Randomizes weapons, kettles, ink colors, music
+    - Includes a '1HKO' setting to make every level have the "Enemy Ink Is Lava" challenge
