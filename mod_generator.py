@@ -115,10 +115,11 @@ class ModsProcess(QtCore.QThread):
         self.status_update.emit('Editing levels...')
         os.makedirs(f'{self.out_dir}/Pack/Scene')
         os.makedirs(f'{self.out_dir}/RSDB')
-
-        with open(f"{self.rom_path}/RSDB/MissionMapInfo.Product.{self.settings['season']}00.rstbl.byml.zs", 'rb') as f:
+        
+        ui_info_file = [f for f in os.listdir(f'{self.rom_path}/RSDB') if f.startswith('MissionMapInfo')][0]
+        with open(f"{self.rom_path}/RSDB/{ui_info_file}", 'rb') as f:
             ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
-
+        
         valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= self.settings['season']]
         main_weapons_list = []
         for season in valid_seasons:
@@ -138,7 +139,7 @@ class ModsProcess(QtCore.QThread):
             
             if self.settings['backgrounds']:
                 self.randomizeBackground(msn, zs_data)
-                        
+            
             if msn in ('BigWorld', 'SmallWorld'):
                 self.editHubs(msn, zs_data)
             
@@ -173,7 +174,7 @@ class ModsProcess(QtCore.QThread):
                 f.write(zs_data.repack())
                 self.updateProgress()
         
-        with open(f"{self.out_dir}/RSDB/MissionMapInfo.Product.{self.settings['season']}00.rstbl.byml.zs", 'wb') as f:
+        with open(f"{self.out_dir}/RSDB/{ui_info_file}", 'wb') as f:
             f.write(ui_missions_data.repack())
             self.updateProgress()
 
@@ -412,7 +413,7 @@ class ModsProcess(QtCore.QThread):
 
 
     def updateMissionParameters(self):
-        if not self.settings['kettles'] and not self.settings['gear'] and not self.settings['remove-cutscenes']:
+        if not self.settings['gear'] and not self.settings['skip-cutscenes']:
             return
         
         with open(f'{self.rom_path}/Pack/SingletonParam.pack.zs', 'rb') as f:
@@ -447,20 +448,16 @@ class ModsProcess(QtCore.QThread):
                     del skill['SkillType']
             zs_data.writer.files[skill_file] = skill_table.repack()
         
-        if self.settings['remove-cutscenes']:
+        if self.settings['skip-cutscenes']:
             skip_file = 'Gyml/Singleton/spl__MissionDemoSkipTable.spl__MissionDemoSkipTable.bgyml'
             skip_table = zs_tools.BYAML(zs_data.writer.files[skip_file])
+            cuts = copy.deepcopy(PARAMS['Cutscenes'])
             for cutscene in skip_table.info['Rows']:
-                if 'DemoSkipCondition' in cutscene:
+                name = cutscene['DemoName'].split('/')[3].split('.')[0]
+                if name in cuts:
                     cutscene['DemoSkipCondition'] = 'Always'
-                else:
-                    cs_name = cutscene['DemoName'].split('/')[3].split('.')[0]
-                    if cs_name in ('Mission_BigWorldTutorial', 'Mission_BigWorldStageFirst',
-                                   'Mission_SecondStageClear', 'Mission_ThirdStageClear'):
-                        cutscene['DemoSkipCondition'] = 'Always'
-            new_cutscenes = ('Mission_IntroduceComrade', 'Mission_IntroduceTrinity', 'Mission_SmallWorldFirst',
-                             'Mission_AfterClearBossStage_0', 'Mission_AfterClearBossStage_1', 'Mission_AfterClearBossStage_2')
-            for cutscene in new_cutscenes:
+                    cuts.remove(name)
+            for cutscene in cuts:
                 skip_table.info['Rows'].append({
                     'DemoName': f'Work/Event/EventSetting/{cutscene}.engine__event__EventSettingParam.gyml',
                     'DemoSkipCondition': 'Always'

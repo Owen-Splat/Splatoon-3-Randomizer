@@ -3,7 +3,6 @@ __pycache__
 /build
 /dist
 /output
-/romfs
 settings.txt
 log.txt
 test.py

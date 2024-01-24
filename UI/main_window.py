@@ -40,6 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setChecked(True)
             # self.ui.lavaCheck.setChecked(False)
             self.ui.backgroundCheck.setChecked(False)
+            self.ui.oozeCheck.setChecked(False)
         else:
             self.loadSettings()
         
@@ -74,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
             'Music': self.ui.musicCheck.isChecked(),
-            'Remove_Cutscenes': self.ui.cutsceneCheck.isChecked(),
+            'Skip_Cutscenes': self.ui.cutsceneCheck.isChecked(),
             'Fuzzy_Ooze_Costs': self.ui.oozeCheck.isChecked(),
             'Collectables': self.ui.collectCheck.isChecked()
         }
@@ -125,7 +126,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.ui.backgroundCheck.setChecked(SETTINGS['Backgrounds'])
         except(KeyError, TypeError):
-            self.ui.backgroundCheck.setChecked(True)
+            self.ui.backgroundCheck.setChecked(False)
         
         try:
             self.ui.gearCheck.setChecked(SETTINGS['Hero_Gear'])
@@ -148,9 +149,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.musicCheck.setChecked(True)
         
         try:
-            self.ui.cutsceneCheck.setChecked(SETTINGS['Remove_Cutscenes'])
+            self.ui.cutsceneCheck.setChecked(SETTINGS['Skip_Cutscenes'])
         except(KeyError, TypeError):
-            self.ui.cutsceneCheck.setChecked(False)
+            self.ui.cutsceneCheck.setChecked(True)
         
         try:
             self.ui.oozeCheck.setChecked(SETTINGS['Fuzzy_Ooze_Costs'])
@@ -237,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # '1HKO': self.ui.lavaCheck.isChecked(),
             'ink-color': self.ui.inkCheck.isChecked(),
             'music': self.ui.musicCheck.isChecked(),
-            'remove-cutscenes': self.ui.cutsceneCheck.isChecked(),
+            'skip-cutscenes': self.ui.cutsceneCheck.isChecked(),
             'ooze-costs': self.ui.oozeCheck.isChecked(),
             'collectables': self.ui.collectCheck.isChecked()
         }

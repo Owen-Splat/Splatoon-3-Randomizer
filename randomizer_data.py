@@ -3,7 +3,7 @@ from randomizer_paths import *
 import yaml
 import os
 
-VERSION = "0.1.2"
+VERSION = "0.2.0"
 
 with open(os.path.join(DATA_PATH, 'seeds.yml'), 'r') as f:
     seed_info = yaml.safe_load(f)
