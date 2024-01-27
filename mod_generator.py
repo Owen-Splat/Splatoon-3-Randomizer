@@ -143,9 +143,6 @@ class ModsProcess(QtCore.QThread):
             if msn in ('BigWorld', 'SmallWorld'):
                 self.editHubs(msn, zs_data)
             
-            # if msn.endswith('King'):
-            #     self.changeBossGoals(msn, zs_data)
-            
             # mission info
             info_file = f'SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml'
             mission_data = zs_tools.BYAML(zs_data.writer.files[info_file])
@@ -169,6 +166,9 @@ class ModsProcess(QtCore.QThread):
             # scene bgm
             if self.settings['music']:
                 self.randomizeMusic(msn, zs_data)
+            
+            if self.settings['skip-cutscenes']:
+                self.removeCutscenes(zs_data)
             
             with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
                 f.write(zs_data.repack())
@@ -234,18 +234,6 @@ class ModsProcess(QtCore.QThread):
         zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
 
-    # def changeBossGoals(self, msn, zs_data):
-    #     banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
-        
-    #     for act in banc.info['Actors']:
-    #         if act['Name'].startswith('SplMissionStageTreasure'):
-    #             act['Gyaml'] = 'Obj_GoalMissionAlterna'
-    #             act['Name'] = 'Obj_GoalMissionAlterna'
-    #             break # there's only one goal/treasure actor, so no need to continue iterating
-        
-    #     zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
-
-
     def fixMissionCompatibility(self, msn, mission_data):
         if 'King' in msn or 'Boss' in msn:
             return
@@ -262,16 +250,6 @@ class ModsProcess(QtCore.QThread):
         # remove admission fee for levels that should be free
         if msn in freebies and 'Admission' in mission_data.info:
             mission_data.info['Admission'] = oead.S32(0)
-        
-        # # make alterna and crater levels have the correct MapType
-        # try:
-        #     stage = [k for k,v in self.levels.items() if v == msn][0]
-        #     if stage[4] == 'A':
-        #         mission_data.info['MapType'] = 'ChallengeStage'
-        #     elif stage[4] == 'C':
-        #         mission_data.info['MapType'] = 'SmallWorldStage'
-        # except IndexError:
-        #     pass # this just means that the stage is not a mission, or is After Alterna. we can ignore this case
 
 
     def addChallenges(self, mission_data):
@@ -410,6 +388,37 @@ class ModsProcess(QtCore.QThread):
             #         'SLinkUserName': ''
             #     }
             zs_data.writer.files[info_file] = bgm_data.repack()
+
+
+    def skipCutscene(self, flow, before, after):
+        event_tools.insertEventAfter(flow.flowchart, before, after)
+        return event_tools.writeFlow(flow)
+
+
+    def removeCutscenes(self, zs_data):
+        """Most cutscenes we allow to be skipped through a DemoSkipTable. But some either don't work or give issues.
+        
+        Lots of levels contain the same data embedded in them, in which the first one loaded is cached.
+        
+        So we edit every instance of the rest of the cutscenes that we want to speed up or delete entirely"""
+        
+        unneeded_events = ['Mission_IntroduceComrade', 'Mission_BigWorldTutorial', 'Mission_IntroduceTrinity']
+        event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
+        for f in event_files:
+            if any(s in f for s in unneeded_events):
+                del zs_data.writer.files[f]
+            if 'Mission_AppearSmallWorldBoss' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event46')
+            if 'Mission_TreasureMarge' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event49')
+            if 'Mission_DestroyLaunchPadKebaInk' in f:
+                flow = event_tools.readFlow(zs_data.writer.files[f])
+                zs_data.writer.files[f] =\
+                    self.skipCutscene(flow, 'EntryPoint0', 'Event12')
 
 
     def updateMissionParameters(self):

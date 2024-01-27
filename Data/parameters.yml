@@ -452,39 +452,47 @@ Cutscenes:
   - Mission_AfterClearBossStage_2
   - Mission_AfterLastBoss
   - Mission_AppearBossA
+  - Mission_AppearBossA_Cleared
   - Mission_AppearBossB
+  - Mission_AppearBossB_Cleared
   - Mission_AppearBossC
-  - Mission_AppearSmallWorldBoss
-  - Mission_BeforeBreakKebaInkTutorial
-  - Mission_BigWorldFirst
+  - Mission_AppearBossC_Cleared
+  # - Mission_AppearSmallWorldBoss
+  - Mission_Area02First
+  - Mission_Area03First
+  - Mission_Area04First
+  - Mission_Area04FirstB
+  - Mission_Area05First
+  - Mission_Area05FirstB
+  - Mission_Area06First
+  # - Mission_BeforeBreakKebaInkTutorial
+  # - Mission_BigWorldFirst
   - Mission_BigWorldFirstAfterClear
   - Mission_BigWorldStageFirst
+  - Mission_BigWorldStageFirst02
   - Mission_BigWorldTutorial
   - Mission_CraterLastCore
   - Mission_DefeatBossA
   - Mission_DefeatBossB
   - Mission_DefeatBossC
   - Mission_DefeatLastBoss
-  - Mission_DestroyLaunchPadKebaInk
-  - Mission_FirstArea02
-  - Mission_FirstArea03
-  - Mission_FirstArea04
-  - Mission_FirstArea05
-  - Mission_FirstArea06
-  # - Mission_FirstKebaInk
-  - Mission_FirstLaunchPad
-  - Mission_FirstLaunchPadEnter
-  - Mission_FirstRocketStage01
+  # - Mission_DestroyLaunchPadKebaInk
+  - Mission_FirstKebaInk
   - Mission_FirstStageClear
   - Mission_FirstTakolien
   - Mission_FourthStageClear
-  - Mission_IntroduceComrade
-  - Mission_IntroduceTrinity
+  # - Mission_IntroduceComrade
+  # - Mission_IntroduceTrinity
   - Mission_LastBoss02Failed
   - Mission_LastBoss02First
-  - Mission_LaunchPadStage02Start
-  - Mission_LaunchPadStage03Start
-  - Mission_LaunchPadStage04Start
+  - Mission_LaunchPad01
+  - Mission_LaunchPad02
+  - Mission_LaunchPad02start
+  - Mission_LaunchPad03
+  - Mission_LaunchPad03Start
+  - Mission_LaunchPadFirst
+  - Mission_LaunchPadStage01_End
+  - Mission_LaunchPadStage01_Start
   - Mission_Phase1StartBossA
   - Mission_Phase1StartBossB
   - Mission_Phase1StartBossC
@@ -499,26 +507,26 @@ Cutscenes:
   - Mission_PrevLastBoss
   - Mission_PrevLastBoss01
   - Mission_ReadyForLastBossStage
-  - Mission_RocketStage05
-  - Mission_SecondLaunchPad
+  - Mission_RocketStage04Start
+  - Mission_RocketStage05_01
+  - Mission_RocketStage05_02
+  - Mission_RocketStage05_03
   - Mission_SecondStageClear
   - Mission_SmallWorldBossDefeat
   - Mission_SmallWorldFirst
   - Mission_StaffRoll
-  - Mission_ThirdLaunchPad
   - Mission_ThirdStageClear
-  - Mission_TreasureMarge
-  - Mission_TrinityBecomeFriend
-  - News_Ending
-  - News_FirstBoot
-  - News_MissionEnding
-  - News_Opening
-  - News_UpdateInfo
-  - News_VersionUp
-  - PlayerMake_ToPlaza_FlowChart
-  - PlayerMake_TrainArrival_FlowChart
-  - PlayerMake_WeaponGet
-  - Plaza_Intro
-  - Plaza_Overview
+  # - Mission_TreasureMarge
+  # - Mission_TrinityBecomeFriend
+  # - News_MissionEnding
+  # - News_Opening
+  # - News_UpdateInfo
+  # - News_VersionUp
+  # - PlayerMake_ToPlaza_FlowChart
+  # - PlayerMake_TrainArrival_FlowChart
+  # - PlayerMake_WeaponGet
+  # - Plaza_Intro
+  # - Plaza_IntroStation
+  # - Plaza_Overview
 
 ...
