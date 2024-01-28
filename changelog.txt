@@ -5,7 +5,7 @@ v0.2.0
     - The '1HKO' setting has been replaced with the 'Hero Gear Upgrades' setting
         It will later return as part of a general challenges tab
     - The 'Remove Cutscenes' setting has been replaced with a 'Skip Cutscenes' setting
-        Instead of manually editing every single cutscene file, the randomizer now just adds a skip option
+        Most cutscenes now have a skip button, while a couple have been completely removed due to issues
     - Bosses will now be limited to one per site
     - The random weapons now display when standing over the kettle in Alterna
     - Fixed a bug where C-1 would not be vanilla, which made it impossible to advance past the first level
