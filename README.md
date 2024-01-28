@@ -1,13 +1,13 @@
 # Splatoon-3-Randomizer
-A randomizer for Splatoon 3 Hero Mode. Currently still very early in development
+A randomizer for Splatoon 3 Hero Mode
 
-This release version allows for shuffling levels, weapons, ink color, and music. Grizzco weapons are included, as well as being able to use the Rainmaker! There is also the option to add a "Enemy ink is lava" challenge to every level
-
-Please note that while most things are functional, this randomizer is still very early in development and lacks proper logic. There is a definite possibilty in levels being unbeatable. There is a setting that at least tries to prevent this by keeping the first weapon as vanilla
+Allows for shuffling levels, weapons, ink color, music, collectables, and more! Grizzco weapons are included, as well as being able to use the Rainmaker!
 
 In order to run the randomizer, you must have the RomFS of the game extracted and on the device you're running this program from. This can be extracted on pc through Yuzu or Ryujinx, or nxdumptool from the Homebrew App Store. The RomFS is the component of the game package with all of the data files (i.e. non-executable files)
 
 The season that you choose to play should match the major version number that you are playing on. For example, if you are playing on version 5.1.0, you should select season 5. If you choose a season higher than your game version, the randomizer will shuffle in weapons that aren't supported by your version, which results in having no weapon in that slot
+
+For the level overlays to be updated when standing over kettles, you must make sure that the `romfs/RSDB/MissionMapInfo.Product.XXX.rstbl.byml.zs` file matches the version you are playing on. For example, if you are playing on versions 4.0.0 -> 4.0.2, the number in the file name needs to be 400. If on 4.1.0, it needs to be 410. The last number is always 0
 
 ## How to run:
 
