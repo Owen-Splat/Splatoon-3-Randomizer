@@ -287,6 +287,31 @@ Main_Weapons:
     - Shelter_Compact_01
     - Stringer_Short_01
     - Saber_Normal_01
+  Season_7:
+    - Shooter_Gravity_01
+    - Roller_Hunter_01
+    - Charger_Quick_01
+    - Charger_Long_01
+    - Charger_LongScope_01
+    - Slosher_Washtub_01
+    - Slosher_Double_01
+    - Spinner_Serein_01
+    - Maneuver_Gallon_01
+    - Maneuver_Long_00
+    - Shelter_Focus_00
+    # Side Order
+    - Shooter_ExtraOne_Sdodr
+    - Shooter_ExtraTwo_Sdodr
+    - Roller_Sdodr
+    - Brush_Sdodr
+    - Stringer_Sdodr
+    - Maneuver_Sdodr
+    - Charger_ExtraOne_Sdodr
+    - Shelter_Sdodr
+    - Slosher_Sdodr
+    - Blaster_ExtraOne_Sdodr
+    - Spinner_Sdodr
+    - Saber_Sdodr
 
 Sub_Weapons:
   - Beacon

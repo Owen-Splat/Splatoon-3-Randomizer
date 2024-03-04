@@ -27,7 +27,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # randomizer settings connections
         self.ui.browseButton1.clicked.connect(self.romBrowse)
-        self.ui.browseButton2.clicked.connect(self.outBrowse)
+        self.ui.browseButton2.clicked.connect(self.dlcBrowse)
+        self.ui.browseButton3.clicked.connect(self.outBrowse)
         self.ui.seedButton.clicked.connect(self.generateSeed)
         self.ui.randomizeButton.clicked.connect(self.randomizeButton_Clicked)
                 
@@ -38,7 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if DEFAULTS:
             for item in desc_items:
                 item.setChecked(True)
-            # self.ui.lavaCheck.setChecked(False)
+            self.ui.lavaCheck.setChecked(False)
             self.ui.backgroundCheck.setChecked(False)
             self.ui.oozeCheck.setChecked(False)
         else:
@@ -64,15 +65,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def saveSettings(self):
         settings_dict = {
             'Romfs_Folder': self.ui.lineEdit.text(),
-            'Output_Folder': self.ui.lineEdit_2.text(),
-            'Seed': self.ui.lineEdit_3.text(),
+            'DLC_Folder': self.ui.lineEdit_2.text(),
+            'Output_Folder': self.ui.lineEdit_3.text(),
+            'Seed': self.ui.lineEdit_4.text(),
             'Platform': self.ui.platformComboBox.currentText(),
             'Season': self.ui.seasonSpinBox.value(),
             'Kettles': self.ui.kettleCheck.isChecked(),
-            'Beatable': self.ui.beatableCheck.isChecked(),
+            # 'Beatable': self.ui.beatableCheck.isChecked(),
             'Backgrounds': self.ui.backgroundCheck.isChecked(),
             'Hero_Gear': self.ui.gearCheck.isChecked(),
-            # '1HKO': self.ui.lavaCheck.isChecked(),
+            '1HKO': self.ui.lavaCheck.isChecked(),
             'Ink_Color': self.ui.inkCheck.isChecked(),
             'Music': self.ui.musicCheck.isChecked(),
             'Skip_Cutscenes': self.ui.cutsceneCheck.isChecked(),
@@ -92,14 +94,20 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
         
         try:
+            if os.path.exists(SETTINGS['DLC_Folder']):
+                self.ui.lineEdit_2.setText(SETTINGS['DLC_Folder'])
+        except (KeyError, TypeError):
+            pass
+
+        try:
             if os.path.exists(SETTINGS['Output_Folder']):
-                self.ui.lineEdit_2.setText(SETTINGS['Output_Folder'])
+                self.ui.lineEdit_3.setText(SETTINGS['Output_Folder'])
         except (KeyError, TypeError):
             pass
         
         try:
             if SETTINGS['Seed'] != "":
-                self.ui.lineEdit_3.setText(SETTINGS['Seed'])
+                self.ui.lineEdit_4.setText(SETTINGS['Seed'])
         except (KeyError, TypeError):
             pass
 
@@ -118,10 +126,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except(KeyError, TypeError):
             self.ui.kettleCheck.setChecked(True)
         
-        try:
-            self.ui.beatableCheck.setChecked(SETTINGS['Beatable'])
-        except(KeyError, TypeError):
-            self.ui.beatableCheck.setChecked(True)
+        # try:
+        #     self.ui.beatableCheck.setChecked(SETTINGS['Beatable'])
+        # except(KeyError, TypeError):
+        #     self.ui.beatableCheck.setChecked(True)
         
         try:
             self.ui.backgroundCheck.setChecked(SETTINGS['Backgrounds'])
@@ -133,10 +141,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except(KeyError, TypeError):
             self.ui.gearCheck.setChecked(True)
         
-        # try:
-        #     self.ui.lavaCheck.setChecked(SETTINGS['1HKO'])
-        # except(KeyError, TypeError):
-        #     self.ui.lavaCheck.setChecked(False)
+        try:
+            self.ui.lavaCheck.setChecked(SETTINGS['1HKO'])
+        except(KeyError, TypeError):
+            self.ui.lavaCheck.setChecked(False)
 
         try:
             self.ui.inkCheck.setChecked(SETTINGS['Ink_Color'])
@@ -171,11 +179,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.lineEdit.setText(folder_path)
     
     
+    def dlcBrowse(self):
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if os.path.exists(folder_path):
+            self.ui.lineEdit_2.setText(folder_path)
+    
+    
     # Output Folder Browse
     def outBrowse(self):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Folder')
         if os.path.exists(folder_path):
-            self.ui.lineEdit_2.setText(folder_path)
+            self.ui.lineEdit_3.setText(folder_path)
     
     
     # Generate New Seed
@@ -183,16 +197,15 @@ class MainWindow(QtWidgets.QMainWindow):
         adj1 = random.choice(ADJECTIVES)
         adj2 = random.choice(ADJECTIVES)
         char = random.choice(CHARACTERS)
-        self.ui.lineEdit_3.setText(adj1 + adj2 + char)
+        self.ui.lineEdit_4.setText(adj1 + adj2 + char)
     
-    
-    # Randomize Button Clicked
-    def randomizeButton_Clicked(self):
+
+    def validateFolders(self) -> bool:
         rom_path = self.ui.lineEdit.text()
         
         if not os.path.exists(rom_path):
             self.showUserError('RomFS path does not exist!')
-            return
+            return False
         
         # get the right folder
         folders = [f.lower() for f in os.listdir(rom_path)]
@@ -203,20 +216,28 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.lineEdit.setText(rom_path)
         else:
             self.showUserError('RomFS path is not valid!')
-            return
+            return False
         
         # validate the romfs by checking how many missions the user has in their romfs
         try:
             level_files = [f for f in os.listdir(f'{rom_path}/Pack/Scene') if f.startswith('Msn_')]
             if len(level_files) < 69:
                 self.showUserError('Could not find all level files')
-                return
+                return False
         except FileNotFoundError as e:
             self.showUserError(f'Could not validate RomFS:\n\n{e}')
-            return
+            return False
 
-        if not os.path.exists(self.ui.lineEdit_2.text()):
+        if not os.path.exists(self.ui.lineEdit_3.text()):
             self.showUserError('Output path does not exist!')
+            return False
+        
+        return True
+    
+    
+    # Randomize Button Clicked
+    def randomizeButton_Clicked(self):
+        if not self.validateFolders():
             return
         
         seed = self.ui.lineEdit_3.text().strip()
@@ -232,10 +253,10 @@ class MainWindow(QtWidgets.QMainWindow):
         settings = {
             'season': self.ui.seasonSpinBox.value(),
             'kettles': self.ui.kettleCheck.isChecked(),
-            'beatable': self.ui.beatableCheck.isChecked(),
+            # 'beatable': self.ui.beatableCheck.isChecked(),
             'backgrounds': self.ui.backgroundCheck.isChecked(),
             'gear': self.ui.gearCheck.isChecked(),
-            # '1HKO': self.ui.lavaCheck.isChecked(),
+            '1HKO': self.ui.lavaCheck.isChecked(),
             'ink-color': self.ui.inkCheck.isChecked(),
             'music': self.ui.musicCheck.isChecked(),
             'skip-cutscenes': self.ui.cutsceneCheck.isChecked(),
@@ -243,7 +264,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'collectables': self.ui.collectCheck.isChecked()
         }
         
-        self.progress_window = ProgressWindow(rom_path, outdir, seed, settings)
+        self.progress_window = ProgressWindow(self.ui.lineEdit.text(), outdir, seed, settings)
         self.progress_window.setFixedSize(472, 125)
         self.progress_window.setWindowTitle(f"{seed}")
         self.progress_window.show()

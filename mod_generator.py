@@ -154,8 +154,8 @@ class ModsProcess(QtCore.QThread):
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{random.choice(PARAMS['Colors'])}.game__gfx__parameter__TeamColorDataSet.gyml"
             
-            # if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
-            #     self.addChallenges(mission_data)
+            if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
+                self.addChallenges(mission_data)
             
             has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
             if has_weapons:
@@ -277,7 +277,7 @@ class ModsProcess(QtCore.QThread):
         for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
             e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
             
-            if i == 0 and self.settings['beatable']: # leave first option as vanilla
+            if i == 0: # leave first option as vanilla
                 try:
                     if e['SupplyWeaponType'] == 'Hero':
                         mains.append('Hero')

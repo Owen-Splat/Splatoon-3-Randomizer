@@ -1,3 +1,8 @@
+v0.3.0
+    - The '1HKO' setting has returned
+    - The 'Beatable' setting has been removed
+        It is now just the default behavior
+------
 v0.2.0
     - Randomizes backgrounds, fuzzy ooze costs, collectables, and hero gear
     - Adds seasonal weapons support
