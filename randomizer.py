@@ -3,9 +3,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 import UI.main_window as window
 from randomizer_paths import RESOURCE_PATH, RUNNING_FROM_SOURCE
-
-import os
-import sys
+import os, sys
 
 
 def interruptHandler(sig, frame):
