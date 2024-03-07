@@ -1,8 +1,6 @@
 from PySide6 import QtWidgets
-from UI.ui_progress_form import Ui_ProgressWindow
-
-from mod_generator import ModsProcess
-
+from RandomizerUI.UI.ui_progress_form import Ui_ProgressWindow
+from RandomizerCore.Randomizers.rotm import RotM_Process
 import os
 import copy
 import shutil
@@ -37,7 +35,7 @@ class ProgressWindow(QtWidgets.QMainWindow):
             shutil.rmtree(self.out_dir, ignore_errors=True)
         
         self.ui.progressBar.setMaximum(self.num_of_mod_tasks)
-        self.mods_process = ModsProcess(self.rom_path, f'{self.out_dir}', self.seed, self.settings)
+        self.mods_process = RotM_Process(self.rom_path, f'{self.out_dir}', self.seed, self.settings)
         self.mods_process.setParent(self)
         self.mods_process.progress_update.connect(self.updateProgress)
         self.mods_process.status_update.connect(self.updateStatus)
@@ -58,7 +56,7 @@ class ProgressWindow(QtWidgets.QMainWindow):
 
     def modsError(self, er_message=str):
         self.mods_error = True
-        from randomizer_paths import LOGS_PATH
+        from RandomizerCore.Paths.randomizer_paths import LOGS_PATH
         with open(LOGS_PATH, 'w') as f:
             f.write(f'{self.seed}')
             f.write(f'\n\n{er_message}')

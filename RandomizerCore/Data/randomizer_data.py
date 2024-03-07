@@ -1,11 +1,11 @@
-from randomizer_paths import *
+from RandomizerCore.Paths.randomizer_paths import *
 
 import yaml
 import os
 
 VERSION = "0.2.0"
 
-with open(os.path.join(DATA_PATH, 'seeds.yml'), 'r') as f:
+with open(os.path.join(RESOURCE_PATH, 'seeds.yml'), 'r') as f:
     seed_info = yaml.safe_load(f)
     ADJECTIVES = seed_info['Adjectives']
     CHARACTERS = seed_info['Characters']

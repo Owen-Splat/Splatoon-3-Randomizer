@@ -1,5 +1,5 @@
-from randomizer_data import *
-import yaml, copy, os
+from RandomizerCore.Data.randomizer_data import *
+import yaml, os
 
 MAIN_ORDERS = {
     'kettleCheck': True,

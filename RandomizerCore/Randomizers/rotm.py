@@ -1,20 +1,17 @@
 from PySide6 import QtCore
-
+from RandomizerCore.Data.randomizer_data import PARAMS
+import RandomizerCore.Tools.event_tools as event_tools
+import RandomizerCore.Tools.zs_tools as zs_tools
 import os
 import copy
 import time
 import random
 import traceback
-
-import Tools.event_tools as event_tools
-import Tools.zs_tools as zs_tools
 import oead
 
-from randomizer_data import PARAMS
 
 
-
-class ModsProcess(QtCore.QThread):
+class RotM_Process(QtCore.QThread):
     progress_update = QtCore.Signal(int)
     status_update = QtCore.Signal(str)
     error = QtCore.Signal(str)

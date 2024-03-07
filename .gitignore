@@ -1,8 +1,6 @@
 __pycache__
 .qt_for_python
 /build
-/dist
 /output
 settings.txt
 log.txt
-test.py

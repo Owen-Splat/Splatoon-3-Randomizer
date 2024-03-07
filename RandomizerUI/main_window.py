@@ -1,9 +1,9 @@
 from PySide6 import QtCore, QtWidgets
-from UI.ui_form import Ui_MainWindow
-from UI.progress_window import ProgressWindow
-import UI.settings_manager as settings_manager
-from randomizer_data import *
-from randomizer_paths import *
+from RandomizerUI.UI.ui_form import Ui_MainWindow
+from RandomizerUI.progress_window import ProgressWindow
+import RandomizerUI.settings_manager as settings_manager
+from RandomizerCore.Data.randomizer_data import *
+from RandomizerCore.Paths.randomizer_paths import *
 import os, random
 
 

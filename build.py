@@ -1,7 +1,7 @@
 import os
 import sys
 import shutil
-from randomizer_data import VERSION
+from RandomizerCore.Data.randomizer_data import VERSION
 
 import struct
 if (struct.calcsize("P") * 8) == 64:
