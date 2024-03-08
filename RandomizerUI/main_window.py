@@ -169,8 +169,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def showChangeLog(self):
         message = QtWidgets.QMessageBox()
         message.setWindowTitle("What's New?")
-        message.setText(CHANGES)
-        message.setDetailedText(LOG)
+        message.setText(NEW_CHANGES)
+        message.setDetailedText(OLD_CHANGES)
         message.exec()
     
     
