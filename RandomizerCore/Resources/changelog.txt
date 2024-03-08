@@ -1,30 +1,54 @@
 v0.3.0
-    - Adds Side Order support (Not implemented yet in case you're running from source :p)
+
+    - Adds Side Order support
+
     - Adds season 7 weapons support
-    - The 'Enemy Ink Is Lava' setting has returned
-    - The 'Beatable' setting has been removed and is now just the default behavior
+
+    - The "Enemy Ink Is Lava" setting has returned
+
+    - The "Beatable" setting has been removed
+        It is now just the default behavior
+
 ------
 v0.2.0
+
     - Randomizes backgrounds, fuzzy ooze costs, collectables, and hero gear
+
     - Adds seasonal weapons support
+
     - Adds an option to choose the output format for console or emulator
-    - The 'Enemy Ink Is Lava' setting has been replaced with the 'Hero Gear Upgrades' setting
+
+    - The "Enemy Ink Is Lava" setting has been replaced with the "Hero Gear Upgrades" setting
         It will later return as part of a general challenges tab
-    - The 'Remove Cutscenes' setting has been replaced with a 'Skip Cutscenes' setting
+    
+    - The "Remove Cutscenes" setting has been replaced with a "Skip Cutscenes" setting
         Most cutscenes now have a skip button, while a couple have been completely removed due to issues
+    
     - Bosses will now be limited to one per site
+
     - The random weapons now display when standing over the kettle in Alterna
+
     - Fixed a bug where C-1 would not be vanilla, which made it impossible to advance past the first level
+
 ------
 v0.1.2
+
     - Improvements to weapon randomization
+
     - Fixed a bug where kettles would always be randomized even if the setting was unchecked
+
 ------
 v0.1.1
+
     - Adds partial support for removing cutscenes
+
     - Improvements to weapon randomization
+
     - Improvements to music randomization
+
 ------
 v0.1.0 - initial release
+
     - Randomizes weapons, kettles, ink colors, music
+
     - Includes an "Enemy Ink Is Lava" challenge setting

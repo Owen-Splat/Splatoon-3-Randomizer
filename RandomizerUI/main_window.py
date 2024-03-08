@@ -37,6 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setFixedSize(self.size())
         self.setWindowTitle(f'{self.windowTitle()} v{VERSION}')
         self.show()
+
+        if DEFAULTS or RUNNING_FROM_SOURCE:
+            self.showChangeLog()
     
     
     def eventFilter(self, source, event):
@@ -160,6 +163,14 @@ class MainWindow(QtWidgets.QMainWindow):
         message = QtWidgets.QMessageBox()
         message.setWindowTitle('Error')
         message.setText(msg)
+        message.exec()
+    
+    
+    def showChangeLog(self):
+        message = QtWidgets.QMessageBox()
+        message.setWindowTitle("What's New?")
+        message.setText(CHANGES)
+        message.setDetailedText(LOG)
         message.exec()
     
     
