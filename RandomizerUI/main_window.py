@@ -117,10 +117,15 @@ class MainWindow(QtWidgets.QMainWindow):
     
     
     def validateFolders(self) -> bool:
+        rotm, sdodr = self.getStoryModes()
+        
+        if not rotm and not sdodr:
+            return False
+        
         if not self.validateRomFS(self.ui.lineEdit.text()):
             return False
         
-        if not self.validateRomFS(self.ui.lineEdit_2.text()):
+        if sdodr and not self.validateRomFS(self.ui.lineEdit_2.text()):
             return False
         
         if not os.path.exists(self.ui.lineEdit_3.text()):
@@ -132,31 +137,60 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def validateRomFS(self, romfs_path):
         if not os.path.exists(romfs_path):
-            self.showUserError('RomFS path does not exist!')
+            self.showUserError(f'RomFS path does not exist!\n\n"{romfs_path}"')
             return False
         
         # get the right folder
         folders = [f.lower() for f in os.listdir(romfs_path)]
-        if 'pack' in folders:
-            pass
-        elif 'romfs' in folders:
+        
+        if 'romfs' in folders:
             romfs_path = os.path.join(romfs_path, 'romfs')
-            self.ui.lineEdit.setText(romfs_path)
-        else:
-            self.showUserError('RomFS path is not valid!')
+            line = self.ui.lineEdit if self.ui.lineEdit.text() == romfs_path else self.ui.lineEdit_2
+            line.setText(romfs_path)
+        
+        if 'pack' not in folders:
+            self.showUserError(f'RomFS path is not valid!\n\n"{romfs_path}"')
             return False
         
         # validate the romfs by checking for Scenes
         try:
             level_files = [f for f in os.listdir(f'{romfs_path}/Pack/Scene') if f.startswith(('Msn_', 'Sdodr_'))]
             if not level_files:
-                self.showUserError('Could not find any level files!')
+                self.showUserError(f'Could not find any level files!\n\n"{romfs_path}"')
                 return False
         except FileNotFoundError as e:
             self.showUserError(f'Could not validate RomFS:\n\n{e}')
             return False
         
         return True
+    
+    
+    def getStoryModes(self):
+        mode_window = QtWidgets.QDialog()
+        mode_window.setFixedSize(round(self.width()/3.5), round(self.height()/3.5))
+        mode_window.setWindowTitle('Choose Modes')
+        
+        mode_window.rotmCheck = QtWidgets.QCheckBox(mode_window)
+        mode_window.rotmCheck.setObjectName(u"rotmCheck")
+        mode_window.rotmCheck.setGeometry(QtCore.QRect(20, 10, 175, 20))
+        mode_window.rotmCheck.setText("Return of the Mammalians")
+        mode_window.rotmCheck.setChecked(True)
+        
+        mode_window.sdodrCheck = QtWidgets.QCheckBox(mode_window)
+        mode_window.sdodrCheck.setObjectName(u"sdodrCheck")
+        mode_window.sdodrCheck.setGeometry(QtCore.QRect(20, 50, 175, 20))
+        mode_window.sdodrCheck.setText("Spire of Order")
+        mode_window.sdodrCheck.setChecked(False)
+        
+        mode_window.okButton = QtWidgets.QPushButton(mode_window)
+        mode_window.okButton.setObjectName(u"okButton")
+        mode_window.okButton.setGeometry(QtCore.QRect(25, 90, 175, 20))
+        mode_window.okButton.setText("Randomize")
+        mode_window.okButton.setDefault(False)
+        mode_window.okButton.clicked.connect(lambda: mode_window.close())
+        
+        mode_window.exec()
+        return mode_window.rotmCheck.isChecked(), mode_window.sdodrCheck.isChecked()
     
     
     def showUserError(self, msg):
