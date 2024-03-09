@@ -17,7 +17,6 @@ if getattr(sys, "frozen", False):
 else:
     RUNNING_FROM_SOURCE = True
     ROOT_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
-    print(ROOT_PATH)
     SETTINGS_PATH = os.path.join(ROOT_PATH, 'settings.txt')
     LOGS_PATH = os.path.join(ROOT_PATH, 'log.txt')
 

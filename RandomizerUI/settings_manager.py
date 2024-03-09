@@ -75,7 +75,7 @@ def loadSettings(window, settings, checks):
         if os.path.exists(settings['Output_Folder']):
             window.ui.lineEdit_3.setText(settings['Output_Folder'])
     if 'Seed' in settings:
-        window.ui.lineEdit_4.setText(settings['Seed'])
+        window.ui.lineEdit_4.setText(str(settings['Seed']))
     if 'Platform' in settings:
         window.ui.platformComboBox.setCurrentIndex(1 if str(settings['Platform']).lower().strip() == 'emulator' else 0)
     if 'Season' in settings:
