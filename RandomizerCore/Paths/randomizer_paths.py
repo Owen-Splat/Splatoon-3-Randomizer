@@ -21,4 +21,4 @@ else:
     LOGS_PATH = os.path.join(ROOT_PATH, 'log.txt')
 
 DATA_PATH = os.path.join(ROOT_PATH, 'RandomizerCore/Data')
-RESOURCE_PATH = os.path.join(ROOT_PATH, 'RandomizerCore/Resources')
+RESOURCE_PATH = os.path.join(ROOT_PATH, 'RandomizerUI/Resources')

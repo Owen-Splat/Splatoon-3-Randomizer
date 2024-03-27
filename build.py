@@ -20,4 +20,6 @@ if os.path.exists(release_path) and os.path.isdir(release_path):
 os.rename(freeze_path, release_path)
 shutil.copyfile("README.md", os.path.join(release_path, "README.txt"))
 shutil.copyfile("LICENSE.txt", os.path.join(release_path, "LICENSE.txt"))
+shutil.move(os.path.join(release_path, "RandomizerCore/Data"), os.path.join(release_path, "Data"))
+shutil.move(os.path.join(release_path, "RandomizerUI/Resources"), os.path.join(release_path, "Resources"))
 shutil.make_archive(release_path, "zip", release_path)
