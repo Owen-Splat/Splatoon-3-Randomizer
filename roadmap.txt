@@ -1,0 +1,8 @@
+- shuffle ooze prices instead of (randrange(1, 30) * 100)
+maybe even do some weighted prices depending on core size
+
+- eventually, add some basic logic
+things like if a special can grab treasure/ride rails, if a weapon can paint floor/wall, etc
+
+- side order rando
+randomize weapons, kits, biases, chip effects

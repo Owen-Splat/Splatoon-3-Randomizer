@@ -111,7 +111,7 @@ Backgrounds:
   
 
 Main_Weapons:
-  Season_1:
+  Season_0:
     - Blaster_Bear_Coop
     - Blaster_LightLong_00
     - Blaster_LightLong_Msn
@@ -162,7 +162,6 @@ Main_Weapons:
     - Roller_Hunter_Msn
     - Roller_Normal_00
     - Roller_Normal_Msn
-    - Saber_Lite_00
     - Saber_Normal_00
     - Saber_Normal_Msn
     - Shelter_Bear_Coop
@@ -225,6 +224,8 @@ Main_Weapons:
     - Stringer_Normal_Msn
     - Stringer_Short_00
     - Hero
+  Season_1:
+    - Saber_Lite_00
   Season_2:
     - Shooter_Blaze_01
     - Roller_Wide_00
@@ -299,7 +300,6 @@ Main_Weapons:
     - Maneuver_Gallon_01
     - Maneuver_Long_00
     - Shelter_Focus_00
-    # Side Order
     - Shooter_ExtraOne_Sdodr
     - Shooter_ExtraTwo_Sdodr
     - Roller_Sdodr
@@ -312,6 +312,17 @@ Main_Weapons:
     - Blaster_ExtraOne_Sdodr
     - Spinner_Sdodr
     - Saber_Sdodr
+  Season_8:
+    - Blaster_Long_01
+    - Charger_Light_01
+    - Spinner_Hyper_01
+    - Spinner_HyperShort_01
+    - Maneuver_Long_01
+    - Shelter_Focus_01
+    - Stringer_Explosion_00
+    - Stringer_Explosion_01
+    - Saber_Heavy_00
+    - Saber_Heavy_01
 
 Sub_Weapons:
   - Beacon

@@ -1,3 +1,4 @@
+from io import BytesIO
 import evfl
 import tempfile
 
@@ -19,7 +20,7 @@ def readFlow(data):
 def writeFlow(flow):
 	"""returns the given flow as bytes"""
 	
-	with tempfile.TemporaryFile('wb+') as f:
+	with BytesIO() as f:
 		flow.write(f)
 		f.seek(0)
 		data = f.read()
