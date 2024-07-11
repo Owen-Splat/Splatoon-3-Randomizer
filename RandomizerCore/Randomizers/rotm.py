@@ -199,10 +199,15 @@ class RotM_Process(QtCore.QThread):
                     act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
         
         if msn == 'BigWorld' and self.settings['ooze-costs']:
-            for act in banc.info['Actors']:
-                if act['Name'].startswith('KebaInkCore'):
-                    cost = random.randint(1, 30)
-                    act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] = oead.S32(cost * 100)
+            ooze_costs = []
+            for i in range(2):
+                has_costs = len(ooze_costs) > 0
+                for act in banc.info['Actors']:
+                    if act['Name'].startswith('KebaInkCore'):
+                        if has_costs:
+                            act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] = ooze_costs[random.randrange(len(ooze_costs))]
+                        else:
+                            ooze_costs.append(act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'])
         
         if self.settings['collectables']:
             item_names = [k for k in PARAMS['Collectables']]
@@ -422,7 +427,13 @@ class RotM_Process(QtCore.QThread):
         if not self.settings['gear'] and not self.settings['skip-cutscenes']:
             return
         
-        with open(f'{self.rom_path}/Pack/SingletonParam.pack.zs', 'rb') as f:
+        singleton_files = [f for f in os.listdir(f'{self.rom_path}/Pack') if f.startswith('SingletonParam')]
+        if not singleton_files:
+            return
+        
+        for f in singleton_files: # if there is a SingletonParam_v700 or higher, use that
+            param_file = f
+        with open(f'{self.rom_path}/Pack/{param_file}', 'rb') as f:
             zs_data = zs_tools.SARC(f.read())
         
         # So currently using the map only allows you to jump to kettles that happen to be in their original site
@@ -470,7 +481,7 @@ class RotM_Process(QtCore.QThread):
                 })
             zs_data.writer.files[skip_file] = skip_table.repack()
         
-        with open(f'{self.out_dir}/Pack/SingletonParam.pack.zs', 'wb') as f:
+        with open(f'{self.out_dir}/Pack/{param_file}', 'wb') as f:
             f.write(zs_data.repack())
         self.updateProgress()
 
