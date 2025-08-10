@@ -1,4 +1,4 @@
-from RandomizerCore.Paths.randomizer_paths import *
+from randomizer_paths import *
 import yaml
 
 VERSION = "0.3.0"

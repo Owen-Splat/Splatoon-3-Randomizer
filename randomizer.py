@@ -2,7 +2,7 @@
 
 from PySide6 import QtCore, QtGui, QtWidgets
 import RandomizerUI.main_window as window
-from RandomizerCore.Paths.randomizer_paths import RESOURCE_PATH, RUNNING_FROM_SOURCE
+from randomizer_paths import RESOURCE_PATH, RUNNING_FROM_SOURCE
 import os, sys
 
 def interruptHandler(sig, frame):
