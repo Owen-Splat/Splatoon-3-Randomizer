@@ -326,12 +326,17 @@ class Ui_ProgressWindow(QObject):
         self.label.setFont(label_font)
         self.progress_bar = QProgressBar(central_widget)
         self.progress_bar.setMaximum(0) # non-progress bar, too lazy to calculate steps
-        self.button = QPushButton("Test", central_widget)
+        self.folder_button = QPushButton("Open Output Folder", central_widget)
+        self.folder_button.clicked.connect(window.openOutputFolderButtonClicked)
+        self.close_button = QPushButton("Ok", central_widget)
+        self.close_button.clicked.connect(window.close)
 
         vl.addWidget(self.label)
         vl.addWidget(self.progress_bar)
-        vl.addWidget(self.button)
-        self.button.hide()
+        vl.addWidget(self.folder_button)
+        vl.addWidget(self.close_button)
+        self.folder_button.hide()
+        self.close_button.hide()
 
         central_widget.setLayout(vl)
         window.setCentralWidget(central_widget)

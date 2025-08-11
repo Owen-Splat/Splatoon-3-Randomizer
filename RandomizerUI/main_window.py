@@ -86,7 +86,6 @@ class MainWindow(QMainWindow):
         for c in so_tab.findChildren(QCheckBox):
             settings['SideOrder'][c.text()] = c.isChecked()
 
-        print("Would open ProgressWindow")
         self.progress_window = ProgressWindow(f"{self.windowTitle().split(' v')[0]} - {seed}", settings)
         self.progress_window.show()
 
@@ -205,6 +204,8 @@ class ProgressWindow(QMainWindow):
             if self.base_out_dir.exists(): # delete files if user canceled
                 shutil.rmtree(str(self.base_out_dir), ignore_errors=True)
             self.done = True
+            self.ui.progress_bar.hide()
+            self.ui.close_button.show()
             return
         
         if self.cancel:
@@ -220,7 +221,7 @@ class ProgressWindow(QMainWindow):
         else:
             self.updateStatus("All done! Check the README for instructions on how to play!")
             self.ui.progress_bar.hide()
-            self.ui.button.show()
+            self.ui.folder_button.show()
             self.done = True
 
 
@@ -233,3 +234,20 @@ class ProgressWindow(QMainWindow):
             self.cancel = True
             self.ui.label.setText('Canceling...')
             self.mods_process.stop()
+
+
+    def openFolder(self, path):
+        if platform.system() == "Windows":
+            import os
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            import subprocess
+            subprocess.Popen(["open", path])
+        else:
+            import subprocess
+            subprocess.Popen(["xdg-open", path])
+
+
+    def openOutputFolderButtonClicked(self):
+        self.openFolder(self.base_out_dir.parent.absolute())
+        self.window().close()
