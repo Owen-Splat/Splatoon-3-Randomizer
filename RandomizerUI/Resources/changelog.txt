@@ -3,7 +3,7 @@
 <li>Adds support for all game versions</li>
 <li>Adds support for randomizing enemies and their sizes</li>
 <li>The "Enemy Ink Is Lava" setting as returned</li>
-<li>Added the option to choose if weapons are randomized</li>
+<li>Added the option to choose if weapons are randomized. All new weapons are now added</li>
 <li>The "Kettles" option has been renamed to "Levels" for better clarity</li>
 <li>The "Beatable" setting has been removed, it is now default behavior</li>
 <li>The randomizer app can now be resized</li>
