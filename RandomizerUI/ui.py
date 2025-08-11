@@ -245,7 +245,7 @@ class Ui_MainWindow(QObject):
 
         This also matches the current Light/Dark Mode"""
 
-        box = RandoHelpWindow(f"{self.window.windowTitle()} - {title}", text, with_scroll)
+        box = RandoHelpWindow(f"{self.window.windowTitle().split(" v")[0]} - {title}", text, with_scroll)
         box.exec()
 
 
