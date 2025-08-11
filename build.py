@@ -1,4 +1,3 @@
-from version import VERSION
 from pathlib import Path
 import platform, shutil, sys
 
@@ -18,7 +17,7 @@ exe_path = Path(sys.argv[0]).parent.absolute() / 'dist' / str(base_name + exe_ex
 if not (exe_path.is_file() or exe_path.is_dir()):
     raise Exception("Executable not found: %s" % exe_path)
 
-release_path = Path(".") / "dist" / str("release_archive_" + VERSION)
+release_path = Path(".") / "dist" / "release_archive"
 print("Writing build to path: %s" % (release_path))
 
 if release_path.exists() and release_path.is_dir():
