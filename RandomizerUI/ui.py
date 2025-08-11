@@ -256,12 +256,6 @@ class Ui_MainWindow(QObject):
         box.exec()
 
 
-    def createModeWindow(self) -> tuple:
-        mode_window = RandoModeWindow(self.window.windowTitle())
-        mode_window.exec()
-        return mode_window.hm_check.isChecked(), mode_window.so_check.isChecked()
-
-
     def openFileBrowser(self, dir: str) -> str:
         return QFileDialog.getExistingDirectory(self.window, 'Select Folder', dir)
 

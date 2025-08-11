@@ -50,25 +50,3 @@ class RandoHelpWindow(QMessageBox):
             self.setStyleSheet("QScrollArea{min-width:600 px; min-height: 450px}")
         else:
             self.setText(text)
-
-
-
-class RandoModeWindow(QDialog):
-    """Custom QDialog for selecting which game modes to randomize"""
-
-    def __init__(self, title: str) -> tuple:
-        super(RandoModeWindow, self).__init__()
-        self.setWindowTitle(title)
-        vl = QVBoxLayout()
-        label = QLabel("Choose the modes you wish to randomize", self)
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignCenter)
-        self.hm_check = QCheckBox("Hero Mode", self)
-        self.so_check = QCheckBox("Side Order", self)
-        button = QPushButton("Randomize", self)
-        button.clicked.connect(self.close)
-        vl.addWidget(label)
-        vl.addWidget(self.hm_check)
-        vl.addWidget(self.so_check)
-        vl.addWidget(button)
-        self.setLayout(vl)
-        self.setFixedSize(self.size() / 2)
