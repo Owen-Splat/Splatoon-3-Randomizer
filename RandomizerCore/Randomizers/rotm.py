@@ -161,6 +161,9 @@ class RotM_Process(QtCore.QThread):
             if self.settings['Skip Cutscenes']:
                 self.removeCutscenes(zs_data)
 
+            if self.settings['Enemies'] or self.settings['Enemy Sizes']:
+                self.randomizeEnemies(zs_data)
+
             with open(self.out_dir / 'Pack' / 'Scene' / m, 'wb') as f:
                 f.write(zs_data.repack())
 
@@ -168,7 +171,7 @@ class RotM_Process(QtCore.QThread):
             f.write(ui_missions_data.repack())
 
 
-    def randomizeBackground(self, msn, zs_data):
+    def randomizeBackground(self, msn, zs_data: zs_tools.SARC):
         if msn[4] == 'C' or 'King' in msn or 'Boss' in msn:
             return
 
@@ -180,7 +183,7 @@ class RotM_Process(QtCore.QThread):
             zs_data.writer.files[renders[0]] = render_data.repack()
 
 
-    def editHubs(self, msn, zs_data):
+    def editHubs(self, msn, zs_data:zs_tools.SARC):
         banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
 
         # changes the ChangeSceneName parameters of kettles to the randomized levels
@@ -475,6 +478,24 @@ class RotM_Process(QtCore.QThread):
 
         with open(self.out_dir /'Pack' / param_file, 'wb') as f:
             f.write(zs_data.repack())
+
+
+    def randomizeEnemies(self, zs_data: zs_tools.SARC):
+        banc_file = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bcett.byml')][0]
+        banc = zs_tools.BYAML(zs_data.writer.files[banc_file])
+        for act in banc.info['Actors']:
+            if act['Name'] in PARAMS['Enemies']:
+                if self.settings['Enemies']:
+                    enemy = random.choice(PARAMS['Enemies'])
+                    act['Name'] = enemy
+                    act['Gyaml'] = enemy
+                size = 1.0
+                if self.settings['Enemy Sizes']:
+                    size = random.uniform(0.5, 2.0)
+                    act['Scale'] = oead.byml.Array([oead.F32(size) for s in range(3)])
+                if enemy.endswith('Takopter'):
+                    act['Translate'][1] = oead.F32(float(act['Translate'][1]) + (1.0 * size))
+        zs_data.writer.files[banc_file] = banc.repack()
 
 
     # STOP THREAD

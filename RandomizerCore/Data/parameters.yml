@@ -565,4 +565,47 @@ Cutscenes:
   # - Plaza_IntroStation
   # - Plaza_Overview
 
+Enemies:
+  - EnemyBarrierTakopter
+  - EnemyBombTakopter
+  - EnemyBoostBombTakopter
+  - EnemyBoostTakopter
+  # - EnemyCleaner
+  # - EnemyEscape # doesnt appear for some reason, causing softlocks if it needs killed, test more
+  - EnemyHohei
+  - EnemyStamp
+  - EnemyStampWave
+  - EnemyTakopodDEV
+  - EnemyTakopter
+  - SplEnemyCharge
+  - SplEnemyChargeElite
+  - SplEnemySpinner
+  # - CoopEnemySakeCopter
+  # - EnemyFlyingHoheiMissile
+  # - EnemyFlyingHoheiMother
+  # - EnemyFlyingHohei
+  # - EnemyFlyingHoheiMotherRide
+  # - EnemyFlyingHoheiRide
+  - EnemyTakolienFixedBounceShieldVehicle
+  - EnemyTakolienFixedBounceVehicle
+  - EnemyTakolienEasyHideVehicle
+  - EnemyTakolienBounceVehicle
+  - EnemyTakolienBounceShieldVehicle
+  - EnemyTakolienBoostVehicle
+  - EnemyTakolienBoostShieldVehicle
+  - EnemyTakodozer
+  - EnemyTakoHopperHide
+  - EnemyTakoHopperFree
+  - EnemyTakoHopper
+  - EnemyTakolienEasyShieldVehicle
+  - EnemyTakolienEasyVehicle
+  - EnemyTakolienVehicle
+  - EnemyTakolienShieldVehicle
+  - EnemyTakolienHideVehicle
+  - EnemyTakolienFixedVehicle
+  - EnemyTakolienFixedShieldVehicle
+  - EnemyTakolienFixedEasyVehicle
+  - EnemyTakolienFixedEasyShieldVehicle
+  # - EnemyUtsubox
+
 ...
