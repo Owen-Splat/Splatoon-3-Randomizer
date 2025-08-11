@@ -1,4 +1,6 @@
 __pycache__
+/build
+/dist
 settings.txt
 log.txt
 TODO.txt

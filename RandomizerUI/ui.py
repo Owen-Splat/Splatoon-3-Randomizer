@@ -4,7 +4,8 @@ from PySide6.QtWidgets import (QMainWindow, QLabel, QLineEdit, QPushButton, QChe
                                QProgressBar, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget,
                                QSpacerItem, QSizePolicy, QApplication, QFileDialog)
 from RandomizerUI.custom_widgets import *
-from randomizer_data import VERSION, CHANGES
+from randomizer_data import CHANGES
+from version import VERSION
 
 
 class Ui_MainWindow(QObject):

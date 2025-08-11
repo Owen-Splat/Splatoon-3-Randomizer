@@ -1,25 +1,30 @@
-import os
-import sys
-import shutil
-from RandomizerCore.Data.randomizer_data import VERSION
+from version import VERSION
+from pathlib import Path
+import platform, shutil, sys
 
-import struct
-if (struct.calcsize("P") * 8) == 64:
-	bitness_suffix = "_x64"
-else:
-	bitness_suffix = "_x32"
+base_name = 'Splatoon 3 Randomizer'
 
-base_name = f"S3Rando-{VERSION}-{sys.platform}{bitness_suffix}"
-build_path = os.path.join(".", "build")
-freeze_path = os.path.join(build_path, "exe.win-amd64-3.8")
-release_path = os.path.join(build_path, base_name)
+exe_ext = ""
+if platform.system() == "Windows":
+    exe_ext = ".exe"
+    platform_name = "win"
+if platform.system() == "Darwin":
+    exe_ext = ".app"
+    platform_name = "mac"
+if platform.system() == "Linux":
+    platform_name = "linux"
 
-if os.path.exists(release_path) and os.path.isdir(release_path):
-  shutil.rmtree(release_path)
+exe_path = Path(sys.argv[0]).parent.absolute() / 'dist' / str(base_name + exe_ext)
+if not (exe_path.is_file() or exe_path.is_dir()):
+    raise Exception("Executable not found: %s" % exe_path)
 
-os.rename(freeze_path, release_path)
-shutil.copyfile("README.md", os.path.join(release_path, "README.txt"))
-shutil.copyfile("LICENSE.txt", os.path.join(release_path, "LICENSE.txt"))
-shutil.move(os.path.join(release_path, "RandomizerCore/Data"), os.path.join(release_path, "Data"))
-shutil.move(os.path.join(release_path, "RandomizerUI/Resources"), os.path.join(release_path, "Resources"))
-shutil.make_archive(release_path, "zip", release_path)
+release_path = Path(".") / "dist" / str("release_archive_" + VERSION)
+print("Writing build to path: %s" % (release_path))
+
+if release_path.exists() and release_path.is_dir():
+    shutil.rmtree(release_path)
+
+release_path.mkdir(parents=True, exist_ok=True)
+shutil.copyfile("README.md", release_path / "README.txt")
+
+shutil.move(exe_path, release_path / str(base_name + exe_ext))

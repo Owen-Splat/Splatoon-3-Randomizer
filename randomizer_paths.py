@@ -12,8 +12,8 @@ try:
         SETTINGS_PATH = userdata_path / 'settings.txt'
         LOGS_PATH = userdata_path / 'log.txt'
     else:
-        SETTINGS_PATH = ROOT_PATH / 'settings.txt'
-        LOGS_PATH = ROOT_PATH / 'log.txt'
+        SETTINGS_PATH = Path() / 'settings.txt'
+        LOGS_PATH = Path() / 'log.txt'
 except ImportError:
     RUNNING_FROM_SOURCE = True
     ROOT_PATH = Path(__file__).parent.absolute()

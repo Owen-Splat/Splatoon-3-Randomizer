@@ -3,7 +3,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 import RandomizerUI.main_window as window
 from randomizer_paths import RESOURCE_PATH, RUNNING_FROM_SOURCE
-import os, sys
+import sys
 
 def interruptHandler(sig, frame):
     sys.exit(0)
@@ -12,12 +12,11 @@ def interruptHandler(sig, frame):
 import signal
 signal.signal(signal.SIGINT, interruptHandler)
 
-
 # Set app id so the custom taskbar icon will show while running from source
 if RUNNING_FROM_SOURCE:
     from ctypes import windll
     try:
-        windll.shell32.SetCurrentProcessExplicitAppUserModelID("Splatoon_3_Randomizer")
+        windll.shell32.SetCurrentProcessExplicitAppUserModelID("Splatoon3_Randomizer")
     except AttributeError:
         pass # Ignore for versions of Windows before Windows 7
 
@@ -27,7 +26,7 @@ if sys.platform == "darwin": # mac
 
 app = QtWidgets.QApplication([])
 app.setStyle('fusion')
-app.setWindowIcon(QtGui.QIcon(os.path.join(RESOURCE_PATH, build_icon)))
+app.setWindowIcon(QtGui.QIcon(str(RESOURCE_PATH / build_icon)))
 
 m = window.MainWindow()
 

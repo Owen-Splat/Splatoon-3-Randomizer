@@ -1,8 +1,6 @@
 from randomizer_paths import *
 import yaml
 
-VERSION = "0.3.0"
-
 with open(RESOURCE_PATH / 'adjectives.txt', 'r') as f:
     ADJECTIVES = f.read().splitlines()
 
