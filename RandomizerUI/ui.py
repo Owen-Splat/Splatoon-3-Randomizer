@@ -66,6 +66,7 @@ class Ui_MainWindow(QObject):
         vl.addLayout(hl)
 
         tab_widget = QTabWidget(central_widget)
+        tab_widget.setObjectName("ModeTab")
         tab_widget.addTab(self.createTabHM(), "Hero Mode")
         tab_widget.addTab(self.createTabSO(), "Side Order")
         vl.addWidget(tab_widget, 5)
@@ -132,6 +133,7 @@ class Ui_MainWindow(QObject):
 
     def createTabHM(self) -> QWidget:
         tab = QWidget()
+        tab.setObjectName("HeroModeTab")
         vl = QVBoxLayout()
 
         # define all settings widgets first so that we can rearrange them easily later
@@ -199,6 +201,7 @@ class Ui_MainWindow(QObject):
 
     def createTabSO(self) -> QWidget:
         tab = QWidget()
+        tab.setObjectName("SideOrderTab")
         vl = QVBoxLayout()
 
         label = QLabel("Nothing here yet :)", tab)
@@ -261,7 +264,13 @@ class Ui_MainWindow(QObject):
 
 
     def findCheckBox(self, name: str) -> QCheckBox:
-        return self.window.findChild(QCheckBox, name)
+        check = self.window.findChild(QCheckBox, name)
+        if check == None: # search by text if none were found
+            for c in self.window.findChildren(QCheckBox):
+                if c.text() == name:
+                    check = c
+                    break
+        return check
 
 
     def findComboBox(self, name: str) -> RandoComboBox:
@@ -278,6 +287,10 @@ class Ui_MainWindow(QObject):
 
     def findSpinBox(self, name: str) -> QSpinBox:
         return self.window.findChild(QSpinBox, name)
+
+
+    def findTab(self, name: str) -> QWidget:
+        return self.window.findChild(QWidget, name)
 
 
     def addOptionDescriptions(self) -> None:
