@@ -9,10 +9,10 @@ class MyDumper(yaml.Dumper):
         return super(MyDumper, self).increase_indent(flow, False)
 
 
-def saveSettings(window):
+def saveSettings(window) -> None:
     seed = window.ui.findLineEdit("SeedLine").text()
-    if len(seed) > 50:
-        seed = seed[:50]
+    if len(seed) > 32:
+        seed = seed[:32]
 
     major_version = window.ui.findSpinBox("MajorVersion").value()
     minor_version = window.ui.findSpinBox("MinorVersion").value()
@@ -41,11 +41,10 @@ def saveSettings(window):
         yaml.dump(settings, f, Dumper=MyDumper, sort_keys=False)
 
 
-def loadSettings(window, settings):
+def loadSettings(window, settings) -> None:
     for k,v in settings.items():
         if isinstance(v, dict):
             for k,v in v.items():
-                print(k)
                 window.ui.findCheckBox(k).setChecked(v)
         else:
             if not isinstance(v, bool):
@@ -65,8 +64,8 @@ def loadSettings(window, settings):
                                 window.ui.findLineEdit("OutLine").setText(settings[k])
                         case 'Seed':
                             seed = str(settings[k])
-                            if len(seed) > 50:
-                                seed = seed[:50]
+                            if len(seed) > 32:
+                                seed = seed[:32]
                             window.ui.findLineEdit("SeedLine").setText(seed)
                         case 'Platform':
                             window.ui.findComboBox("PlatformBox").setCurrentIndex(
@@ -79,8 +78,7 @@ def loadSettings(window, settings):
                             window.ui.findSpinBox("MajorVersion").setValue(major_version)
                             window.ui.findSpinBox("MinorVersion").setValue(minor_version)
                             window.ui.findSpinBox("PatchVersion").setValue(patch_version)
-
                 except: # if it errors we dont really care why, ignore so it is left at the default value
-                    pass
+                    continue
             else:
                 window.ui.findCheckBox(k).setChecked(v)

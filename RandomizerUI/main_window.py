@@ -1,33 +1,19 @@
 from PySide6.QtWidgets import QMainWindow, QCheckBox
-# from RandomizerUI.UI.ui_form import Ui_MainWindow
-from RandomizerUI.ui import Ui_MainWindow
-# from RandomizerUI.progress_window import ProgressWindow
+from RandomizerUI.ui import Ui_MainWindow, Ui_ProgressWindow
 import RandomizerUI.settings_manager as settings_manager
 from RandomizerCore.Data.randomizer_data import *
+from RandomizerCore.Randomizers.rotm import RotM_Process
 from randomizer_paths import *
-import random
+from pathlib import Path
+import random, shutil
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
-        super (MainWindow, self).__init__()
+    def __init__(self) -> None:
+        super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.addOptionDescriptions()
-
-        # if DEFAULTS:
-        #     for k,v in settings_manager.ALL_ORDERS.items():
-        #         exec(f"self.ui.{k}.setChecked({v})")
-        # else:
-        #     checks = {}
-        #     for option in settings_manager.ALL_ORDERS:
-        #         widget = self.findChild(QtWidgets.QWidget, option)
-        #         checks[option] = widget.text()
-        #     settings_manager.loadSettings(self, SETTINGS, checks)
-
-        # self.setFixedSize(self.size())
-        # self.setWindowTitle(f'{self.windowTitle()} v{VERSION}')
-        # self.show()
 
         if DEFAULTS:
             self.ui.showChangelog()
@@ -46,7 +32,7 @@ class MainWindow(QMainWindow):
         line.setText(str(Path(folder_path)))
 
 
-    def seedButtonClicked(self):
+    def seedButtonClicked(self) -> None:
         adj1 = random.choice(ADJECTIVES)
         adj2 = random.choice(ADJECTIVES)
         char = random.choice(CHARACTERS)
@@ -54,7 +40,7 @@ class MainWindow(QMainWindow):
         line.setText(adj1 + adj2 + char)
 
 
-    def randomizeButtonClicked(self):
+    def randomizeButtonClicked(self) -> None:
         # first we need to check all settings under each tab
         # if all of them are unchecked, skip over randomizing that mode
         hm_tab = self.ui.findTab("HeroModeTab")
@@ -71,24 +57,24 @@ class MainWindow(QMainWindow):
 
         seed = self.ui.findLineEdit("SeedLine").text().strip()
         if seed:
-            if len(seed) > 50:
-                seed = seed[:50]
+            if len(seed) > 32:
+                seed = seed[:32]
         else:
             random.seed()
             seed = str(random.getrandbits(32))
 
-        outdir = f"{self.ui.findLineEdit("OutLine").text()}/{seed}"
+        outdir = Path(self.ui.findLineEdit("OutLine").text()) / f"S3Rando-{seed}"
         if self.ui.findComboBox("PlatformBox").currentText()[9:].strip() == 'Console':
-            outdir += '/atmosphere/contents/0100C2500FC20000'
-        outdir += '/romfs'
+            outdir = outdir / 'atmosphere' / 'contents' / '0100C2500FC20000'
+        outdir = outdir / 'romfs'
 
         major_version = self.ui.findSpinBox("MajorVersion").value()
         minor_version = self.ui.findSpinBox("MinorVersion").value()
         patch_version = self.ui.findSpinBox("PatchVersion").value()
 
         settings = {
-            'RomFS': self.ui.findLineEdit("BaseLine").text(),
-            # 'DLC': self.ui.findLineEdit("DLCLine").text(),
+            'RomFS': Path(self.ui.findLineEdit("BaseLine").text()),
+            # 'DLC': Path(self.ui.findLineEdit("DLCLine").text()),
             'Output': outdir,
             'Seed': seed,
             'Version': f"{major_version}.{minor_version}.{patch_version}",
@@ -101,9 +87,8 @@ class MainWindow(QMainWindow):
             settings['SideOrder'][c.text()] = c.isChecked()
 
         print("Would open ProgressWindow")
-        # self.progress_window = ProgressWindow(settings)
-        # self.progress_window.setWindowTitle(f"{self.windowTitle().split(' v')[0]} - {seed}")
-        # self.progress_window.show()
+        self.progress_window = ProgressWindow(f"{self.windowTitle().split(' v')[0]} - {seed}", settings)
+        self.progress_window.show()
 
 
     def validateFolders(self, base: bool, dlc: bool) -> bool:
@@ -125,7 +110,7 @@ class MainWindow(QMainWindow):
         return True
 
 
-    def validateRomFS(self, line_name: str):
+    def validateRomFS(self, line_name: str) -> bool:
         line = self.ui.findLineEdit(line_name)
         romfs_path = Path(line.text())
         field = ""
@@ -162,6 +147,89 @@ class MainWindow(QMainWindow):
         return True
 
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         settings_manager.saveSettings(self)
         event.accept()
+
+
+
+class ProgressWindow(QMainWindow):
+    def __init__(self, title: str, settings: dict) -> None:
+        super(ProgressWindow, self).__init__()
+        self.ui = Ui_ProgressWindow()
+        self.ui.setupUi(title, self)
+
+        self.done = False
+        self.cancel = False
+        self.mods_error = False
+        self.mods_done = False
+        self.settings = settings
+        self.randomize_hm = False
+        self.randomize_so = False
+
+        # remove any old files if generating a new one with the same seed
+        self.base_out_dir = Path(str(settings['Output']).split(settings['Seed'])[0] + settings['Seed'])
+        if self.base_out_dir.exists():
+            shutil.rmtree(str(self.base_out_dir), ignore_errors=True)
+
+        # start mod threads for each mode that the user has selected options for
+        if any([v for k,v in settings['HeroMode'].items()]):
+            self.randomize_hm = True
+            self.mods_process = RotM_Process(self, settings)
+            self.startModProcess()
+
+
+    def startModProcess(self) -> None:
+        self.mods_process.status_update.connect(self.updateStatus)
+        self.mods_process.error.connect(self.modsError)
+        self.mods_process.is_done.connect(self.modsDone)
+        self.mods_process.start() # start the work thread
+
+
+    # receives the string signal as a parameter named status
+    def updateStatus(self, status: str) -> None:
+        self.ui.label.setText(status)
+
+
+    def modsError(self, er_message=str) -> None:
+        self.mods_error = True
+        from randomizer_paths import LOGS_PATH
+        with open(LOGS_PATH, 'w') as f:
+            f.write(f'{self.settings['Seed']}')
+            f.write(f'\n\n{er_message}')
+
+
+    def modsDone(self) -> None:
+        if self.mods_error:
+            self.updateStatus("Error detected! Check the created log.txt for more info")
+            if self.base_out_dir.exists(): # delete files if user canceled
+                shutil.rmtree(str(self.base_out_dir), ignore_errors=True)
+            self.done = True
+            return
+        
+        if self.cancel:
+            self.updateStatus("Canceling...")
+            if self.base_out_dir.exists(): # delete files if user canceled
+                shutil.rmtree(str(self.base_out_dir), ignore_errors=True)
+            self.done = True
+            self.close()
+            return
+
+        if isinstance(self.mods_process, RotM_Process) and self.randomize_so:
+            pass # will start side order process once it's created
+        else:
+            self.updateStatus("All done! Check the README for instructions on how to play!")
+            self.ui.progress_bar.hide()
+            self.ui.button.show()
+            self.done = True
+
+
+    # override the window close event to close the randomization thread
+    def closeEvent(self, event) -> None:
+        if self.done:
+            event.accept()
+        else:
+            event.ignore()
+            self.cancel = True
+            self.ui.label.setText('Canceling...')
+            self.mods_process.stop()

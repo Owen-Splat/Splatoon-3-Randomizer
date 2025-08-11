@@ -299,7 +299,7 @@ class Ui_MainWindow(QObject):
                 widget.installEventFilter(self)
 
 
-    def eventFilter(self, source: QWidget, event):
+    def eventFilter(self, source: QWidget, event) -> bool:
         match event.type():
             case QEvent.Type.HoverEnter:
                 self.setExplanationText(source.whatsThis())
@@ -307,3 +307,31 @@ class Ui_MainWindow(QObject):
                 self.setExplanationText()
 
         return QWidget.eventFilter(self, source, event)
+
+
+
+class Ui_ProgressWindow(QObject):
+    def setupUi(self, title: str, window: QMainWindow) -> None:
+        window.setWindowTitle(title)
+        self.window = window
+
+        central_widget = QWidget()
+        vl = QVBoxLayout()
+
+        self.label = QLabel("", central_widget)
+        self.label.setMinimumWidth((len(title)*10)//1)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label_font = self.label.font()
+        label_font.setPointSize(14)
+        self.label.setFont(label_font)
+        self.progress_bar = QProgressBar(central_widget)
+        self.progress_bar.setMaximum(0) # non-progress bar, too lazy to calculate steps
+        self.button = QPushButton("Test", central_widget)
+
+        vl.addWidget(self.label)
+        vl.addWidget(self.progress_bar)
+        vl.addWidget(self.button)
+        self.button.hide()
+
+        central_widget.setLayout(vl)
+        window.setCentralWidget(central_widget)

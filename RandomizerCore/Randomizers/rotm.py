@@ -1,37 +1,27 @@
 from PySide6 import QtCore
 from RandomizerCore.Data.randomizer_data import PARAMS
+from pathlib import Path
 import RandomizerCore.Tools.event_tools as event_tools
 import RandomizerCore.Tools.zs_tools as zs_tools
-import os
-import copy
-import time
-import random
-import traceback
-import oead
+import copy, oead, random, time, traceback
 
 
 
 class RotM_Process(QtCore.QThread):
-    progress_update = QtCore.Signal(int)
     status_update = QtCore.Signal(str)
     error = QtCore.Signal(str)
     is_done = QtCore.Signal()
-    
-    
-    def __init__(self, rom_path, out_dir, seed, settings, parent=None):
+
+
+    def __init__(self, parent, settings: dict):
         QtCore.QThread.__init__(self, parent)
-        self.rom_path = rom_path
-        self.out_dir = out_dir
-        random.seed(seed)
-        self.settings = settings
-        self.progress_value = 0
+        self.rom_path = Path(settings['RomFS'])
+        self.out_dir = Path(settings['Output'])
+        random.seed(settings['Seed'])
+        self.game_version = settings['Version']
+        self.settings = settings['HeroMode']
         self.thread_active = True
         self.levels = {}
-
-
-    def updateProgress(self):
-        self.progress_value += 1
-        self.progress_update.emit(self.progress_value)
 
 
     # automatically called when this thread is started
@@ -50,11 +40,10 @@ class RotM_Process(QtCore.QThread):
 
 
     def randomizeKettles(self):
-        if not self.settings['kettles']:
+        if not self.settings['Levels']:
             return
         
-        time.sleep(1)
-        self.status_update.emit('Randomizing kettles...')
+        self.status_update.emit('Randomizing Hero Mode levels...')
 
         # restrict After Alterna to vanilla for now to avoid confusion
         self.levels['Msn_ExStage'] = 'Msn_ExStage'
@@ -79,7 +68,6 @@ class RotM_Process(QtCore.QThread):
             new_level = random.choice(c_levels)
             c_levels.remove(new_level)
             self.levels[msn] = new_level
-            self.updateProgress()
             time.sleep(0.01)
         
         boss_sites = []
@@ -91,7 +79,6 @@ class RotM_Process(QtCore.QThread):
             boss = b_levels.pop()
             a_levels.remove(boss)
             self.levels[new_level] = boss
-            self.updateProgress()
             time.sleep(0.01)
         
         for msn in PARAMS['Alterna_Missions']:
@@ -102,84 +89,89 @@ class RotM_Process(QtCore.QThread):
             new_level = random.choice(a_levels)
             a_levels.remove(new_level)
             self.levels[msn] = new_level
-            self.updateProgress()
             time.sleep(0.01)
 
 
     # iterate through all level files and randomize the level data
     def editLevels(self):
         time.sleep(0.5)
-        self.status_update.emit('Editing levels...')
-        os.makedirs(f'{self.out_dir}/Pack/Scene')
-        os.makedirs(f'{self.out_dir}/RSDB')
-        
-        ui_info_file = [f for f in os.listdir(f'{self.rom_path}/RSDB') if f.startswith('MissionMapInfo')][0]
-        with open(f"{self.rom_path}/RSDB/{ui_info_file}", 'rb') as f:
+        self.status_update.emit('Editing Hero Mode levels...')
+        (self.out_dir / 'Pack' / 'Scene').mkdir(parents=True, exist_ok=True)
+        (self.out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
+
+        ui_info_file = [f.name for f in (self.rom_path / 'RSDB').iterdir() if f.name.startswith('MissionMapInfo')][0]
+        with open(self.rom_path / 'RSDB' / ui_info_file, 'rb') as f:
             ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
-        
-        valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= self.settings['season']]
+
+        match self.game_version:
+            case "1.0.0":
+                season = 0
+            case "1.1.0":
+                season = 1
+            case _:
+                season = int(self.game_version.split('.')[0])
+
+        valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= season]
         main_weapons_list = []
         for season in valid_seasons:
             for weapon in PARAMS['Main_Weapons'][season]:
                 main_weapons_list.append(weapon)
-        
-        missions = [f for f in os.listdir(f'{self.rom_path}/Pack/Scene') if f.startswith('Msn_')
-                    or f.split(".", 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
+
+        missions = [f.name for f in (self.rom_path / 'Pack' / 'Scene').iterdir() if f.name.startswith('Msn_')
+                    or f.name.split('.', 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
         for m in missions:
             if not self.thread_active:
                 break
-            
+
             msn = m.split('.', 1)[0]
-            
-            with open(f'{self.rom_path}/Pack/Scene/{m}', 'rb') as f:
+
+            with open(self.rom_path / 'Pack' / 'Scene' / m, 'rb') as f:
                 zs_data = zs_tools.SARC(f.read())
-            
-            if self.settings['backgrounds']:
+
+            if self.settings['Backgrounds']:
                 self.randomizeBackground(msn, zs_data)
-            
+
             if msn in ('BigWorld', 'SmallWorld'):
                 self.editHubs(msn, zs_data)
-            
+
             # mission info
             info_file = f'SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml'
             mission_data = zs_tools.BYAML(zs_data.writer.files[info_file])
-            
-            if self.settings['kettles']:
+
+            if self.settings['Levels']:
                 self.fixMissionCompatibility(msn, mission_data)
-            
-            if self.settings['ink-color']:
+
+            if self.settings['Ink Colors']:
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{random.choice(PARAMS['Colors'])}.game__gfx__parameter__TeamColorDataSet.gyml"
-            
-            if self.settings['1HKO'] and mission_data.info['MapType'].endswith('Stage'):
+
+            if self.settings['Enemy Ink Is Lava'] and mission_data.info['MapType'].endswith('Stage'):
                 self.addChallenges(mission_data)
-            
+
             has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
-            if has_weapons:
+            if has_weapons and self.settings['Weapons']:
                 self.randomizeWeapons(mission_data, main_weapons_list, ui_missions_data)
-            
+
             zs_data.writer.files[info_file] = mission_data.repack()
-            
+
             # scene bgm
-            if self.settings['music']:
+            if self.settings['Music']:
                 self.randomizeMusic(msn, zs_data)
-            
-            if self.settings['skip-cutscenes']:
+
+            if self.settings['Skip Cutscenes']:
                 self.removeCutscenes(zs_data)
-            
-            with open(f'{self.out_dir}/Pack/Scene/{m}', 'wb') as f:
+
+            with open(self.out_dir / 'Pack' / 'Scene' / m, 'wb') as f:
                 f.write(zs_data.repack())
-                self.updateProgress()
-        
-        with open(f"{self.out_dir}/RSDB/{ui_info_file}", 'wb') as f:
+
+        with open(self.out_dir / 'RSDB' / ui_info_file, 'wb') as f:
             f.write(ui_missions_data.repack())
-            self.updateProgress()
 
 
     def randomizeBackground(self, msn, zs_data):
         if msn[4] == 'C' or 'King' in msn or 'Boss' in msn:
             return
-        
+
         renders = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('RenderingMission.bgyml')]
         if renders:
             render_data = zs_tools.BYAML(zs_data.writer.files[renders[0]])
@@ -192,13 +184,13 @@ class RotM_Process(QtCore.QThread):
         banc = zs_tools.BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
 
         # changes the ChangeSceneName parameters of kettles to the randomized levels
-        if self.settings['kettles']:
+        if self.settings['Levels']:
             for act in banc.info['Actors']:
                 if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
                     scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
                     act['spl__MissionGatewayBancParam']['ChangeSceneName'] = self.levels[scene]
-        
-        if msn == 'BigWorld' and self.settings['ooze-costs']:
+
+        if msn == 'BigWorld' and self.settings['Fuzzy Ooze Costs']:
             ooze_costs = []
             for i in range(2):
                 has_costs = len(ooze_costs) > 0
@@ -208,8 +200,8 @@ class RotM_Process(QtCore.QThread):
                             act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] = ooze_costs[random.randrange(len(ooze_costs))]
                         else:
                             ooze_costs.append(act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'])
-        
-        if self.settings['collectables']:
+
+        if self.settings['Collectables']:
             item_names = [k for k in PARAMS['Collectables']]
             items = []
             for item in item_names:
@@ -232,14 +224,14 @@ class RotM_Process(QtCore.QThread):
                                 'DropIkuraValue': oead.S32(10),
                                 'DropNum': oead.S32(10)
                             }
-        
+
         zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
 
     def fixMissionCompatibility(self, msn, mission_data):
         if 'King' in msn or 'Boss' in msn:
             return
-        
+
         freebies = (
             self.levels['Msn_A01_01'],
             self.levels['Msn_ExStage'],
@@ -274,11 +266,11 @@ class RotM_Process(QtCore.QThread):
             while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
                 mission_data.info['OctaSupplyWeaponInfoArray'].append(
                     mission_data.info['OctaSupplyWeaponInfoArray'][0])
-        
+
         mains = ['']
         for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
             e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
-            
+
             if i == 0: # leave first option as vanilla
                 try:
                     if e['SupplyWeaponType'] == 'Hero':
@@ -296,7 +288,7 @@ class RotM_Process(QtCore.QThread):
                 except KeyError:
                     mains.append('Hero')
                     continue
-            
+
             main_weapon = ''
             while main_weapon in mains:
                 main_weapon = random.choice(main_weapons_list)
@@ -305,22 +297,22 @@ class RotM_Process(QtCore.QThread):
             if main_weapon == 'Hero':
                 e['SupplyWeaponType'] = 'Hero'
                 continue
-            
+
             # sub
             sub_weapon = random.choice(PARAMS['Sub_Weapons'])
             if sub_weapon == 'Free':
                 e['SubWeapon'] = ''
             else:
                 e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
-            
+
             # special
             if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook_Mission', 'SpJetpack_Mission')):
                 if i == 0:
                     continue
-            
+
             special_weapon = random.choice(PARAMS['Special_Weapons'])
             e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
-            
+
             e['SupplyWeaponType'] = 'Normal'
             if main_weapon == 'Free' and sub_weapon == 'Free':
                 e['SupplyWeaponType'] = 'Special'
@@ -330,7 +322,7 @@ class RotM_Process(QtCore.QThread):
             elif special_weapon == 'SpSuperHook_Mission':
                 if random.random() < 0.125:
                     e['SupplyWeaponType'] = 'MainAndSpecial'
-        
+
         for info in ui_missions_data.info:
             if 'MapNameLabel' in info:
                 if info['MapNameLabel'] == mission_data.info['MapNameLabel']:
@@ -345,7 +337,7 @@ class RotM_Process(QtCore.QThread):
             # special case where Msn_EX02's SceneBgm isn't named properly like the others
             info_file = f'SceneComponent/SceneBgm/Msn_A01_01.spl__SceneBgmParam.bgyml'
             bgm_data = zs_tools.BYAML(zs_data.writer.files[info_file])
-        
+
         if 'SceneSpecificBgm' in bgm_data.info and '_R_' not in msn:
             bgms = list(copy.deepcopy(PARAMS['Music']))
             if 'King' in msn: # shuffle boss music within bosses
@@ -399,11 +391,11 @@ class RotM_Process(QtCore.QThread):
 
     def removeCutscenes(self, zs_data):
         """Most cutscenes we allow to be skipped through a DemoSkipTable. But some either don't work or give issues.
-        
+
         Lots of levels contain the same data embedded in them, in which the first one loaded is cached.
-        
+
         So we edit every instance of the rest of the cutscenes that we want to speed up or delete entirely"""
-        
+
         unneeded_events = ['Mission_IntroduceComrade', 'Mission_BigWorldTutorial', 'Mission_IntroduceTrinity']
         event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
         for f in event_files:
@@ -424,22 +416,22 @@ class RotM_Process(QtCore.QThread):
 
 
     def updateMissionParameters(self):
-        if not self.settings['gear'] and not self.settings['skip-cutscenes']:
+        if not self.settings['Hero Gear Upgrades'] and not self.settings['Skip Cutscenes']:
             return
-        
-        singleton_files = [f for f in os.listdir(f'{self.rom_path}/Pack') if f.startswith('SingletonParam')]
+
+        singleton_files = [f.name for f in (self.rom_path / 'Pack').iterdir() if f.name.startswith('SingletonParam')]
         if not singleton_files:
             return
-        
+
         for f in singleton_files: # if there is a SingletonParam_v700 or higher, use that
             param_file = f
-        with open(f'{self.rom_path}/Pack/{param_file}', 'rb') as f:
+        with open(self.rom_path / 'Pack' / param_file, 'rb') as f:
             zs_data = zs_tools.SARC(f.read())
-        
+
         # So currently using the map only allows you to jump to kettles that happen to be in their original site
         # I thought this would fix that, but nope
 
-        # if self.settings['kettles']:
+        # if self.settings['Levels']:
         #     table_file = 'Gyml/Singleton/spl__MissionStageTable.spl__MissionStageTable.bgyml'
         #     stage_table = zs_tools.BYAML(zs_data.writer.files[table_file])
         #     for stage in stage_table.info['Rows']:
@@ -451,8 +443,8 @@ class RotM_Process(QtCore.QThread):
         #                 site_num = nums[site_num]
         #             stage['WorldAreaType'] = 'BigWorld' + site_num
         #     zs_data.writer.files[table_file] = stage_table.repack()
-        
-        if self.settings['gear']:
+
+        if self.settings['Hero Gear Upgrades']:
             skills = [s for s in PARAMS['Upgrade_Skills']]
             random.shuffle(skills)
             skill_file = 'Gyml/Singleton/spl__MissionConstant.spl__MissionConstant.bgyml'
@@ -464,8 +456,8 @@ class RotM_Process(QtCore.QThread):
                 if new_skill == 'HeroShotUp':
                     del skill['SkillType']
             zs_data.writer.files[skill_file] = skill_table.repack()
-        
-        if self.settings['skip-cutscenes']:
+
+        if self.settings['Skip Cutscenes']:
             skip_file = 'Gyml/Singleton/spl__MissionDemoSkipTable.spl__MissionDemoSkipTable.bgyml'
             skip_table = zs_tools.BYAML(zs_data.writer.files[skip_file])
             cuts = copy.deepcopy(PARAMS['Cutscenes'])
@@ -480,10 +472,9 @@ class RotM_Process(QtCore.QThread):
                     'DemoSkipCondition': 'Always'
                 })
             zs_data.writer.files[skip_file] = skip_table.repack()
-        
-        with open(f'{self.out_dir}/Pack/{param_file}', 'wb') as f:
+
+        with open(self.out_dir /'Pack' / param_file, 'wb') as f:
             f.write(zs_data.repack())
-        self.updateProgress()
 
 
     # STOP THREAD
