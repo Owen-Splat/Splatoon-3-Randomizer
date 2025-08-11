@@ -1,5 +1,5 @@
 from PySide6 import QtCore
-from RandomizerCore.Data.randomizer_data import PARAMS
+from randomizer_data import PARAMS
 from pathlib import Path
 import RandomizerCore.Tools.event_tools as event_tools
 import RandomizerCore.Tools.zs_tools as zs_tools

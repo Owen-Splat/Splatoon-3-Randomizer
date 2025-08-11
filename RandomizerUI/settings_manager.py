@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QCheckBox
-from RandomizerCore.Data.randomizer_data import *
+from randomizer_data import *
 from pathlib import Path
 import yaml
 

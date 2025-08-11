@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QCheckBox
 from RandomizerUI.ui import Ui_MainWindow, Ui_ProgressWindow
 import RandomizerUI.settings_manager as settings_manager
-from RandomizerCore.Data.randomizer_data import *
+from randomizer_data import *
 from RandomizerCore.Randomizers.rotm import RotM_Process
 from randomizer_paths import *
 from pathlib import Path
