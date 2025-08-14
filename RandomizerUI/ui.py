@@ -336,7 +336,7 @@ class Ui_ProgressWindow(QObject):
         self.label.setMinimumWidth((len(title)*10)//1)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label_font = self.label.font()
-        label_font.setPointSize(12)
+        label_font.setPointSize(14)
         self.label.setFont(label_font)
         self.progress_bar = QProgressBar(central_widget)
         self.progress_bar.setMaximum(0) # non-progress bar, too lazy to calculate steps
@@ -354,3 +354,4 @@ class Ui_ProgressWindow(QObject):
 
         central_widget.setLayout(vl)
         window.setCentralWidget(central_widget)
+        window.setMinimumSize(600, 100)

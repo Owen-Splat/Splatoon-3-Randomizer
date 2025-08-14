@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFrame, QLabel, QMainWindow,
-                               QMessageBox, QPushButton, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QMainWindow, QMessageBox,
+                               QScrollArea, QVBoxLayout, QWidget)
 
 
 class RandoComboBox(QComboBox):
@@ -47,6 +47,7 @@ class RandoHelpWindow(QMessageBox):
             scroll.setWidgetResizable(True)
             scroll.setWidget(self.content)
             self.layout().addWidget(scroll, 0, 0, 1, 1)
-            self.setStyleSheet("QScrollArea{min-width:600 px; min-height: 450px}")
+            self.setStyleSheet("QScrollArea{min-width:600px; min-height: 450px}")
         else:
             self.setText(text)
+            self.setStyleSheet("QLabel{min-width: 200px; min-height: 40px}")
