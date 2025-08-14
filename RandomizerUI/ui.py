@@ -70,7 +70,7 @@ class Ui_MainWindow(QObject):
         tab_widget.setObjectName("ModeTab")
         tab_widget.addTab(self.createTabHM(), "Hero Mode")
         tab_widget.addTab(self.createTabSO(), "Side Order")
-        vl.addWidget(tab_widget, 5)
+        vl.addWidget(tab_widget, 4)
         central_widget.setLayout(vl)
         window.setCentralWidget(central_widget)
 
@@ -82,7 +82,10 @@ class Ui_MainWindow(QObject):
         label.setText('Hover over an option to see what it does')
         label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         label.setStyleSheet('color: rgb(80, 80, 80);')
-        label.setFixedHeight(40)
+        exp_font = label.font()
+        exp_font.setPointSize(10) # 9 -> 10
+        label.setFont(exp_font)
+        label.setFixedHeight(50)
         vl.addWidget(label)
 
         hl = QHBoxLayout()
@@ -162,6 +165,8 @@ class Ui_MainWindow(QObject):
         sizes_check.setWhatsThis("Randomizes the size of every non-boss enemy.")
         ohko_check = QCheckBox("Enemy Ink Is Lava", tab)
         ohko_check.setWhatsThis('Adds the "Enemy Ink Is Lava" challenge to every Alterna level.\nHaving armor will negate the challenge.')
+        text_check = QCheckBox("Text", tab)
+        text_check.setWhatsThis("Randomizes the text.")
 
         # now group the settings widgets together
         hl = QHBoxLayout()
@@ -194,6 +199,14 @@ class Ui_MainWindow(QObject):
         hl.addWidget(sizes_check)
         hl.addSpacerItem(self.createHorizontalSpacer())
         hl.addWidget(ohko_check)
+        vl.addLayout(hl)
+        vl.addSpacerItem(self.createVerticalSpacer())
+        hl = QHBoxLayout()
+        hl.addWidget(text_check)
+        hl.addSpacerItem(self.createHorizontalSpacer())
+        hl.addWidget(QLabel("", tab))
+        hl.addSpacerItem(self.createHorizontalSpacer())
+        hl.addWidget(QLabel("", tab))
         vl.addLayout(hl)
 
         tab.setLayout(vl)
@@ -323,7 +336,7 @@ class Ui_ProgressWindow(QObject):
         self.label.setMinimumWidth((len(title)*10)//1)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label_font = self.label.font()
-        label_font.setPointSize(14)
+        label_font.setPointSize(12)
         self.label.setFont(label_font)
         self.progress_bar = QProgressBar(central_widget)
         self.progress_bar.setMaximum(0) # non-progress bar, too lazy to calculate steps
