@@ -2,6 +2,7 @@
 <ul>
 <li>Adds support for all game versions</li>
 <li>Adds support for randomizing enemies and their sizes</li>
+<li>Adds support for randomized text</li>
 <li>The "Enemy Ink Is Lava" setting as returned</li>
 <li>Added the option to choose if weapons are randomized. All new weapons are now added</li>
 <li>The "Kettles" option has been renamed to "Levels" for better clarity</li>
