@@ -2,6 +2,7 @@ from PySide6 import QtCore
 from randomizer_data import PARAMS
 from pathlib import Path
 import RandomizerCore.Tools.event_tools as event_tools
+import RandomizerCore.Tools.text_tools as text_tools
 import RandomizerCore.Tools.zs_tools as zs_tools
 import copy, oead, random, time, traceback
 
@@ -27,9 +28,14 @@ class RotM_Process(QtCore.QThread):
     # automatically called when this thread is started
     def run(self):
         try:
+            (self.out_dir / 'Pack' / 'Scene').mkdir(parents=True, exist_ok=True)
+            (self.out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
+            (self.out_dir / 'Mals').mkdir(parents=True, exist_ok=True)
+
             self.randomizeKettles()
             self.editLevels()
             self.updateMissionParameters()
+            self.randomizeText()
         
         except Exception:
             er = traceback.format_exc()
@@ -94,10 +100,7 @@ class RotM_Process(QtCore.QThread):
 
     # iterate through all level files and randomize the level data
     def editLevels(self):
-        time.sleep(0.5)
         self.status_update.emit('Editing Hero Mode levels...')
-        (self.out_dir / 'Pack' / 'Scene').mkdir(parents=True, exist_ok=True)
-        (self.out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
 
         ui_info_file = [f.name for f in (self.rom_path / 'RSDB').iterdir() if f.name.startswith('MissionMapInfo')][0]
         with open(self.rom_path / 'RSDB' / ui_info_file, 'rb') as f:
@@ -476,17 +479,23 @@ class RotM_Process(QtCore.QThread):
                 })
             zs_data.writer.files[skip_file] = skip_table.repack()
 
-        with open(self.out_dir /'Pack' / param_file, 'wb') as f:
+        with open(self.out_dir / 'Pack' / param_file, 'wb') as f:
             f.write(zs_data.repack())
 
 
-    def randomizeEnemies(self, zs_data: zs_tools.SARC):
+    def randomizeEnemies(self, zs_data: zs_tools.SARC) -> None:
         banc_file = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bcett.byml')][0]
         banc = zs_tools.BYAML(zs_data.writer.files[banc_file])
         for act in banc.info['Actors']:
+            if not self.thread_active:
+                break
             if act['Name'] in PARAMS['Enemies']:
                 if self.settings['Enemies']:
                     enemy = random.choice(PARAMS['Enemies'])
+                    while 'Shield' in enemy: # 1/5 enemies will be shielded so lets trim that down
+                        if random.randint(1, 2) == 2:
+                            break
+                        enemy = random.choice(PARAMS['Enemies'])
                     act['Name'] = enemy
                     act['Gyaml'] = enemy
                 size = 1.0
@@ -494,8 +503,33 @@ class RotM_Process(QtCore.QThread):
                     size = random.uniform(0.5, 2.0)
                     act['Scale'] = oead.byml.Array([oead.F32(size) for s in range(3)])
                 if enemy.endswith('Takopter'):
-                    act['Translate'][1] = oead.F32(float(act['Translate'][1]) + (1.0 * size))
+                    act['Translate'][1] = oead.F32(float(act['Translate'][1]) + (1.5 * size))
         zs_data.writer.files[banc_file] = banc.repack()
+
+
+    def randomizeText(self) -> None:
+        if not self.settings['Text']:
+            return
+
+        message_files = [f.name for f in (self.rom_path / 'Mals').iterdir()]
+        for file in message_files:
+            if not self.thread_active:
+                break
+            with open(self.rom_path / 'Mals' / file, 'rb') as f:
+                zs_data = zs_tools.SARC(f.read())
+            mission_text_files = [str(f) for f in zs_data.reader.get_files()
+                                  if any(n in f for n in ('LogicMsg/', 'Mission/', 'Mission_', "Msn_", 'Sdodr_'))
+                                  and not f.name.startswith('AlternaLog') # Hidden logs contain corrupted text
+                                  and f.name != 'MissionStageName.msbt' # Stage names should be left vanilla
+                                  and f.name.endswith('.msbt')] # I don't think there's any other files but just in case
+            text_entries = []
+            for text_file in mission_text_files:
+                text_entries.extend(text_tools.getText(zs_data.writer.files[text_file]))
+            random.shuffle(text_entries)
+            for text_file in mission_text_files:
+                zs_data.writer.files[text_file] = text_tools.randomizeText(zs_data.writer.files[text_file], text_entries)
+            with open(self.out_dir / 'Mals' / file, 'wb') as f:
+                f.write(zs_data.repack())
 
 
     # STOP THREAD
