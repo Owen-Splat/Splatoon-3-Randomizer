@@ -300,18 +300,30 @@ Main_Weapons:
     - Maneuver_Gallon_01
     - Maneuver_Long_00
     - Shelter_Focus_00
-    - Shooter_ExtraOne_Sdodr
-    - Shooter_ExtraTwo_Sdodr
-    - Roller_Sdodr
-    - Brush_Sdodr
-    - Stringer_Sdodr
-    - Maneuver_Sdodr
-    - Charger_ExtraOne_Sdodr
-    - Shelter_Sdodr
-    - Slosher_Sdodr
-    - Blaster_ExtraOne_Sdodr
-    - Spinner_Sdodr
-    - Saber_Sdodr
+    - Shooter_Normal_Oct # Octo Shot Replica
+    - Shooter_Normal_O # Order Shot Replica
+    - Blaster_Short_O # Order Blaster Replica
+    - Roller_Normal_O # Order Roller Replica
+    - Brush_Normal_O # Orderbrush Replica
+    - Charger_Normal_O # Order Charger Replica
+    - Slosher_Strong_O # Order Slosher Replica
+    - Spinner_Standard_O # Order Splatling Replica
+    - Maneuver_Normal_O # Order Dualie Replicas
+    - Shelter_Normal_O # Order Brella Replica
+    - Stringer_Normal_O # Order Stringer Replica
+    - Saber_Normal_O # Order Splatana Replica
+    # - Shooter_ExtraOne_Sdodr
+    # - Shooter_ExtraTwo_Sdodr
+    # - Roller_Sdodr
+    # - Brush_Sdodr
+    # - Stringer_Sdodr
+    # - Maneuver_Sdodr
+    # - Charger_ExtraOne_Sdodr
+    # - Shelter_Sdodr
+    # - Slosher_Sdodr
+    # - Blaster_ExtraOne_Sdodr
+    # - Spinner_Sdodr
+    # - Saber_Sdodr
   Season_8:
     - Blaster_Long_01
     - Charger_Light_01
@@ -323,6 +335,38 @@ Main_Weapons:
     - Stringer_Explosion_01
     - Saber_Heavy_00
     - Saber_Heavy_01
+  Season_9: []
+  Season_10:
+    - Shooter_Precision_02
+    - Shooter_Blaze_02
+    - Shooter_Normal_02
+    - Shooter_Expert_02
+    - Shooter_Heavy_02
+    - Shooter_Long_02
+    - Blaster_Middle_02
+    - Blaster_LightLong_02
+    - Shooter_TripleQuick_02
+    - Shooter_TripleMiddle_02
+    - Roller_Compact_02
+    - Roller_Heavy_02
+    - Roller_Wide_02
+    - Brush_Normal_02
+    - Brush_Heavy_02
+    - Charger_Normal_02
+    - Charger_NormalScope_02
+    - Slosher_Diffusion_02
+    - Slosher_Double_02
+    - Spinner_Quick_02
+    - Spinner_Hyper_02
+    - Maneuver_Short_02
+    - Maneuver_Normal_02
+    - Maneuver_Dual_02
+    - Shelter_Wide_02
+    - Shelter_Compact_02
+    - Stringer_Normal_02
+    - Stringer_Short_02
+    - Saber_Normal_02
+    - Saber_Lite_02
 
 Sub_Weapons:
   - Beacon
