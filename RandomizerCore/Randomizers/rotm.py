@@ -517,17 +517,23 @@ class RotM_Process(QtCore.QThread):
                 break
             with open(self.rom_path / 'Mals' / file, 'rb') as f:
                 zs_data = zs_tools.SARC(f.read())
+
+            # get all files that we want to edit
             mission_text_files = [str(f) for f in zs_data.reader.get_files()
-                                  if any(n in f for n in ('LogicMsg/', 'Mission/', 'Mission_', "Msn_", 'Sdodr_'))
-                                  and not f.name.startswith('AlternaLog') # Hidden logs contain corrupted text
-                                  and f.name != 'MissionStageName.msbt' # Stage names should be left vanilla
-                                  and f.name.endswith('.msbt')] # I don't think there's any other files but just in case
+                                  if str(f).startswith(('LogicMsg/', 'CommonMsg/Mission/'))
+                                  and str(f).split('/')[-1].startswith(('Mission_', 'Msn_'))
+                                  and 'AlternaLog' not in str(f)
+                                  and 'MissionStageName' not in str(f)]
+
+            # store the messages in an array, shuffle it, then replace the old messages with the shuffled ones
             text_entries = []
             for text_file in mission_text_files:
                 text_entries.extend(text_tools.getText(zs_data.writer.files[text_file]))
             random.shuffle(text_entries)
             for text_file in mission_text_files:
                 zs_data.writer.files[text_file] = text_tools.randomizeText(zs_data.writer.files[text_file], text_entries)
+
+            # finally, repack the sarc archive
             with open(self.out_dir / 'Mals' / file, 'wb') as f:
                 f.write(zs_data.repack())
 
