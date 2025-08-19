@@ -19,8 +19,8 @@ class RotM_Process(QtCore.QThread):
         self.rom_path = Path(settings['RomFS'])
         self.out_dir = Path(settings['Output'])
         random.seed(settings['Seed'])
-        self.game_version = settings['Version']
-        self.settings = settings['HeroMode']
+        self.game_version = str(settings['Version'])
+        self.settings = dict(settings['HeroMode'])
         self.thread_active = True
         self.levels = {}
 
@@ -521,9 +521,12 @@ class RotM_Process(QtCore.QThread):
             # get all files that we want to edit
             mission_text_files = [str(f) for f in zs_data.reader.get_files()
                                   if str(f).startswith(('LogicMsg/', 'CommonMsg/Mission/'))
-                                  and str(f).split('/')[-1].startswith(('Mission_', 'Msn_'))
-                                  and 'AlternaLog' not in str(f)
-                                  and 'MissionStageName' not in str(f)]
+                                  or str(f).split('/')[-1].startswith(('Mission_', 'Msn_'))]
+            for text_file in reversed(mission_text_files):
+                if 'AlternaLog' in text_file:
+                    mission_text_files.remove(text_file)
+                if 'MissionStageName' in text_file:
+                    mission_text_files.remove(text_file)
 
             # store the messages in an array, shuffle it, then replace the old messages with the shuffled ones
             text_entries = []
