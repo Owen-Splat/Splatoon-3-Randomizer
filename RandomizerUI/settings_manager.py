@@ -45,6 +45,9 @@ def loadSettings(window, settings) -> None:
     for k,v in settings.items():
         if isinstance(v, dict):
             for k,v in v.items():
+                check = window.ui.findCheckBox(k)
+                if check is None:
+                    continue
                 window.ui.findCheckBox(k).setChecked(v)
         else:
             if not isinstance(v, bool):
