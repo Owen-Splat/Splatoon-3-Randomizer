@@ -142,7 +142,7 @@ class Ui_MainWindow(QObject):
 
         # define all settings widgets first so that we can rearrange them easily later
         weapons_check = QCheckBox("Weapons", tab)
-        weapons_check.setWhatsThis("Randomizes the weapons that each level can give.\nEach level will give 3 choices, with the first staying vanilla.")
+        weapons_check.setWhatsThis("Randomizes weapons. Each level will have three options.\nHero weapon is also randomized. Upgrading will give a new weapon.")
         levels_check = QCheckBox("Levels", tab)
         levels_check.setWhatsThis("Randomizes which levels the kettles take you to.\nAfter Alterna is vanilla. One boss max per site.")
         cutscenes_check = QCheckBox("Skip Cutscenes", tab)
