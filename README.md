@@ -1,21 +1,21 @@
 # Splatoon-3-Randomizer
 A randomizer for Splatoon 3 Hero Mode
 
-You can download the randomizer here: https://github.com/Owen-Splat/Splatoon-3-Randomizer/releases/tag/v0.2.0
+You can download the randomizer here: https://github.com/Owen-Splat/Splatoon-3-Randomizer/releases/latest
 
 **NOTE**: This mod is not online safe. To avoid getting your Nintendo Switch banned, you should always play mods on emuMMC. Playing offline is not enough as some games (like Splatoon 3) stores telemetry that will then be sent to Nintendo the next time the console is connected to the internet
 
 ## Information
-This randomizer allows for shuffling levels, weapons, ink color, music, collectables, fuzzy ink prices, and backgrounds! Grizzco weapons are included, as well as being able to use the Rainmaker! There are additional settings such as Enemy Ink Is Lava (OHKO on every level), and randomizing enemies!
+This randomizer allows for shuffling levels, weapons, ink color, music, enemies, and much more! There is logic in place to ensure that every seed should be able to be finished, however it is a work in progress and as such there may be occasional issues. Please report them either on this repository or notify me on Discord or Bluesky *@Owen_Splat*
 
 In order to run the randomizer, you must have the RomFS of the game extracted and on the device you're running this program from. This can be extracted on pc using your emulator of choice, or on console using nxdumptool from the Homebrew App Store. The RomFS is the component of the game package with all of the data files (i.e. non-executable files). You **NEED** to make sure that the RomFS dump includes the update RomFS that you are playing on, otherwise key features of the randomizer will not work correctly
 
-The season that you choose to play should match the major version number that you are playing on. For example, if you are playing on version 5.1.0, you should select season 5. If you choose a season higher than your game version, the randomizer will shuffle in weapons that aren't supported by your version, which results in having no weapon in that slot
+Please make sure that your RomFS dump matches the version that you will be playing on! Version mismatches will cause issues!
 
 ## Running from source:
 **NOTE**: This is for advanced users or those helping with the development of the randomizer.
 
-If you want to run from source, then you need to clone this repository and make sure you have Python 3.12 installed. Due to the dependencies, earlier and later versions will not work
+If you want to run from source, then you need to clone this repository and make sure you have Python 3.12.X installed. Due to the dependencies, earlier and later versions will not work
 
 Open the folder in a command prompt and install dependencies by running:  
 `py -3.12 -m pip install -r requirements.txt` (on Windows)  
