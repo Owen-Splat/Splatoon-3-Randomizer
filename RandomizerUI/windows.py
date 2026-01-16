@@ -68,16 +68,11 @@ class MainWindow(QMainWindow):
             outdir = outdir / 'atmosphere' / 'contents' / '0100C2500FC20000'
         outdir = outdir / 'romfs'
 
-        major_version = self.ui.findSpinBox("MajorVersion").value()
-        minor_version = self.ui.findSpinBox("MinorVersion").value()
-        patch_version = self.ui.findSpinBox("PatchVersion").value()
-
         settings = {
             'RomFS': Path(self.ui.findLineEdit("BaseLine").text()),
             # 'DLC': Path(self.ui.findLineEdit("DLCLine").text()),
             'Output': outdir,
             'Seed': seed,
-            'Version': f"{major_version}.{minor_version}.{patch_version}",
             'HeroMode': {},
             'SideOrder': {},
         }
