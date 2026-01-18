@@ -13,6 +13,9 @@ with open(RESOURCE_PATH / 'changelog.txt', 'r') as f:
 with open(DATA_PATH / 'parameters.yml', 'r') as f:
     PARAMS = yaml.safe_load(f)
 
+with open(DATA_PATH / "logic.yml", 'r') as f:
+    LOGIC = yaml.safe_load(f)
+
 try:
     with open(SETTINGS_PATH, 'r') as f:
         SETTINGS = yaml.safe_load(f)
