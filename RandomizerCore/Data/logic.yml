@@ -1,4 +1,4 @@
-Mission:
+Missions:
   A01_01:
     Range: 13.0 # Minimum range needed
     Floor_Paint: False # Does the player need the ability to paint the floor
@@ -367,6 +367,11 @@ Mission:
     Rail: False
     Attack: True
   A06_07C:
+    Range: 26.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
     Special: SpJetpack_Mission
   A06_08C:
     Range: 5.0
@@ -380,21 +385,21 @@ Mission:
     Wall_Paint: False
     Rail: False
     Attack: False
-  Msn_MorayKing: # idk yet if it's possible to replace the treasures, if not then specials wont work for bosses
+  MorayKing: # idk yet if it's possible to replace the treasures, if not then specials wont work for bosses
     Range: 9.8
     Floor_Paint: True
     Wall_Paint: True
     Rail: False
     Attack: True
     Main: True
-  Msn_SharkKing:
+  SharkKing:
     Range: 11.0
     Floor_Paint: True
     Wall_Paint: False
     Rail: False
     Attack: True
     Main: True
-  Msn_MantaKing:
+  MantaKing:
     Range: 5.0
     Floor_Paint: True
     Wall_Paint: False
@@ -413,8 +418,6 @@ Main_Weapons:
     Range: 11.3
   Shooter_Normal: # splattershot
     Range: 12.9
-  Hero:
-    Range: 12.9
   Shooter_Gravity: # 52 gal
     Range: 13.3
   Shooter_QuickMiddle: # nzap
@@ -429,7 +432,7 @@ Main_Weapons:
     Range: 16.0
   Blaster_Short: # luna
     Range: 11.2
-  Blaster_Bear_Coop: # grizzco blaster
+  Blaster_Bear: # grizzco blaster
     Range: 11.2
   Blaster_Middle: # blaster
     Range: 13.3
@@ -475,7 +478,7 @@ Main_Weapons:
     Range: 31.0
   Charger_LongScope: # e-liter scope
     Range: 33.0
-  Charger_Bear_Coop: # grizzco charger
+  Charger_Bear: # grizzco charger
     Range: 31.0
   Charger_Light: # bamboozler
     Range: 21.0
@@ -493,7 +496,7 @@ Main_Weapons:
     Range: 15.0
   Slosher_Washtub: # explosher
     Range: 20.7
-  Slosher_Bear_Coop: # grizzco slosher
+  Slosher_Bear: # grizzco slosher
     Range: 20.7
   Slosher_Double: # dread wringer
     Range: 15.5
@@ -511,7 +514,7 @@ Main_Weapons:
     Range: 17.0
   Maneuver_Short: # dapple dualies
     Range: 9.8
-  Maneuver_Bear_Coop: # grizzco dualies
+  Maneuver_Bear: # grizzco dualies
     Range: 9.8
   Maneuver_Normal: # splat dualies
     Range: 12.5
@@ -525,7 +528,7 @@ Main_Weapons:
     Range: 19.1
   Shelter_Normal: # brella
     Range: 12.5
-  Shelter_Bear_Coop:
+  Shelter_Bear:
     Range: 12.5
   Shelter_Wide: # tenta
     Range: 15.0
@@ -539,7 +542,7 @@ Main_Weapons:
     Range: 15.0
   Stringer_Explosion: # wellstring
     Range: 23.0
-  Stringer_Bear_Coop: # grizzco stringer
+  Stringer_Bear: # grizzco stringer
     Range: 25.0
   Saber_Normal: # splatana stamper
     Range: 16.5
@@ -547,7 +550,7 @@ Main_Weapons:
     Range: 13.0
   Saber_Heavy: # decavitator
     Range: 15.0
-  Saber_Bear_Coop: # grizzco splatana
+  Saber_Bear: # grizzco splatana
     Range: 9.8 # guessing around dapple range
   Free:
     Range: 0.0

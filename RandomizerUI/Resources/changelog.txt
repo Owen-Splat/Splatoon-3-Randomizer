@@ -7,6 +7,7 @@
 <li>Adds support for randomized text</li>
 <li>The "Enemy Ink Is Lava" setting as returned</li>
 <li>Added the option to choose if weapons are randomized. All new weapons are now added</li>
+<li>Hero weapon and upgrades are now randomized. Hero weapon choices are now vanilla</li>
 <li>The "Kettles" option has been renamed to "Levels" for better clarity</li>
 <li>The "Beatable" setting has been removed, the randomizer now has proper logic</li>
 <li>The randomizer app can now be resized</li>

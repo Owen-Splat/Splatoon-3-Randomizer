@@ -5,6 +5,15 @@ v0.3
 
 - improve/clean old code
 
+v0.4
+- improve logic
+
+- add proper icons for the randomized hero and grizzco weapons
+
+- add any new weapons we get
+
+v0.5
+- initial side order support (random weapons, kits, biases, chip effects, ink color, music, etc)
+
 v1.0
-- side order rando
-randomize weapons, kits, biases, chip effects
+whenever both modes are in a state im happy with :)

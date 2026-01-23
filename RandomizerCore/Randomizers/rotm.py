@@ -1,5 +1,5 @@
 from PySide6 import QtCore
-from randomizer_data import PARAMS
+from randomizer_data import PARAMS, LOGIC
 from pathlib import Path
 import RandomizerCore.Tools.event_tools as event_tools
 import RandomizerCore.Tools.text_tools as text_tools
@@ -19,20 +19,31 @@ class RotM_Process(QtCore.QThread):
         self.rom_path = Path(settings['RomFS'])
         self.out_dir = Path(settings['Output'])
         random.seed(settings['Seed'])
-        self.game_version = str(settings['Version'])
         self.settings = dict(settings['HeroMode'])
         self.thread_active = True
-        self.levels = {}
 
 
     # automatically called when this thread is started
     def run(self):
         try:
+            # Make paths before making any edits
             (self.out_dir / 'Pack' / 'Scene').mkdir(parents=True, exist_ok=True)
             (self.out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
             (self.out_dir / 'Mals').mkdir(parents=True, exist_ok=True)
 
-            self.randomizeKettles()
+            # Store the game version based on the provided romfs
+            self.version = self.getGameVersion()
+
+            # makes a dict of old levels and the new level that will replace it
+            self.levels = {}
+            if self.settings['Levels']:
+                self.levels = self.randomizeLevels()
+
+            # makes a dict of levels and weapon choices, each level is given 3 choices in increasing difficulty
+            self.weapon_placements = {}
+            if self.settings['Weapons']:
+                self.weapon_placements = self.randomizeWeaponsWithLogic()
+
             self.editLevels()
             self.updateMissionParameters()
             self.randomizeText()
@@ -45,22 +56,36 @@ class RotM_Process(QtCore.QThread):
             self.is_done.emit()
 
 
-    def randomizeKettles(self):
-        if not self.settings['Levels']:
-            return
-        
-        self.status_update.emit('Randomizing Hero Mode levels...')
+    def getGameVersion(self) -> str:
+        """Get the version string from the RSDB folder in the RomFS
+
+        In the case of the user having dumped multiple updates into the same directory, get the highest one"""
+
+        rsdb_path = self.rom_path / "RSDB"
+        markers = [int(f.stem.split('.')[2], 16) for f in rsdb_path.iterdir() if f.stem.startswith("ActorInfo")]
+        version_string = hex(max(markers))[2:].lower()
+        return version_string
+
+
+    def randomizeLevels(self) -> dict:
+        """Creates a dict of randomized levels, the key is the old level and the value is the new level"""
+
+        # Update the ui status and add a slight delay so that the user has time to read it
+        self.status_update.emit('Randomizing levels...')
+        time.sleep(1)
+
+        levels = {}
 
         # restrict After Alterna to vanilla for now to avoid confusion
-        self.levels['Msn_ExStage'] = 'Msn_ExStage'
+        levels['Msn_ExStage'] = 'Msn_ExStage'
 
         # C-1 needs to be vanilla to allow the player to use Smallfry
         # C-1 -> C-4 all need to be beaten for the Octavio ooze
         # So all Crater levels need to stay in the Crater, and C-1 stays vanilla
-        self.levels['Msn_C_01'] = 'Msn_C_01'
+        levels['Msn_C_01'] = 'Msn_C_01'
 
-        c_levels = [c for c in copy.deepcopy(PARAMS['Crater_Missions']) if c not in self.levels]
-        a_levels = [a for a in copy.deepcopy(PARAMS['Alterna_Missions']) if a not in self.levels]
+        c_levels = [c for c in copy.deepcopy(PARAMS['Crater_Missions']) if c not in levels]
+        a_levels = [a for a in copy.deepcopy(PARAMS['Alterna_Missions']) if a not in levels]
         b_levels = [b for b in a_levels if b.endswith('King')]
         random.shuffle(c_levels)
         random.shuffle(a_levels)
@@ -69,56 +94,224 @@ class RotM_Process(QtCore.QThread):
         for msn in PARAMS['Crater_Missions']:
             if not self.thread_active:
                 break
-            if msn in self.levels:
+            if msn in levels:
                 continue
             new_level = random.choice(c_levels)
             c_levels.remove(new_level)
-            self.levels[msn] = new_level
-            time.sleep(0.01)
+            levels[msn] = new_level
         
         boss_sites = []
         while b_levels:
             new_level = random.choice(a_levels)
-            if new_level in self.levels or new_level[6] in boss_sites:
+            if new_level in levels or new_level[6] in boss_sites:
                 continue
             boss_sites.append(new_level[6])
             boss = b_levels.pop()
             a_levels.remove(boss)
-            self.levels[new_level] = boss
-            time.sleep(0.01)
+            levels[new_level] = boss
         
         for msn in PARAMS['Alterna_Missions']:
             if not self.thread_active:
                 break
-            if msn in self.levels:
+            if msn in levels:
                 continue
             new_level = random.choice(a_levels)
             a_levels.remove(new_level)
-            self.levels[msn] = new_level
-            time.sleep(0.01)
+            levels[msn] = new_level
+
+        return levels
 
 
-    # iterate through all level files and randomize the level data
-    def editLevels(self):
-        self.status_update.emit('Editing Hero Mode levels...')
+    def randomizeWeaponsWithLogic(self) -> dict:
+        """Creates a dict of levels and weapon choices. Each level is given 3 choices in increasing difficulty
 
-        ui_info_file = [f.name for f in (self.rom_path / 'RSDB').iterdir() if f.name.startswith('MissionMapInfo')][0]
-        with open(self.rom_path / 'RSDB' / ui_info_file, 'rb') as f:
-            ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
+        Currently, the difficulty is just the weapon type (main, sub, special)"""
 
-        match self.game_version:
-            case "1.0.0":
+        # Update the ui status and add a slight delay so that the user has time to read it
+        self.status_update.emit("Randomizing weapons...")
+        time.sleep(1)
+
+        weapon_placements = {}
+
+        # Now get the season corresponding to the version. This is just the major version marker besides 1.0.0 which is season 0
+        match self.version:
+            case "100":
                 season = 0
-            case "1.1.0":
-                season = 1
-            case _:
-                season = int(self.game_version.split('.')[0])
+            case _: # default
+                season = int(self.version[0], 16)
 
+        # Now use the season to get all the valid weapons listed in our PARAMS file
         valid_seasons = [k for k in PARAMS['Main_Weapons'] if int(k[-1]) <= season]
         main_weapons_list = []
         for season in valid_seasons:
             for weapon in PARAMS['Main_Weapons'][season]:
                 main_weapons_list.append(weapon)
+
+        # Now for each level in the logic file, randomly assign 3 weapon choices in increasing difficulty
+        # If any are not valid for the given level, reroll
+        for k,v in LOGIC["Missions"].items():
+            if not self.thread_active:
+                break
+            weapons = []
+            for i in range(3):
+                if not self.thread_active:
+                    break
+                if (not str(k).endswith('C')) and (i == 0): # keep hero weapon choice since the hero weapon is randomized
+                    weapons.append("Hero")
+                    continue
+                w = self.assignWeapon(main_weapons_list, i)
+                while not self.checkIfWeaponIsValid(w, v):
+                    w = self.assignWeapon(main_weapons_list, i)
+                weapons.append(w)
+            weapon_placements[f"Msn_{k}"] = weapons
+
+        return weapon_placements
+
+    # TODO: MAKE SURE THE USER DOES NOT GET REPEAT WEAPON CHOICES
+    def assignWeapon(self, main_weapons: list, index: int) -> str:
+        """Assigns a random weapon of difficulty index with no regard of the level logic"""
+
+        # Since we are using index as the difficulty, add one so we dont multiply by 0
+        # This gives us a difficulty rating of 1-3
+        difficulty = index + 1
+
+        # Add a chance for special with the chance decreasing based on the difficulty value
+        # Since we reroll if the weapon is not valid, there will be more rolls so odds are technically higher
+        # 1/8 -> 1/12 -> 1/16
+        odds = 8
+        odds += 4 * (difficulty - 1)
+        special = ""
+        if random.random() < (1 / odds):
+            special = random.choice(PARAMS["Special_Weapons"])
+            if special != "SpSuperHook_Mission":
+                return special
+
+        # Determine the weight of each class in regards to the difficulty value
+        # This will be reformatted into something more readable, but this is fine for testing what weapons are typically easier or harder 
+        class_weights = {
+            "Shooter": 4 - difficulty,
+            "Blaster": 3 / difficulty,
+            "Roller": 3 / difficulty,
+            "Brush": 3 / difficulty,
+            "Charger": 4 - difficulty,
+            "Slosher": 3 / difficulty,
+            "Spinner": 4 - difficulty,
+            "Maneuver": 4 - difficulty,
+            "Shelter": 0.5 + (difficulty - 1),
+            "Stringer": 4 - difficulty,
+            "Saber": 0.5 + (difficulty - 1),
+            "Free": 0 + ((difficulty - 1) * 2)
+        }
+
+        # Now make a dict of the weapon names with the class difficulty
+        mains_with_weights = {}
+        for m in main_weapons:
+            if not self.thread_active:
+                break
+            for k,v in class_weights.items():
+                if not self.thread_active:
+                    break
+                if m.startswith(k):
+                    mains_with_weights[m] = v
+                    break
+
+        # Now get a random main weapon using the weights
+        main = random.choices(list(mains_with_weights.keys()), list(mains_with_weights.values()))[0]
+        if special:
+            result = f"{special}+{main}"
+            return result
+
+        # Now we do the same for sub weapons
+        # Besides just difficulty, we need to ensure that we attempt to give a proper bomb if the main weapon is empty
+        has_main = True if main == "Free" else False
+        sub_weights = {
+            "Beacon": difficulty * has_main,
+            "Bomb_Curling_Mission": 4 - difficulty,
+            "Bomb_Fizzy": 3 / difficulty,
+            "Bomb_Quick_Mission": 4 - difficulty,
+            "Bomb_Robot_Mission": 4 - difficulty,
+            "Bomb_Splash_Mission": 4 - difficulty,
+            "Bomb_Suction_Mission": 4 - difficulty,
+            "Bomb_Torpedo": 3 / difficulty,
+            "LineMarker": 0.5 + (difficulty - 1),
+            "PointSensor": difficulty * has_main,
+            "PoisonMist": difficulty * has_main,
+            "SalmonBuddy": 3 / difficulty,
+            "Shield": difficulty * has_main,
+            "Sprinkler": difficulty * has_main,
+            "Trap_Mission": 3 / difficulty,
+            "Free": difficulty * has_main
+        }
+        sub = random.choices(list(sub_weights.keys()), list(sub_weights.values()))[0]
+
+        result = f"{main}+{sub}"
+        return result
+
+
+    def checkIfWeaponIsValid(self, weapon: str, level_logic: dict) -> bool:
+        """Checks if the randomly assigned weapon is valid against the level logic"""
+
+        result = True
+
+        # Unique case where the level is designed around curling bomb
+        if "Sub" in level_logic:
+            if not weapon.endswith(level_logic["Sub"]):
+                result = False
+
+        # Special
+        if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
+            special = weapon.split('+')[0]
+            weapon_logic = LOGIC["Special_Weapons"][special]
+            if weapon_logic["Range"] < level_logic["Range"]:
+                result = False
+            if (not weapon_logic["Floor_Paint"]) and (level_logic["Floor_Paint"]):
+                result = False
+            if (not weapon_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
+                result = False
+            if (not weapon_logic["Rail"]) and (level_logic["Rail"]):
+                result = False
+            return result
+
+        # Main + Sub
+        if '+' in weapon:
+            main, sub = weapon.split('+')
+            main_parts = main.split('_')
+            main_without_last = main_parts[:-1]
+            main = "_".join(main_without_last)
+            main_logic = LOGIC["Main_Weapons"][main]
+            sub_logic = LOGIC["Sub_Weapons"][sub]
+            if main_logic["Range"] < level_logic["Range"]:
+                if sub_logic["Range"] < level_logic["Range"]:
+                    result = False
+            if main == "Free": # all main weapons can paint floor and walls, so if main is nothing, check sub ability to paint
+                if (not sub_logic["Floor_Paint"]) and (level_logic["Floor_Paint"]):
+                    result = False
+                if (not sub_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
+                    result = False
+            if level_logic["Attack"]:
+                if not sub_logic["Attack"]:
+                    result = False
+            return result
+
+        # Main only
+        weapon_parts = weapon.split('_')
+        weapon_without_last = weapon_parts[:-1]
+        weapon = "_".join(weapon_without_last)
+        main_logic = LOGIC["Main_Weapons"][weapon]
+        if main_logic["Range"] < level_logic["Range"]: # this covers no weapon
+            result = False
+
+        return result
+
+
+    # iterate through all level files and randomize the level data
+    def editLevels(self):
+        self.status_update.emit('Editing Hero Mode levels...')
+        time.sleep(1)
+
+        ui_info_file = [f.name for f in (self.rom_path / 'RSDB').iterdir() if f.name.startswith('MissionMapInfo') and f.name.split('.')[2] == self.version][0]
+        with open(self.rom_path / 'RSDB' / ui_info_file, 'rb') as f:
+            ui_missions_data = zs_tools.BYAML(f.read(), compressed=True)
 
         missions = [f.name for f in (self.rom_path / 'Pack' / 'Scene').iterdir() if f.name.startswith('Msn_')
                     or f.name.split('.', 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
@@ -153,7 +346,7 @@ class RotM_Process(QtCore.QThread):
 
             has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
             if has_weapons and self.settings['Weapons']:
-                self.randomizeWeapons(mission_data, main_weapons_list, ui_missions_data)
+                self.editWeaponChoices(msn, mission_data, ui_missions_data)
 
             zs_data.writer.files[info_file] = mission_data.repack()
 
@@ -267,67 +460,52 @@ class RotM_Process(QtCore.QThread):
             mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
 
 
-    def randomizeWeapons(self, mission_data, main_weapons_list, ui_missions_data: zs_tools.BYAML = None):
+    def editWeaponChoices(self, mission_name: str, mission_data: zs_tools.BYAML, ui_missions_data: zs_tools.BYAML) -> None:
+        if mission_name.split('_', 1)[1] not in LOGIC["Missions"]:
+            return
+
         if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
             while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
                 mission_data.info['OctaSupplyWeaponInfoArray'].append(
-                    mission_data.info['OctaSupplyWeaponInfoArray'][0])
+                    mission_data.info['OctaSupplyWeaponInfoArray'][-1])
 
-        mains = ['']
         for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
             e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
 
-            if i == 0: # leave first option as vanilla
+            if i == 0: # leave first option as vanilla if it is a hero weapon
                 try:
                     if e['SupplyWeaponType'] == 'Hero':
-                        mains.append('Hero')
-                        continue
-                    else:
-                        main_weapon = str(e['WeaponMain'])
-                        if main_weapon == '':
-                            mains.append('Hero')
-                            continue
-                        main_weapon = main_weapon.split('/')[2]
-                        main_weapon = main_weapon.split('.')[0]
-                        mains.append(main_weapon)
                         continue
                 except KeyError:
-                    mains.append('Hero')
                     continue
 
-            main_weapon = ''
-            while main_weapon in mains:
-                main_weapon = random.choice(main_weapons_list)
-            mains.append(main_weapon)
-            e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
-            if main_weapon == 'Hero':
-                e['SupplyWeaponType'] = 'Hero'
+            weapon = self.weapon_placements[mission_name][i]
+
+            if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
+                if '+' in weapon:
+                    special_weapon, main_weapon = weapon.split('+')
+                else:
+                    special_weapon = weapon
+                    main_weapon = "Free"
+                e['SubWeapon'] = ""
+                e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
+                if weapon.startswith("SpSuperHook_Mission"):
+                    e["SupplyWeaponType"] = "MainAndSpecial"
+                    e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+                    if main_weapon == "Free":
+                        e["WeaponMain"] = ""
+                else:
+                    e["SupplyWeaponType"] = "Special"
                 continue
 
-            # sub
-            sub_weapon = random.choice(PARAMS['Sub_Weapons'])
-            if sub_weapon == 'Free':
-                e['SubWeapon'] = ''
-            else:
-                e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
-
-            # special
-            if 'SpecialWeapon' in e and any(sp in e['SpecialWeapon'] for sp in ('SpSuperHook_Mission', 'SpJetpack_Mission')):
-                if i == 0:
-                    continue
-
-            special_weapon = random.choice(PARAMS['Special_Weapons'])
-            e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
-
-            e['SupplyWeaponType'] = 'Normal'
-            if main_weapon == 'Free' and sub_weapon == 'Free':
-                e['SupplyWeaponType'] = 'Special'
-            elif special_weapon in ('SpJetpack_Mission', 'SpGachihoko', 'SpSuperLanding', 'SpUltraStamp_Mission', 'SpChariot_Mission'):
-                if random.random() < 0.125: # 1/8 chance for special
-                    e['SupplyWeaponType'] = 'Special'
-            elif special_weapon == 'SpSuperHook_Mission':
-                if random.random() < 0.125:
-                    e['SupplyWeaponType'] = 'MainAndSpecial'
+            e['SupplyWeaponType'] = "Normal"
+            main_weapon, sub_weapon = weapon.split('+')
+            e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+            e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
+            if main_weapon == "Free":
+                e["WeaponMain"] = ""
+            if sub_weapon == "Free":
+                e["SubWeapon"] = ""
 
         for info in ui_missions_data.info:
             if 'MapNameLabel' in info:
@@ -510,6 +688,8 @@ class RotM_Process(QtCore.QThread):
     def randomizeText(self) -> None:
         if not self.settings['Text']:
             return
+
+        self.status_update.emit("Randomizing text...")
 
         message_files = [f.name for f in (self.rom_path / 'Mals').iterdir()]
         for file in message_files:
