@@ -14,11 +14,13 @@ signal.signal(signal.SIGINT, interruptHandler)
 
 # Set app id so the custom taskbar icon will show while running from source
 if RUNNING_FROM_SOURCE:
-    from ctypes import windll
     try:
+        from ctypes import windll
         windll.shell32.SetCurrentProcessExplicitAppUserModelID("Splatoon3_Randomizer")
     except AttributeError:
         pass # Ignore for versions of Windows before Windows 7
+    except ImportError: # linux
+        pass
 
 build_icon = "icon.ico"
 if sys.platform == "darwin": # mac
