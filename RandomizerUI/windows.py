@@ -1,11 +1,16 @@
 from PySide6.QtWidgets import QMainWindow, QCheckBox
 from RandomizerUI.ui import Ui_MainWindow, Ui_ProgressWindow
-import RandomizerUI.settings_manager as settings_manager
-from randomizer_data import *
-from RandomizerCore.Randomizers.rotm import RotM_Process
+from RandomizerUI.settings_manager import SettingsManager
+from RandomizerCore.Randomizers.HeroMode.hero import HeroMode_Process
 from randomizer_paths import *
 from pathlib import Path
 import random, shutil
+
+with open(RESOURCE_PATH / 'adjectives.txt', 'r') as f:
+    ADJECTIVES = f.read().splitlines()
+
+with open(RESOURCE_PATH / 'characters.txt', 'r') as f:
+    CHARACTERS = f.read().splitlines()
 
 
 class MainWindow(QMainWindow):
@@ -15,10 +20,9 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.addOptionDescriptions()
 
-        if DEFAULTS:
+        self.settings = SettingsManager(self)
+        if not self.settings.load():
             self.ui.showChangelog()
-        else:
-            settings_manager.loadSettings(self, SETTINGS)
 
 
     def browseButtonClicked(self, line_name: str) -> None:
@@ -55,33 +59,8 @@ class MainWindow(QMainWindow):
         if not self.validateFolders(randomize_hm, randomize_so):
             return
 
-        seed = self.ui.findLineEdit("SeedLine").text().strip()
-        if seed:
-            if len(seed) > 32:
-                seed = seed[:32]
-        else:
-            random.seed()
-            seed = str(random.getrandbits(32))
-
-        outdir = Path(self.ui.findLineEdit("OutLine").text()) / f"S3Rando-{seed}"
-        if self.ui.findComboBox("PlatformBox").currentText()[9:].strip() == 'Console':
-            outdir = outdir / 'atmosphere' / 'contents' / '0100C2500FC20000'
-        outdir = outdir / 'romfs'
-
-        settings = {
-            'RomFS': Path(self.ui.findLineEdit("BaseLine").text()),
-            # 'DLC': Path(self.ui.findLineEdit("DLCLine").text()),
-            'Output': outdir,
-            'Seed': seed,
-            'HeroMode': {},
-            'SideOrder': {},
-        }
-        for c in hm_tab.findChildren(QCheckBox):
-            settings['HeroMode'][c.text()] = c.isChecked()
-        for c in so_tab.findChildren(QCheckBox):
-            settings['SideOrder'][c.text()] = c.isChecked()
-
-        self.progress_window = ProgressWindow(f"{self.windowTitle().split(' v')[0]} - {seed}", settings)
+        settings = self.settings.fetch()
+        self.progress_window = ProgressWindow(f"{self.windowTitle().split(' v')[0]} - {settings['Seed']}", settings)
         self.progress_window.show()
 
 
@@ -142,7 +121,7 @@ class MainWindow(QMainWindow):
 
 
     def closeEvent(self, event) -> None:
-        settings_manager.saveSettings(self)
+        self.settings.save()
         event.accept()
 
 
@@ -169,7 +148,7 @@ class ProgressWindow(QMainWindow):
         # start mod threads for each mode that the user has selected options for
         if any([v for k,v in settings['HeroMode'].items()]):
             self.randomize_hm = True
-            self.mods_process = RotM_Process(self, settings)
+            self.mods_process = HeroMode_Process(self, settings)
             self.startModProcess()
 
 
@@ -211,7 +190,7 @@ class ProgressWindow(QMainWindow):
             self.close()
             return
 
-        if isinstance(self.mods_process, RotM_Process) and self.randomize_so:
+        if isinstance(self.mods_process, HeroMode_Process) and self.randomize_so:
             pass # will start side order process once it's created
         else:
             self.updateStatus("All done! Check the README for instructions on how to play!")
