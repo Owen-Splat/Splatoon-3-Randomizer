@@ -1,6 +1,6 @@
 from RandomizerCore.Tools.zs_tools import BYAML
 from randomizer_paths import DATA_PATH
-import random, time, yaml
+import time, yaml
 
 with open(DATA_PATH / "weapons.yml", "r") as f:
     WEAPONS = yaml.safe_load(f)
@@ -68,8 +68,8 @@ def assignWeapon(thread, main_weapons: list, index: int) -> str:
     odds = 8
     odds += 4 * (difficulty - 1)
     special = ""
-    if random.random() < (1 / odds):
-        special = random.choice(WEAPONS["Special_Weapons"])
+    if thread.rng.random() < (1 / odds):
+        special = thread.rng.choice(WEAPONS["Special_Weapons"])
         if special != "SpSuperHook_Mission":
             return special
 
@@ -103,7 +103,7 @@ def assignWeapon(thread, main_weapons: list, index: int) -> str:
                 break
 
     # Now get a random main weapon using the weights
-    main = random.choices(list(mains_with_weights.keys()), list(mains_with_weights.values()))[0]
+    main = thread.rng.choices(list(mains_with_weights.keys()), list(mains_with_weights.values()))[0]
     if special:
         result = f"{special}+{main}"
         return result
@@ -129,7 +129,7 @@ def assignWeapon(thread, main_weapons: list, index: int) -> str:
         "Trap_Mission": 3 / difficulty,
         "Free": difficulty * has_main
     }
-    sub = random.choices(list(sub_weights.keys()), list(sub_weights.values()))[0]
+    sub = thread.rng.choices(list(sub_weights.keys()), list(sub_weights.values()))[0]
 
     result = f"{main}+{sub}"
     return result

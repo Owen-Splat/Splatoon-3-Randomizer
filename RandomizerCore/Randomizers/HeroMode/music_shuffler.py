@@ -1,6 +1,5 @@
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
 from randomizer_paths import DATA_PATH
-import random
 
 with open(DATA_PATH / "HeroMode" / "music.txt", "r") as f:
     music_list = f.read().splitlines()
@@ -8,7 +7,7 @@ MUSIC = [m for m in music_list if not m.startswith('#')]
 
 
 # TODO: Fix any case where music might not play in a level. Also try to get non-mission songs to play
-def randomizeMusic(thread, msn: str, zs_data: SARC) -> None:
+def randomizeMusic(rng, msn: str, zs_data: SARC) -> None:
     """Assigns a new BGM to the level
 
     The music stays relative to the level type (e.g. boss songs in bosses)"""
@@ -33,7 +32,7 @@ def randomizeMusic(thread, msn: str, zs_data: SARC) -> None:
                     'BGM_Mission_Stage_Rocket_02',
                     'BGM_Mission_Stage_Rocket_03',
                     'BGM_Mission_Stage_Rocket_04')
-        new_bgm = random.choice(bgms)
+        new_bgm = rng.choice(bgms)
         bgm_data.info['SceneSpecificBgm'] = new_bgm
         # if 'Rocket' in new_bgm:
         #     bgm_data.info['MainController'] = {}

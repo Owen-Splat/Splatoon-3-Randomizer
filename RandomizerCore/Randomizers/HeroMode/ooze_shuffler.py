@@ -1,8 +1,7 @@
 from RandomizerCore.Tools.zs_tools import BYAML
-import random
 
 
-def shuffleCosts(banc: BYAML) -> None:
+def shuffleCosts(rng, banc: BYAML) -> None:
     """Randomizes the amount of power eggs to clear each fuzzy ooze"""
 
     # Instead of completely random prices, we want to shuffle the vanilla prices
@@ -15,4 +14,4 @@ def shuffleCosts(banc: BYAML) -> None:
     for act in banc.info['Actors']:
         if act['Name'].startswith('KebaInkCore'):
             act['spl__KebaInkCoreBancParam']['NecessarySalmonRoe'] =\
-                ooze_costs[random.randrange(len(ooze_costs))]
+                ooze_costs[rng.randrange(len(ooze_costs))]

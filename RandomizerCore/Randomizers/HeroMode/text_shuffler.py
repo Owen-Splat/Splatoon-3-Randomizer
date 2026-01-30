@@ -1,6 +1,5 @@
 from RandomizerCore.Tools.zs_tools import SARC
 from RandomizerCore.Tools import text_tools
-import random
 
 
 # TODO: Could be cool to have an option to google translate the text
@@ -30,7 +29,7 @@ def randomizeText(thread) -> None:
         text_entries = []
         for text_file in mission_text_files:
             text_entries.extend(text_tools.getText(zs_data.writer.files[text_file]))
-        random.shuffle(text_entries)
+        thread.rng.shuffle(text_entries)
         for text_file in mission_text_files:
             zs_data.writer.files[text_file] = text_tools.randomizeText(zs_data.writer.files[text_file], text_entries)
 

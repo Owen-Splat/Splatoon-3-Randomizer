@@ -1,6 +1,6 @@
 from RandomizerCore.Tools.zs_tools import BYAML
 from randomizer_paths import DATA_PATH
-import random, time
+import time
 
 with open(DATA_PATH / "HeroMode" / "missions.txt", "r") as f:
     MISSIONS = f.read().splitlines()
@@ -29,22 +29,22 @@ def randomizeLevels(thread) -> dict:
     c_levels = [c for c in crater_missions if c not in levels]
     a_levels = [a for a in alterna_missions if a not in levels]
     b_levels = [b for b in a_levels if b.endswith('King')]
-    random.shuffle(c_levels)
-    random.shuffle(a_levels)
-    random.shuffle(b_levels)
+    thread.rng.shuffle(c_levels)
+    thread.rng.shuffle(a_levels)
+    thread.rng.shuffle(b_levels)
 
     for msn in crater_missions:
         if not thread.thread_active:
             break
         if msn in levels:
             continue
-        new_level = random.choice(c_levels)
+        new_level = thread.rng.choice(c_levels)
         c_levels.remove(new_level)
         levels[msn] = new_level
     
     boss_sites = []
     while b_levels:
-        new_level = random.choice(a_levels)
+        new_level = thread.rng.choice(a_levels)
         if new_level in levels or new_level[6] in boss_sites:
             continue
         boss_sites.append(new_level[6])
@@ -57,7 +57,7 @@ def randomizeLevels(thread) -> dict:
             break
         if msn in levels:
             continue
-        new_level = random.choice(a_levels)
+        new_level = thread.rng.choice(a_levels)
         a_levels.remove(new_level)
         levels[msn] = new_level
 

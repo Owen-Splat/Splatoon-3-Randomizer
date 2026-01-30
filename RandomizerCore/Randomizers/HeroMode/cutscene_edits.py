@@ -1,7 +1,6 @@
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
 from RandomizerCore.Tools import event_tools
 from randomizer_paths import DATA_PATH
-import random
 
 with open(DATA_PATH / "HeroMode" / "cutscenes.txt", "r") as f:
     cutscene_list = f.read().splitlines()

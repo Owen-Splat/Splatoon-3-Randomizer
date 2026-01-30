@@ -3,11 +3,9 @@ from RandomizerCore.Randomizers.HeroMode import (background_shuffler,
 collectable_shuffler, color_shuffler, cutscene_edits, enemy_shuffler,
 level_shuffler, music_shuffler, ooze_shuffler, text_shuffler,
 upgrade_shuffler, weapon_shuffler)
-from pathlib import Path
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
-import RandomizerCore.Tools.event_tools as event_tools
-import RandomizerCore.Tools.text_tools as text_tools
-import copy, oead, random, time, traceback
+from pathlib import Path
+import oead, random, time, traceback
 
 
 
@@ -19,10 +17,10 @@ class HeroMode_Process(QtCore.QThread):
 
     def __init__(self, parent, settings: dict):
         QtCore.QThread.__init__(self, parent)
-        self.rom_path = Path(settings['RomFS'])
-        self.out_dir = Path(settings['Output'])
-        random.seed(settings['Seed'])
-        self.settings = dict(settings['HeroMode'])
+        self.rom_path = Path(settings["RomFS"])
+        self.out_dir = Path(settings["Output"])
+        self.rng = random.Random(settings["Seed"])
+        self.settings = dict(settings["HeroMode"])
         self.thread_active = True
 
 
@@ -61,6 +59,10 @@ class HeroMode_Process(QtCore.QThread):
             self.is_done.emit()
 
 
+    # TODO: We will need this for randomizing Side Order as well to check valid weapons
+    # There will probably be other general functions we will need as well
+    # e.g. Streamlined Read/Write functions with automatic error handling
+    # These functions/scripts will be in the root RandomizerCore/Randomizers folder
     def getGameVersion(self) -> str:
         """Get the version string from the RSDB folder in the RomFS
 
@@ -93,7 +95,7 @@ class HeroMode_Process(QtCore.QThread):
                 zs_data = SARC(f.read())
 
             if self.settings['Backgrounds']:
-                background_shuffler.randomizeBackground(self, msn, zs_data)
+                background_shuffler.randomizeBackground(self.rng, msn, zs_data)
 
             if msn in ('BigWorld', 'SmallWorld'):
                 self.editHubs(msn, zs_data)
@@ -107,7 +109,7 @@ class HeroMode_Process(QtCore.QThread):
 
             if self.settings['Ink Colors']:
                 mission_data.info['TeamColor'] =\
-                    f"Work/Gyml/{color_shuffler.getRandomColor()}.game__gfx__parameter__TeamColorDataSet.gyml"
+                    f"Work/Gyml/{color_shuffler.getRandomColor(self.rng)}.game__gfx__parameter__TeamColorDataSet.gyml"
 
             if self.settings['Enemy Ink Is Lava'] and mission_data.info['MapType'].endswith('Stage'):
                 self.addChallenges(mission_data)
@@ -120,7 +122,7 @@ class HeroMode_Process(QtCore.QThread):
 
             # scene bgm
             if self.settings['Music']:
-                music_shuffler.randomizeMusic(self, msn, zs_data)
+                music_shuffler.randomizeMusic(self.rng, msn, zs_data)
 
             if self.settings['Skip Cutscenes']:
                 cutscene_edits.removeCutscenes(zs_data)
@@ -142,10 +144,10 @@ class HeroMode_Process(QtCore.QThread):
             level_shuffler.changeKettleDestinations(banc, self.levels)
 
         if msn == 'BigWorld' and self.settings['Fuzzy Ooze Costs']:
-            ooze_shuffler.shuffleCosts(banc)
+            ooze_shuffler.shuffleCosts(self.rng, banc)
 
         if self.settings['Collectables']:
-            collectable_shuffler.randomizeCollectables(banc)
+            collectable_shuffler.randomizeCollectables(self.rng, banc)
 
         zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
 
@@ -223,7 +225,7 @@ class HeroMode_Process(QtCore.QThread):
         #     zs_data.writer.files[table_file] = stage_table.repack()
 
         if self.settings['Hero Gear Upgrades']:
-            upgrade_shuffler.randomizeUpgrades(zs_data)
+            upgrade_shuffler.randomizeUpgrades(self.rng, zs_data)
 
         if self.settings['Skip Cutscenes']:
             cutscene_edits.addSkipButton(zs_data)
