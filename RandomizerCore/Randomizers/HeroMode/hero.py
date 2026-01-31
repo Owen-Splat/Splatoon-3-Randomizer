@@ -50,11 +50,11 @@ class HeroMode_Process(QtCore.QThread):
 
             if self.settings["Text"]:
                 text_shuffler.randomizeText(self)
-        
+
         except Exception:
             er = traceback.format_exc()
             self.error.emit(er)
-        
+
         finally:
             self.is_done.emit()
 
@@ -76,6 +76,8 @@ class HeroMode_Process(QtCore.QThread):
 
     # iterate through all level files and randomize the level data
     def editLevels(self):
+        """Iterates through all the level files and makes various changes based on settings"""
+
         self.status_update.emit('Editing Hero Mode levels...')
         time.sleep(1)
 
@@ -105,7 +107,7 @@ class HeroMode_Process(QtCore.QThread):
             mission_data = BYAML(zs_data.writer.files[info_file])
 
             if self.settings['Levels']:
-                self.fixMissionCompatibility(msn, mission_data)
+                level_shuffler.fixMissionCompatibility(self.levels, msn, mission_data)
 
             if self.settings['Ink Colors']:
                 mission_data.info['TeamColor'] =\
@@ -150,28 +152,6 @@ class HeroMode_Process(QtCore.QThread):
             collectable_shuffler.randomizeCollectables(self.rng, banc)
 
         zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
-
-
-    def fixMissionCompatibility(self, msn: str, mission_data: BYAML):
-        """Remove the admission fee for levels that should be free
-
-        We dont want to lock the player out of being able to play any levels"""
-
-        if 'King' in msn or 'Boss' in msn:
-            return
-
-        freebies = (
-            self.levels['Msn_A01_01'],
-            self.levels['Msn_ExStage'],
-            self.levels['Msn_C_01'],
-            self.levels['Msn_C_02'],
-            self.levels['Msn_C_03'],
-            self.levels['Msn_C_04']
-        )
-
-        # remove admission fee for levels that should be free
-        if msn in freebies and 'Admission' in mission_data.info:
-            mission_data.info['Admission'] = oead.S32(0)
 
 
     # TODO: Eventually add random challenges (OHKO, Time Limit, etc)

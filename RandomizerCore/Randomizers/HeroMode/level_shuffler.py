@@ -1,6 +1,6 @@
 from RandomizerCore.Tools.zs_tools import BYAML
 from randomizer_paths import DATA_PATH
-import time
+import oead, time
 
 with open(DATA_PATH / "HeroMode" / "missions.txt", "r") as f:
     MISSIONS = f.read().splitlines()
@@ -71,3 +71,25 @@ def changeKettleDestinations(banc: BYAML, levels: dict) -> None:
         if act['Name'] in ('MissionGateway', 'MissionGatewayChallenge', 'MissionBossGateway'):
             scene = act['spl__MissionGatewayBancParam']['ChangeSceneName']
             act['spl__MissionGatewayBancParam']['ChangeSceneName'] = levels[scene]
+
+
+def fixMissionCompatibility(levels: dict, msn: str, mission_data: BYAML):
+    """Remove the admission fee for levels that should be free
+
+    We dont want to lock the player out of being able to play any levels"""
+
+    if 'King' in msn or 'Boss' in msn:
+        return
+
+    freebies = (
+        levels['Msn_A01_01'],
+        levels['Msn_ExStage'],
+        levels['Msn_C_01'],
+        levels['Msn_C_02'],
+        levels['Msn_C_03'],
+        levels['Msn_C_04']
+    )
+
+    # remove admission fee for levels that should be free
+    if msn in freebies and 'Admission' in mission_data.info:
+        mission_data.info['Admission'] = oead.S32(0)
