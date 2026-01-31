@@ -1,11 +1,9 @@
 from PySide6 import QtCore
-from RandomizerCore.Randomizers.HeroMode import (background_shuffler,
-collectable_shuffler, color_shuffler, cutscene_edits, enemy_shuffler,
-level_shuffler, music_shuffler, ooze_shuffler, text_shuffler,
-upgrade_shuffler, weapon_shuffler)
-from RandomizerCore.Tools.zs_tools import BYAML, SARC
+from RandomizerCore.Randomizers import common
+from RandomizerCore.Randomizers.HeroMode import *
+# from RandomizerCore.Tools.zs_tools import BYAML, SARC
 from pathlib import Path
-import oead, random, time, traceback
+import random, time, traceback
 
 
 
@@ -35,7 +33,7 @@ class HeroMode_Process(QtCore.QThread):
             (self.out_dir / 'Mals').mkdir(parents=True, exist_ok=True)
 
             # Store the game version based on the provided romfs
-            self.version = self.getGameVersion()
+            self.version = common.getGameVersion(self.rom_path)
 
             # makes a dict of old levels and the new level that will replace it
             self.levels = {}
@@ -61,21 +59,6 @@ class HeroMode_Process(QtCore.QThread):
             self.is_done.emit()
 
 
-    # TODO: We will need this for randomizing Side Order as well to check valid weapons
-    # There will probably be other general functions we will need as well
-    # e.g. Streamlined Read/Write functions with automatic error handling
-    # These functions/scripts will be in the root RandomizerCore/Randomizers folder
-    def getGameVersion(self) -> str:
-        """Get the version string from the RSDB folder in the RomFS
-
-        In the case of the user having dumped multiple updates into the same directory, get the highest one"""
-
-        rsdb_path = self.rom_path / "RSDB"
-        markers = [int(f.stem.split('.')[2], 16) for f in rsdb_path.iterdir() if f.stem.startswith("ActorInfo")]
-        version_string = hex(max(markers))[2:].lower()
-        return version_string
-
-
     # iterate through all level files and randomize the level data
     def editLevels(self) -> None:
         """Iterates through all the level files and makes various changes based on settings"""
@@ -83,30 +66,30 @@ class HeroMode_Process(QtCore.QThread):
         self.status_update.emit('Editing Hero Mode levels...')
         time.sleep(1)
 
-        ui_info_file = [f.name for f in (self.rom_path / 'RSDB').iterdir() if f.name.startswith('MissionMapInfo') and f.name.split('.')[2] == self.version][0]
-        with open(self.rom_path / 'RSDB' / ui_info_file, 'rb') as f:
-            ui_missions_data = BYAML(f.read(), compressed=True)
+        info_name, ui_info_file = common.loadRSDB(self.rom_path, "MissionMapInfo")
 
-        missions = [f.name for f in (self.rom_path / 'Pack' / 'Scene').iterdir() if f.name.startswith('Msn_')
-                    or f.name.split('.', 1)[0] in ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
+        missions = [f.name for f in (self.rom_path / 'Pack' / 'Scene').iterdir()
+                    if f.name.startswith('Msn_')
+                    or f.name.split('.', 1)[0] in
+                    ('BigWorld', 'SmallWorld', 'LaunchPadWorld', 'LastBoss', 'LastBoss02')]
+
         for m in missions:
             if not self.thread_active:
                 break
 
             msn = m.split('.', 1)[0]
 
-            with open(self.rom_path / 'Pack' / 'Scene' / m, 'rb') as f:
-                zs_data = SARC(f.read())
+            level_sarc = common.loadScene(self.rom_path, m)
 
             if self.settings['Backgrounds']:
-                background_shuffler.randomizeBackground(self.rng, msn, zs_data)
+                background_shuffler.randomizeBackground(self.rng, msn, level_sarc)
 
             if msn in ('BigWorld', 'SmallWorld'):
-                self.editHubs(msn, zs_data)
+                self.editHubs(msn, level_sarc)
 
             # mission info
-            info_file = f'SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml'
-            mission_data = BYAML(zs_data.writer.files[info_file])
+            file_path = f"SceneComponent/MissionMapInfo/{msn}.spl__MissionMapInfo.bgyml"
+            mission_data: common.BYAML = common.loadFromSarc(level_sarc, file_path)
 
             if self.settings['Levels']:
                 level_shuffler.fixMissionCompatibility(self.levels, msn, mission_data)
@@ -120,33 +103,33 @@ class HeroMode_Process(QtCore.QThread):
 
             has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
             if has_weapons and self.settings['Weapons']:
-                weapon_shuffler.editWeaponChoices(self, msn, mission_data, ui_missions_data)
+                weapon_shuffler.editWeaponChoices(self, msn, mission_data, ui_info_file)
 
-            zs_data.writer.files[info_file] = mission_data.repack()
+            common.saveToSarc(level_sarc, file_path, mission_data.repack())
 
             # scene bgm
             if self.settings['Music']:
-                music_shuffler.randomizeMusic(self.rng, msn, zs_data)
+                music_shuffler.randomizeMusic(self.rng, msn, level_sarc)
 
             if self.settings['Skip Cutscenes']:
-                cutscene_edits.removeCutscenes(zs_data)
+                cutscene_edits.removeCutscenes(level_sarc)
 
             if self.settings['Enemies'] or self.settings['Enemy Sizes']:
-                enemy_shuffler.randomizeEnemies(self, zs_data)
+                enemy_shuffler.randomizeEnemies(self, level_sarc)
 
             with open(self.out_dir / 'Pack' / 'Scene' / m, 'wb') as f:
-                f.write(zs_data.repack())
+                f.write(level_sarc.repack())
 
-        with open(self.out_dir / 'RSDB' / ui_info_file, 'wb') as f:
-            f.write(ui_missions_data.repack())
+        common.saveRSDB(self.out_dir, info_name, ui_info_file)
 
 
-    def editHubs(self, msn: str, zs_data: SARC) -> None:
+    def editHubs(self, msn: str, hub_sarc: common.SARC) -> None:
         """Makes changes to the hub worlds
 
         This includes changing kettle destinations, ooze costs, and collectables"""
 
-        banc = BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
+        file_path = f"Banc/{msn}.bcett.byml"
+        banc = common.loadFromSarc(hub_sarc, file_path)
 
         if self.settings['Levels']:
             level_shuffler.changeKettleDestinations(banc, self.levels)
@@ -157,12 +140,12 @@ class HeroMode_Process(QtCore.QThread):
         if self.settings['Collectables']:
             collectable_shuffler.randomizeCollectables(self.rng, banc)
 
-        zs_data.writer.files[f'Banc/{msn}.bcett.byml'] = banc.repack()
+        common.saveToSarc(hub_sarc, file_path, banc.repack())
 
 
     # TODO: Eventually add random challenges (OHKO, Time Limit, etc)
     # Having reasonable time limits would require extra logic
-    def addChallenges(self, mission_data: BYAML) -> None:
+    def addChallenges(self, mission_data: common.BYAML) -> None:
         """Adds the 'Enemy Ink Is Lava' challenge parameter to every level"""
 
         if 'ChallengeParamArray' in mission_data.info:
@@ -185,14 +168,7 @@ class HeroMode_Process(QtCore.QThread):
         if not self.settings['Hero Gear Upgrades'] and not self.settings['Skip Cutscenes']:
             return
 
-        singleton_files = [f.name for f in (self.rom_path / 'Pack').iterdir() if f.name.startswith('SingletonParam')]
-        if not singleton_files:
-            return
-
-        for f in singleton_files: # if there is a SingletonParam_v700 or higher, use that
-            param_file = f
-        with open(self.rom_path / 'Pack' / param_file, 'rb') as f:
-            zs_data = SARC(f.read())
+        file_name, param_sarc = common.loadSingletonParams(self.rom_path)
 
         # So currently using the map only allows you to jump to kettles that happen to be in their original site
         # I thought this would fix that, but nope
@@ -211,13 +187,12 @@ class HeroMode_Process(QtCore.QThread):
         #     zs_data.writer.files[table_file] = stage_table.repack()
 
         if self.settings['Hero Gear Upgrades']:
-            upgrade_shuffler.randomizeUpgrades(self.rng, zs_data)
+            upgrade_shuffler.randomizeUpgrades(self.rng, param_sarc)
 
         if self.settings['Skip Cutscenes']:
-            cutscene_edits.addSkipButton(zs_data)
+            cutscene_edits.addSkipButton(param_sarc)
 
-        with open(self.out_dir / 'Pack' / param_file, 'wb') as f:
-            f.write(zs_data.repack())
+        common.saveSingletonParams(self.out_dir, file_name, param_sarc)
 
 
     # STOP THREAD
