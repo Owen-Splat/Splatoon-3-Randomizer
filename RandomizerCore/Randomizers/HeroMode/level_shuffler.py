@@ -73,7 +73,7 @@ def changeKettleDestinations(banc: BYAML, levels: dict) -> None:
             act['spl__MissionGatewayBancParam']['ChangeSceneName'] = levels[scene]
 
 
-def fixMissionCompatibility(levels: dict, msn: str, mission_data: BYAML):
+def fixMissionCompatibility(levels: dict, msn: str, mission_data: BYAML) -> None:
     """Remove the admission fee for levels that should be free
 
     We dont want to lock the player out of being able to play any levels"""

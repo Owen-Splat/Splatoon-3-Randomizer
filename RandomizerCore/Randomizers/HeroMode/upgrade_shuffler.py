@@ -6,6 +6,8 @@ with open(DATA_PATH / "HeroMode" / "upgrades.txt", "r") as f:
 
 
 def randomizeUpgrades(rng, zs_data: SARC) -> None:
+    """Shuffles the hero upgrades around"""
+
     skills = UPGRADES.copy()
     rng.shuffle(skills)
     skill_file = 'Gyml/Singleton/spl__MissionConstant.spl__MissionConstant.bgyml'

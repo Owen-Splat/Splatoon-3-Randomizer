@@ -10,12 +10,14 @@ import oead, random, time, traceback
 
 
 class HeroMode_Process(QtCore.QThread):
+    """The thread for editing files relating to Hero Mode"""
+
     status_update = QtCore.Signal(str)
     error = QtCore.Signal(str)
     is_done = QtCore.Signal()
 
 
-    def __init__(self, parent, settings: dict):
+    def __init__(self, parent, settings: dict) -> None:
         QtCore.QThread.__init__(self, parent)
         self.rom_path = Path(settings["RomFS"])
         self.out_dir = Path(settings["Output"])
@@ -75,7 +77,7 @@ class HeroMode_Process(QtCore.QThread):
 
 
     # iterate through all level files and randomize the level data
-    def editLevels(self):
+    def editLevels(self) -> None:
         """Iterates through all the level files and makes various changes based on settings"""
 
         self.status_update.emit('Editing Hero Mode levels...')
@@ -139,7 +141,11 @@ class HeroMode_Process(QtCore.QThread):
             f.write(ui_missions_data.repack())
 
 
-    def editHubs(self, msn, zs_data: SARC):
+    def editHubs(self, msn: str, zs_data: SARC) -> None:
+        """Makes changes to the hub worlds
+
+        This includes changing kettle destinations, ooze costs, and collectables"""
+
         banc = BYAML(zs_data.writer.files[f'Banc/{msn}.bcett.byml'])
 
         if self.settings['Levels']:
@@ -156,7 +162,7 @@ class HeroMode_Process(QtCore.QThread):
 
     # TODO: Eventually add random challenges (OHKO, Time Limit, etc)
     # Having reasonable time limits would require extra logic
-    def addChallenges(self, mission_data: BYAML):
+    def addChallenges(self, mission_data: BYAML) -> None:
         """Adds the 'Enemy Ink Is Lava' challenge parameter to every level"""
 
         if 'ChallengeParamArray' in mission_data.info:
@@ -173,7 +179,7 @@ class HeroMode_Process(QtCore.QThread):
             mission_data.info['ChallengeParamArray'] = [{'Type': 'DamageSuddenDeath'}]
 
 
-    def updateMissionParameters(self):
+    def updateMissionParameters(self) -> None:
         """Update parameters regarding upgrades and cutscenes"""
 
         if not self.settings['Hero Gear Upgrades'] and not self.settings['Skip Cutscenes']:
@@ -215,5 +221,9 @@ class HeroMode_Process(QtCore.QThread):
 
 
     # STOP THREAD
-    def stop(self):
+    def stop(self) -> None:
+        """Overrides the QThread.stop() method to set the thread_active variable to False
+
+        This variable is used to break loops when the user tries to close the window"""
+
         self.thread_active = False

@@ -7,6 +7,8 @@ with open(DATA_PATH / "HeroMode" / "collectables.yml", "r") as f:
 
 
 def randomizeCollectables(rng, banc: BYAML) -> None:
+    """Iterates through the actor list to change the type and index of collectables"""
+
     item_names = [k for k in COLLECTABLES]
     items = []
     for item in item_names:

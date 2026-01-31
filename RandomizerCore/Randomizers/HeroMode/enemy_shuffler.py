@@ -8,6 +8,8 @@ ENEMIES = [e for e in enemy_list if not e.startswith('#')]
 
 
 def randomizeEnemies(thread, zs_data: SARC) -> None:
+    """Iterates through the list of actors and edits the type and/or size of enemies"""
+
     banc_file = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bcett.byml')][0]
     banc = BYAML(zs_data.writer.files[banc_file])
     for act in banc.info['Actors']:

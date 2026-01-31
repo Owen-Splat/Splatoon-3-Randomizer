@@ -28,12 +28,14 @@ def addSkipButton(zs_data: SARC) -> None:
     zs_data.writer.files[skip_file] = skip_table.repack()
 
 
-def skipCutscene(flow, before, after):
+def skipCutscene(flow, before, after) -> bytes:
+    """Edits the flowchart to skip events and returns the data"""
+
     event_tools.insertEventAfter(flow.flowchart, before, after)
     return event_tools.writeFlow(flow)
 
 
-def removeCutscenes(zs_data: SARC):
+def removeCutscenes(zs_data: SARC) -> None:
     """Most cutscenes we allow to be skipped through a DemoSkipTable. But some either don't work or give issues.
 
     Lots of levels contain the same data embedded in them, in which the first one loaded is cached.
