@@ -1,6 +1,7 @@
 from RandomizerCore.Tools.zs_tools import BYAML
+from RandomizerCore.Randomizers import common
 from randomizer_paths import DATA_PATH
-import time, yaml
+import oead, time, yaml
 
 with open(DATA_PATH / "weapons.yml", "r") as f:
     WEAPONS = yaml.safe_load(f)
@@ -9,17 +10,7 @@ with open(DATA_PATH / "HeroMode" / "logic.yml", "r") as f:
     LOGIC = yaml.safe_load(f)
 
 
-def randomizeWeapons(thread) -> dict:
-    """Creates a dict of levels and weapon choices. Each level is given 3 choices in increasing difficulty
-
-    Currently, the difficulty is just the weapon type (main, sub, special)"""
-
-    # Update the ui status and add a slight delay so that the user has time to read it
-    thread.status_update.emit("Randomizing weapons...")
-    time.sleep(1)
-
-    weapon_placements = {}
-
+def getValidMainWeapons(thread) -> list[str]:
     # Now get the season corresponding to the version. This is just the major version marker besides 1.0.0 which is season 0
     match thread.version:
         case "100":
@@ -33,6 +24,22 @@ def randomizeWeapons(thread) -> dict:
     for season in valid_seasons:
         for weapon in WEAPONS['Main_Weapons'][season]:
             main_weapons_list.append(weapon)
+
+    return main_weapons_list
+
+
+def randomizeWeapons(thread, hero_weapons: list[str]) -> dict:
+    """Creates a dict of levels and weapon choices. Each level is given 3 choices"""
+
+    # Update the ui status and add a slight delay so that the user has time to read it
+    thread.status_update.emit("Randomizing weapons...")
+    time.sleep(1)
+
+    weapon_placements = {}
+
+    main_weapons_list = getValidMainWeapons(thread)
+    for wep in hero_weapons:
+        main_weapons_list.remove(wep)
 
     # Now for each level in the logic file, randomly assign 3 weapon choices in increasing difficulty
     # If any are not valid for the given level, reroll
@@ -191,6 +198,10 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
     return result
 
 
+# TODO: Add zipcaster to levels that need it
+# We will eventually add objects to zipcaster/inkjet levels so any weapon can beat it
+# Right now, any weapon is valid in zipcaster levels since the zipcaster beats them by itself
+# Once we edit these special levels, we will need to add proper logic
 def editWeaponChoices(thread, mission_name: str, mission_data: BYAML, ui_missions_data: BYAML) -> None:
     """Edits the weapon choices in the mission data to the new randomized weapons
 
@@ -247,3 +258,27 @@ def editWeaponChoices(thread, mission_name: str, mission_data: BYAML, ui_mission
         if 'MapNameLabel' in info:
             if info['MapNameLabel'] == mission_data.info['MapNameLabel']:
                 info['OctaSupplyWeaponInfoArray'] = mission_data.info['OctaSupplyWeaponInfoArray']
+
+
+def randomizeHeroWeapons(thread) -> list[str]:
+    """Deletes the hero weapon entries and assigns their IDs to random weapons.
+
+    The weapons are then returned so that they are not used for level weapons"""
+
+    file_name, weapons_info = common.loadRSDB(thread.rom_path, "WeaponInfoMain")
+
+    hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
+
+    for entry in reversed(weapons_info.info):
+        if entry["Id"] in hero_ids:
+            del entry
+
+    weps = []
+    hero_weps: list[str] = thread.rng.sample(getValidMainWeapons(thread), 3)
+    for entry in weapons_info.info:
+        if entry["__RowId"] in hero_weps:
+            entry["Id"] = hero_ids.pop(0)
+            weps.append(entry["__RowId"])
+
+    common.saveRSDB(thread.out_dir, file_name, weapons_info)
+    return weps
