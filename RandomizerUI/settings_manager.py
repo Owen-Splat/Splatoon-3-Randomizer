@@ -81,7 +81,7 @@ class SettingsManager:
         if len(seed) > 32:
             seed = seed[:32]
         else:
-            if not self.saving:
+            if (seed == "") and (not self.saving):
                 random.seed()
                 seed = str(random.getrandbits(32))
 
