@@ -37,23 +37,23 @@ class HeroMode_Process(QtCore.QThread):
 
             # makes a dict of old levels and the new level that will replace it
             self.levels = {}
-            if self.settings['Levels']:
+            if self.settings['Levels'] and self.thread_active:
                 self.levels = level_shuffler.randomizeLevels(self)
 
             # makes a dict of levels and weapon choices
             # each level is given 3 choices in increasing difficulty
             self.weapon_placements = {}
-            if self.settings['Weapons']:
+            if self.settings['Weapons'] and self.thread_active:
                 hero_weapons = weapon_shuffler.randomizeHeroWeapons(self)
                 self.weapon_placements = weapon_shuffler.randomizeWeapons(self, hero_weapons)
 
-            self.editLevels()
-            self.updateMissionParameters()
+            if self.thread_active: self.editLevels()
+            if self.thread_active: self.updateMissionParameters()
 
-            if self.settings["Hero Clothes"]:
+            if self.settings["Hero Clothes"] and self.thread_active:
                 clothes_shuffler.randomizeClothes(self)
 
-            if self.settings["Text"]:
+            if self.settings["Text"] and self.thread_active:
                 text_shuffler.randomizeText(self)
 
         except Exception:
