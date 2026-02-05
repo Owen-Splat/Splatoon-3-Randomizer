@@ -99,7 +99,7 @@ class SettingsManager:
             'Seed': seed,
             'Platform': self.window.ui.findComboBox("PlatformBox").currentText()[9:].strip(),
             'HeroMode': {},
-            # 'SideOrder': {}
+            'SideOrder': {}
         }
 
         hm_tab = self.window.ui.findTab("HeroModeTab")

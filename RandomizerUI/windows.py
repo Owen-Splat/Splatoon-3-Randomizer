@@ -137,27 +137,19 @@ class ProgressWindow(QMainWindow):
         self.mods_error = False
         self.mods_done = False
         self.settings = settings
-        self.randomize_hm = False
-        self.randomize_so = False
 
         # remove any old files if generating a new one with the same seed
-        self.base_out_dir = Path(str(settings['Output']).split(settings['Seed'])[0] + settings['Seed'])
+        self.base_out_dir = Path(str(settings["Output"]).split(settings["Seed"])[0] + settings["Seed"])
         if self.base_out_dir.exists():
             shutil.rmtree(str(self.base_out_dir), ignore_errors=True)
 
+        # initialize the core randomizer object
+        self.core = RandomizersCore(self, settings)
+
         # start mod threads for each mode that the user has selected options for
-        if any([v for k,v in settings['HeroMode'].items()]):
-            self.randomize_hm = True
-            self.mods_process = RandomizersCore(self, settings) #HeroMode_Process(self, settings)
-            self.mods_process.randomizeHeroMode()
-            # self.startModProcess()
-
-
-    def startModProcess(self) -> None:
-        self.mods_process.status_update.connect(self.updateStatus)
-        self.mods_process.error.connect(self.modsError)
-        self.mods_process.is_done.connect(self.modsDone)
-        self.mods_process.start() # start the work thread
+        self.randomizing_hm = self.core.randomizeHeroMode()
+        if not self.randomizing_hm:
+            self.core.randomizeSideOrder()
 
 
     # receives the string signal as a parameter named status
@@ -191,9 +183,11 @@ class ProgressWindow(QMainWindow):
             self.close()
             return
 
-        # if isinstance(self.mods_process, HeroMode_Process) and self.randomize_so:
-        #     pass # will start side order process once it's created
-        # else:
+        if self.randomizing_hm:
+            self.randomizing_hm = False
+            if self.core.randomizeSideOrder():
+                return
+
         self.updateStatus("All done! Check the README for instructions on how to play!")
         self.ui.progress_bar.hide()
         self.ui.folder_button.show()
@@ -208,7 +202,7 @@ class ProgressWindow(QMainWindow):
             event.ignore()
             self.cancel = True
             self.ui.label.setText('Canceling...')
-            self.mods_process.stop()
+            self.core.stop()
 
 
     def openFolder(self, path):

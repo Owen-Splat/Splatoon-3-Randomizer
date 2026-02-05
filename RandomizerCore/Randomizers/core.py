@@ -6,33 +6,57 @@ from pathlib import Path
 
 
 class RandomizersCore(QObject):
-    """A class for managing the threads for the different randomizers"""
+    """A container for managing the threads for the different randomizers
+
+    This also holds shared functions for loading and saving files"""
 
     def __init__(self, window, settings: dict) -> None:
         super().__init__(window)
         self.window = window
         self.rom_path = Path(settings["RomFS"])
         self.out_dir = Path(settings["Output"])
-        self.seed = settings["Seed"]
-        self.hm_settings = settings["HeroMode"]
-        self.so_settings = {} #settings["SideOrder"]
+        self.seed = str(settings["Seed"])
+        self.hm_settings = dict(settings["HeroMode"])
+        self.so_settings = dict(settings["SideOrder"])
         self.version = self.getGameVersion()
 
 
-    def randomizeHeroMode(self) -> None:
+    def randomizeHeroMode(self) -> bool:
+        """Starts the HeroMode_Process thread
+
+        The thread is linked to the progress window"""
+
+        if not any(v for k,v in self.hm_settings.items()):
+            return False
+
         self.current_process = HeroMode_Process(self, self.seed, self.hm_settings)
         self.current_process.status_update.connect(self.window.updateStatus)
         self.current_process.error.connect(self.window.modsError)
         self.current_process.is_done.connect(self.window.modsDone)
         self.current_process.start()
+        return True
 
 
-    def randomizeSideOrder(self) -> None:
+    def randomizeSideOrder(self) -> bool:
+        """Starts the SideOrder_Process thread
+
+        The thread is linked to the progress window"""
+
+        if not any(v for k,v in self.so_settings.items()):
+            return False
+
         self.current_process = SideOrder_Process(self, self.seed, self.so_settings)
         self.current_process.status_update.connect(self.window.updateStatus)
         self.current_process.error.connect(self.window.modsError)
         self.current_process.is_done.connect(self.window.modsDone)
         self.current_process.start()
+        return True
+
+
+    def stop(self) -> None:
+        """Tells the current thread to cancel"""
+
+        self.current_process.thread_active = False
 
 
     def getGameVersion(self) -> str:
@@ -81,6 +105,10 @@ class RandomizersCore(QObject):
 
 
     def loadFromSarc(self, sarc: SARC, file_path: str) -> BYAML:
+        """Loads a file from a SARC archive
+
+        Currently only loads BYAMLs"""
+
         match file_path.split('.')[-1]:
             case "byml" | "bgyml":
                 byaml = BYAML(sarc.writer.files[file_path])
@@ -90,4 +118,6 @@ class RandomizersCore(QObject):
 
 
     def saveToSarc(self, sarc: SARC, file_path: str, data) -> None:
+        """Saves a file to a SARC archive"""
+
         sarc.writer.files[file_path] = data.repack()
