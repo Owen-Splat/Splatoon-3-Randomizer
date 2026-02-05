@@ -11,12 +11,14 @@ with open(DATA_PATH / "HeroMode" / "logic.yml", "r") as f:
 
 
 def getValidMainWeapons(thread) -> list[str]:
+    version_string = common.getGameVersion(thread.rom_path)
+
     # Now get the season corresponding to the version. This is just the major version marker besides 1.0.0 which is season 0
-    match thread.version:
+    match version_string:
         case "100":
             season = 0
         case _: # default
-            season = int(thread.version[0], 16)
+            season = int(version_string[0], 16)
 
     # Now use the season to get all the valid weapons listed in our PARAMS file
     valid_seasons = [k for k in WEAPONS['Main_Weapons'] if int(k[-1]) <= season]
