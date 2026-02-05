@@ -1,4 +1,3 @@
-from RandomizerCore.Randomizers import common
 import oead, time
 
 
@@ -11,9 +10,9 @@ def randomizeClothes(thread) -> None:
     time.sleep(1)
 
     # load gear datasheets
-    file_name_head, head_info = common.loadRSDB(thread.rom_path, "GearInfoHead")
-    file_name_clothes, clothes_info = common.loadRSDB(thread.rom_path, "GearInfoClothes")
-    file_name_shoes, shoes_info = common.loadRSDB(thread.rom_path, "GearInfoShoes")
+    file_name_head, head_info = thread.parent().loadFile("RSDB", "GearInfoHead")
+    file_name_clothes, clothes_info = thread.parent().loadFile("RSDB", "GearInfoClothes")
+    file_name_shoes, shoes_info = thread.parent().loadFile("RSDB", "GearInfoShoes")
 
     # get a dict of key Id and value [head, clothes, shoes]
     gear_sets = {}
@@ -71,6 +70,6 @@ def randomizeClothes(thread) -> None:
             x += 1
 
     # save gear datasheets
-    common.saveRSDB(thread.out_dir, file_name_head, head_info)
-    common.saveRSDB(thread.out_dir, file_name_clothes, clothes_info)
-    common.saveRSDB(thread.out_dir, file_name_shoes, shoes_info)
+    thread.parent().saveFile("RSDB", file_name_head, head_info)
+    thread.parent().saveFile("RSDB", file_name_clothes, clothes_info)
+    thread.parent().saveFile("RSDB", file_name_shoes, shoes_info)

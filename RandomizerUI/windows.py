@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QCheckBox
 from RandomizerUI.ui import Ui_MainWindow, Ui_ProgressWindow
 from RandomizerUI.settings_manager import SettingsManager
-from RandomizerCore.Randomizers.hero import HeroMode_Process
+from RandomizerCore.Randomizers.core import RandomizersCore
 from randomizer_paths import *
 from pathlib import Path
 import random, shutil
@@ -148,8 +148,9 @@ class ProgressWindow(QMainWindow):
         # start mod threads for each mode that the user has selected options for
         if any([v for k,v in settings['HeroMode'].items()]):
             self.randomize_hm = True
-            self.mods_process = HeroMode_Process(self, settings)
-            self.startModProcess()
+            self.mods_process = RandomizersCore(self, settings) #HeroMode_Process(self, settings)
+            self.mods_process.randomizeHeroMode()
+            # self.startModProcess()
 
 
     def startModProcess(self) -> None:
@@ -190,13 +191,13 @@ class ProgressWindow(QMainWindow):
             self.close()
             return
 
-        if isinstance(self.mods_process, HeroMode_Process) and self.randomize_so:
-            pass # will start side order process once it's created
-        else:
-            self.updateStatus("All done! Check the README for instructions on how to play!")
-            self.ui.progress_bar.hide()
-            self.ui.folder_button.show()
-            self.done = True
+        # if isinstance(self.mods_process, HeroMode_Process) and self.randomize_so:
+        #     pass # will start side order process once it's created
+        # else:
+        self.updateStatus("All done! Check the README for instructions on how to play!")
+        self.ui.progress_bar.hide()
+        self.ui.folder_button.show()
+        self.done = True
 
 
     # override the window close event to close the randomization thread

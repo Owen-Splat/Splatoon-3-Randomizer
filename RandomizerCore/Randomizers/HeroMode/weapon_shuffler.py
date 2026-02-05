@@ -1,5 +1,4 @@
 from RandomizerCore.Tools.zs_tools import BYAML
-from RandomizerCore.Randomizers import common
 from randomizer_paths import DATA_PATH
 import oead, time, yaml
 
@@ -11,7 +10,7 @@ with open(DATA_PATH / "HeroMode" / "logic.yml", "r") as f:
 
 
 def getValidMainWeapons(thread) -> list[str]:
-    version_string = common.getGameVersion(thread.rom_path)
+    version_string = thread.parent().version
 
     # Now get the season corresponding to the version. This is just the major version marker besides 1.0.0 which is season 0
     match version_string:
@@ -267,7 +266,7 @@ def randomizeHeroWeapons(thread) -> list[str]:
 
     The weapons are then returned so that they are not used for level weapons"""
 
-    file_name, weapons_info = common.loadRSDB(thread.rom_path, "WeaponInfoMain")
+    file_name, weapons_info = thread.parent().loadFile("RSDB", "WeaponInfoMain")
 
     hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
 
@@ -282,5 +281,5 @@ def randomizeHeroWeapons(thread) -> list[str]:
             entry["Id"] = hero_ids.pop(0)
             weps.append(entry["__RowId"])
 
-    common.saveRSDB(thread.out_dir, file_name, weapons_info)
+    thread.parent().saveFile("RSDB", file_name, weapons_info)
     return weps
