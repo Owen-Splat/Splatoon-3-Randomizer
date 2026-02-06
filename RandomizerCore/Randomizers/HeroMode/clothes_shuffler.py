@@ -5,10 +5,6 @@ import oead, time
 def randomizeClothes(thread) -> None:
     """Randomizes the hero clothes and armor into matching sets"""
 
-    # Update the ui status and add a slight delay so that the user has time to read it
-    thread.status_update.emit("Randomizing hero clothes...")
-    time.sleep(1)
-
     # load gear datasheets
     file_name_head, head_info = thread.parent().loadFile("RSDB", "GearInfoHead")
     file_name_clothes, clothes_info = thread.parent().loadFile("RSDB", "GearInfoClothes")

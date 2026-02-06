@@ -203,7 +203,7 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
 # We will eventually add objects to zipcaster/inkjet levels so any weapon can beat it
 # Right now, any weapon is valid in zipcaster levels since the zipcaster beats them by itself
 # Once we edit these special levels, we will need to add proper logic
-def editWeaponChoices(thread, mission_name: str, mission_data: BYAML, ui_missions_data: BYAML) -> None:
+def editWeaponChoices(thread, mission_name: str, mission_data: BYAML) -> None:
     """Edits the weapon choices in the mission data to the new randomized weapons
 
     The mission weapon data is then copied over to the ui mission data.
@@ -255,18 +255,19 @@ def editWeaponChoices(thread, mission_name: str, mission_data: BYAML, ui_mission
         if sub_weapon == "Free":
             e["SubWeapon"] = ""
 
-    for info in ui_missions_data.info:
-        if 'MapNameLabel' in info:
-            if info['MapNameLabel'] == mission_data.info['MapNameLabel']:
-                info['OctaSupplyWeaponInfoArray'] = mission_data.info['OctaSupplyWeaponInfoArray']
+    thread.ui_missions_info[mission_name] = mission_data.info
 
 
 def randomizeHeroWeapons(thread) -> list[str]:
-    """Deletes the hero weapon entries and assigns their IDs to random weapons.
+    """Pulls 3 unique weapons to replace the hero shot and upgrades"""
 
-    The weapons are then returned so that they are not used for level weapons"""
+    return thread.rng.sample(getValidMainWeapons(thread), 3)
 
-    file_name, weapons_info = thread.parent().loadFile("RSDB", "WeaponInfoMain")
+
+def replaceHeroWeaponEntries(core, hero_weps: list[str]) -> None:
+    """Deletes the hero weapon entries and assigns their IDs to each entry in hero_weps"""
+
+    file_name, weapons_info = core.loadFile("RSDB", "WeaponInfoMain")
 
     hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
 
@@ -274,12 +275,26 @@ def randomizeHeroWeapons(thread) -> list[str]:
         if entry["Id"] in hero_ids:
             del entry
 
-    weps = []
-    hero_weps: list[str] = thread.rng.sample(getValidMainWeapons(thread), 3)
     for entry in weapons_info.info:
+        if len(hero_ids) == 0:
+            break
         if entry["__RowId"] in hero_weps:
             entry["Id"] = hero_ids.pop(0)
-            weps.append(entry["__RowId"])
 
-    thread.parent().saveFile("RSDB", file_name, weapons_info)
-    return weps
+    core.saveFile("RSDB", file_name, weapons_info)
+
+
+def editLevelWeaponUI(thread) -> None:
+    """Edits the mission info in MissionMapInfo to match the mission info inside the level SARC
+
+    This controls what displays when standing over the kettles"""
+
+    info_name, ui_info_file = thread.parent().loadFile("RSDB", "MissionMapInfo")
+
+    for msn_info in ui_info_file.info:
+        if "MapNameLabel" in thread.ui_missions_info:
+            msn_name = msn_info["MapNameLabel"]
+            msn_info = thread.ui_missions_info[msn_name]
+
+    thread.ui_missions_info.clear()
+    thread.parent().saveFile("RSDB", info_name, ui_info_file)

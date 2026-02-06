@@ -34,20 +34,17 @@ class HeroMode_Process(QtCore.QThread):
     # automatically called when this thread is started
     def run(self):
         try:
-            self.editDatasheets() # temp call to add rsdb dir
-
             if self.settings['Levels'] and self.thread_active:
                 self.levels = level_shuffler.randomizeLevels(self)
 
             if self.settings['Weapons'] and self.thread_active:
-                hero_weapons = weapon_shuffler.randomizeHeroWeapons(self)
-                self.weapon_placements = weapon_shuffler.randomizeWeapons(self, hero_weapons)
+                self.hero_weapons = weapon_shuffler.randomizeHeroWeapons(self)
+                self.weapon_placements = weapon_shuffler.randomizeWeapons(self, self.hero_weapons)
+                self.ui_missions_info = {}
 
             if self.thread_active: self.editLevels()
             if self.thread_active: self.updateMissionParameters()
-
-            if self.settings["Hero Clothes"] and self.thread_active:
-                clothes_shuffler.randomizeClothes(self)
+            if self.thread_active: self.editDatasheets()
 
             if self.settings["Text"] and self.thread_active:
                 (self.parent().out_dir / 'Mals').mkdir(parents=True, exist_ok=True)
@@ -77,8 +74,6 @@ class HeroMode_Process(QtCore.QThread):
         time.sleep(1)
 
         (self.parent().out_dir / 'Pack' / 'Scene').mkdir(parents=True, exist_ok=True)
-
-        info_name, ui_info_file = self.parent().loadFile("RSDB", "MissionMapInfo")
 
         missions = [f.name for f in (self.parent().rom_path / 'Pack' / 'Scene').iterdir()
                     if f.name.startswith('Msn_')
@@ -116,7 +111,7 @@ class HeroMode_Process(QtCore.QThread):
 
             has_weapons = True if 'OctaSupplyWeaponInfoArray' in mission_data.info else False
             if has_weapons and self.settings['Weapons']:
-                weapon_shuffler.editWeaponChoices(self, msn, mission_data, ui_info_file)
+                weapon_shuffler.editWeaponChoices(self, msn, mission_data)
 
             self.parent().saveToSarc(level_sarc, file_path, mission_data)
 
@@ -131,8 +126,6 @@ class HeroMode_Process(QtCore.QThread):
                 enemy_shuffler.randomizeEnemies(self, level_sarc)
 
             self.parent().saveFile("Pack/Scene", m, level_sarc)
-
-        self.parent().saveFile("RSDB", info_name, ui_info_file)
 
 
     def editHubs(self, msn: str, hub_sarc) -> None:
@@ -213,5 +206,19 @@ class HeroMode_Process(QtCore.QThread):
 
 
     def editDatasheets(self) -> None:
+        """Edits the datasheets in the RSDB folder"""
+
+        if not self.settings["Weapons"] and not self.settings["Hero Clothes"]:
+            return
+
+        self.status_update.emit("Editing datasheets...")
+        time.sleep(1)
+
         (self.parent().out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
 
+        if self.settings["Weapons"]:
+            weapon_shuffler.replaceHeroWeaponEntries(self.parent(), self.hero_weapons)
+            weapon_shuffler.editLevelWeaponUI(self)
+
+        if self.settings["Hero Clothes"] and self.thread_active:
+            clothes_shuffler.randomizeClothes(self)
