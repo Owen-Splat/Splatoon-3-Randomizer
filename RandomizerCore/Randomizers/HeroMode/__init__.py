@@ -208,7 +208,9 @@ class HeroMode_Process(QtCore.QThread):
     def editDatasheets(self) -> None:
         """Edits the datasheets in the RSDB folder"""
 
-        if not self.settings["Weapons"] and not self.settings["Hero Clothes"]:
+        if not any((self.settings["Weapons"],
+                    self.settings["Ink Colors"],
+                    self.settings["Hero Clothes"])):
             return
 
         self.status_update.emit("Editing datasheets...")
@@ -216,9 +218,12 @@ class HeroMode_Process(QtCore.QThread):
 
         (self.parent().out_dir / 'RSDB').mkdir(parents=True, exist_ok=True)
 
-        if self.settings["Weapons"]:
+        if self.settings["Weapons"] and self.thread_active:
             weapon_shuffler.replaceHeroWeaponEntries(self.parent(), self.hero_weapons)
             weapon_shuffler.editLevelWeaponUI(self)
+
+        if self.settings["Ink Colors"] and self.thread_active:
+            color_shuffler.editColors(self)
 
         if self.settings["Hero Clothes"] and self.thread_active:
             clothes_shuffler.randomizeClothes(self)
