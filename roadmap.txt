@@ -1,7 +1,7 @@
 v0.3
-- implement new features
+- implement randomized item drops
 
-- implement logic (will need to rewrite how levels and weapons are randomized)
+- fix some misc things with weapon randomization & how they are assigned
 
 - improve/clean old code
 
