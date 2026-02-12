@@ -19,6 +19,10 @@ def randomizeText(thread) -> None:
         mission_text_files = [str(f) for f in zs_data.reader.get_files()
                                 if str(f).startswith(('LogicMsg/', 'CommonMsg/Mission/'))
                                 or str(f).split('/')[-1].startswith(('Mission_', 'Msn_'))]
+
+        mission_text_files.remove("LayoutMsg/Msn_PointGuide_00.msbt")
+        mission_text_files.remove("LayoutMsg/Msn_Rogaining_00.msbt")
+
         for text_file in reversed(mission_text_files):
             if 'AlternaLog' in text_file:
                 mission_text_files.remove(text_file)
