@@ -20,7 +20,7 @@ def getValidMainWeapons(thread) -> list[str]:
             season = int(version_string[0], 16)
 
     # Now use the season to get all the valid weapons listed in our PARAMS file
-    valid_seasons = [k for k in WEAPONS['Main_Weapons'] if int(k[-1]) <= season]
+    valid_seasons = [k for k in WEAPONS['Main_Weapons'] if int(k.split('_')[-1]) <= season]
     main_weapons_list = []
     for season in valid_seasons:
         for weapon in WEAPONS['Main_Weapons'][season]:
@@ -271,15 +271,17 @@ def replaceHeroWeaponEntries(core, hero_weps: list[str]) -> None:
 
     hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
 
-    for entry in reversed(weapons_info.info):
+    for entry in list(weapons_info.info):
         if entry["Id"] in hero_ids:
-            del entry
+            weapons_info.info.remove(entry)
 
+    i = 0
     for entry in weapons_info.info:
-        if len(hero_ids) == 0:
+        if i > 2:
             break
         if entry["__RowId"] in hero_weps:
-            entry["Id"] = hero_ids.pop(0)
+            entry["Id"] = hero_ids[hero_weps.index(entry["__RowId"])]
+            i += 1
 
     core.saveFile("RSDB", file_name, weapons_info)
 
