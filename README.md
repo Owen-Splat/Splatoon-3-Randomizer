@@ -15,7 +15,7 @@ Please make sure that your RomFS dump matches the version that you will be playi
 ## Running from source:
 **NOTE**: This is for advanced users or those helping with the development of the randomizer.
 
-If you want to run from source, then you need to clone this repository and make sure you have Python 3.12.X installed. Due to the dependencies, earlier and later versions will not work
+If you want to run from source, then you need to clone this repository and make sure you have Python 3.12.8 installed. Due to the dependencies, earlier and later versions will not work
 
 Open the folder in a command prompt and install dependencies by running:  
 `py -3.12 -m pip install -r requirements.txt` (on Windows)  
