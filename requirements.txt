@@ -1,8 +1,8 @@
 appdirs==1.4.4
 evfl==1.2.0
 oead==1.2.9.post4
-pyinstaller~=6.15.0
-PyLibMS==3.0.9
-PySide6~=6.9.1
-PyYAML==6.0.1
-zstandard==0.23.0
+pyinstaller~=6.19.0
+PyLibMS==3.2.5
+PySide6~=6.10.2
+PyYAML==6.0.3
+zstandard==0.25.0
