@@ -3,20 +3,36 @@
 with open("./version.txt") as f:
     randomizer_version = f.read().strip()
 
+import os
+
+def createDatas(paths):
+    datas = []
+    for path in paths:
+        if '/' not in path:
+            datas.append((path, "."))
+            continue
+        for entry in os.listdir(path):
+            full_path = os.path.join(path, entry)
+            if os.path.isdir(full_path):
+                datas.extend(createDatas([full_path]))
+            else:
+                datas.append((full_path, path))
+    return datas
+
+from PyInstaller.utils.hooks import collect_data_files
+
 a = Analysis(
     ['randomizer.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('RandomizerCore/Data/parameters.yml', 'RandomizerCore/Data'),
-        ('RandomizerUI/Resources/adjectives.txt', 'RandomizerUI/Resources'),
-        ('RandomizerUI/Resources/changelog.txt', 'RandomizerUI/Resources'),
-        ('RandomizerUI/Resources/characters.txt', 'RandomizerUI/Resources'),
-        ('RandomizerUI/Resources/icon.icns', 'RandomizerUI/Resources'),
-        ('RandomizerUI/Resources/icon.ico', 'RandomizerUI/Resources'),
-        ('version.txt', '.')
+    datas=createDatas([
+        "RandomizerCore/Data",
+        "RandomizerUI/Resources",
+        "version.txt"
+    ]) + collect_data_files('lms', include_py_files=True),
+    hiddenimports=[
+        'lms.titleconfig.presets'
     ],
-    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
