@@ -8,7 +8,7 @@ def randomizeText(thread) -> None:
 
     thread.status_update.emit("Randomizing text...")
 
-    message_files = [f.name for f in (thread.parent().rom_path / 'Mals').iterdir()]
+    message_files = [f.name for f in (thread.parent().rom_path / "Mals").iterdir()]
     for file in message_files:
         if not thread.thread_active:
             break
@@ -17,16 +17,24 @@ def randomizeText(thread) -> None:
 
         # get all files that we want to edit
         mission_text_files = [str(f) for f in zs_data.reader.get_files()
-                                if str(f).startswith(('LogicMsg/', 'CommonMsg/Mission/'))
-                                or str(f).split('/')[-1].startswith(('Mission_', 'Msn_'))]
+                                if str(f).startswith(("LogicMsg/", "CommonMsg/Mission/"))
+                                or str(f).split('/')[-1].startswith(("Mission_", "Msn_"))]
 
-        mission_text_files.remove("LayoutMsg/Msn_PointGuide_00.msbt")
-        mission_text_files.remove("LayoutMsg/Msn_Rogaining_00.msbt")
+        # TODO: Keep specific label:text entries vanilla instead of the whole file
+        exclusions = (
+            "Sdodr",
+            "AlternaLog",
+            "StageName",
+            "StageInfo",
+            "PointGuide",
+            "Rogaining",
+            "MainTV",
+            "SelectWeapon",
+            # "DemoTitle" # contains a blank text entry
+        )
 
         for text_file in reversed(mission_text_files):
-            if 'AlternaLog' in text_file:
-                mission_text_files.remove(text_file)
-            if 'MissionStageName' in text_file:
+            if any(sub in text_file for sub in exclusions):
                 mission_text_files.remove(text_file)
 
         # store the messages in an array, shuffle it, then replace old messages with shuffled ones
