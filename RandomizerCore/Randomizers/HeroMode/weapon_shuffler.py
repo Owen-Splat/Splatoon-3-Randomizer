@@ -228,7 +228,7 @@ def editWeaponChoices(thread, mission_name: str, mission_data: BYAML) -> None:
                     if e['SupplyWeaponType'] == 'Hero':
                         continue
                 except KeyError:
-                    continue
+                    pass
 
             weapon = thread.weapon_placements[mission_name][i]
 
