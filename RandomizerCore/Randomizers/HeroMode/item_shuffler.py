@@ -1,6 +1,8 @@
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
-import oead
+import oead, secrets
 
+# we only include one enemy entry because it gets removed if enemies arent randomized
+# enemies get randomized after the item drops, so it will turn into a different enemy anyway
 DROPS = {
     "ItemArmor": 2,
     "ItemCanSpecial_Blower": 1,
@@ -16,21 +18,20 @@ DROPS = {
     "ItemCanSpecial_TripleTornado": 1,
     "ItemCanSpecial_UltraShot": 1,
     "ItemCanSpecial_UltraStamp": 1,
-    "ItemIkura": 2,
+    "ItemIkura": 1,
     "ItemIkuraBottle": 5,
-    "ItemIkuraLarge": 3,
+    "ItemIkuraLarge": 4,
     "ItemInkBottle": 2,
-    "EnemyBombTakopter": 2,
-    "EnemyBoostTakopter": 2,
-    "EnemyTakopter": 2,
-    "EnemyTakodozer": 2,
-    "EnemyTakoHopper": 2,
-    "EnemyTakolienVehicle": 2
+    "EnemyTakopter": 3
 }
 
 
 def randomizeItems(thread, level_sarc: SARC) -> None:
     """Iterates through the actors to find item drops and changes what drops"""
+
+    valid_drops = DROPS.copy()
+    if not thread.settings['Enemies']:
+        del valid_drops["EnemyTakopter"]
 
     # read banc file which contains the actor list
     file_path = [f.name for f in list(level_sarc.reader.get_files())
@@ -40,6 +41,8 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
     # get all the linked items to be dropped
     linked_ids = []
     for act in banc.info["Actors"]:
+        if not thread.thread_active:
+            break
         if "Links" in act:
             for link in act["Links"]:
                 if link["Name"] == "ToDropItem":
@@ -48,21 +51,104 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
     # iterate through them and change the object type
     # keys need to be left vanilla
     for act in banc.info["Actors"]:
+        if not thread.thread_active:
+            break
         if act["Hash"] not in linked_ids:
             continue
         if act["Name"] == "ItemCardKey":
             continue
-        new_item = thread.rng.choices(list(DROPS.keys()), list(DROPS.values()))[0]
-        act['Gyaml'] = new_item
-        act['Name'] = new_item
-        if new_item == 'ItemIkuraBottle':
-            act['spl__ItemIkuraBottleBancParam'] = {
-                'DropIkuraValue': oead.S32(10),
-                'DropNum': oead.S32(10)
+        new_item = thread.rng.choices(list(valid_drops.keys()), list(valid_drops.values()))[0]
+        act["Gyaml"] = new_item
+        act["Name"] = new_item
+        if new_item == "ItemIkuraBottle":
+            act["spl__ItemIkuraBottleBancParam"] = {
+                "DropIkuraValue": oead.S32(10),
+                "DropNum": oead.S32(10)
             }
 
-    # we could go through the boxes that just gives power eggs and make new drops
-    # but that can wait, lets see how it currently feels
+    # the new drop objects need unique hashes and instanceid
+    ids = {
+        "Hash": [[int(h["Hash"]) for h in banc.info["Actors"]]],
+        "SRTHash": [[int(h["SRTHash"]) for h in banc.info["Actors"]]],
+        "InstanceID": [["".join(h["InstanceID"].split('-')) for h in banc.info["Actors"]]]
+    }
+    new_drops = []
+
+    # go through the boxes that just gives power eggs and link to new hashes
+    # we could do this for balloons, but a lot float over water and would be hard to obtain
+    for act in banc.info["Actors"]:
+        if not thread.thread_active:
+            break
+        if "WoodenBox" not in act["Name"]:
+            continue
+        if "Links" in act:
+            continue
+        if thread.rng.random() < (1 / 5): # 1/5 chance of no drop
+            continue
+        act["spl__WoodenBoxBancParam"] = {} # remove egg reward
+        new_item = thread.rng.choices(list(valid_drops.keys()), list(valid_drops.values()))[0]
+        drop = DropItem(new_item, ids, thread.rng)
+        act["Links"] = [{"Name": "ToDropItem", "Dst": oead.U64(drop.hash)}]
+        act["spl__ItemDropBancParam"] = {"ToDropItem": oead.U64(drop.hash)}
+        new_drops.append(drop)
+
+    for drop in new_drops:
+        banc.info["Actors"].append(drop.pack())
 
     # save banc file
     thread.parent().saveToSarc(level_sarc, file_path, banc)
+
+
+
+class DropItem:
+    def __init__(self, name: str, ids: dict, rng):
+        self.name = name
+        self.translate = [0.0, 0.0, 0.0]
+        self.rotation = [0.0, 0.0, 0.0]
+        self.scale = [1.0, 1.0, 1.0]
+        self.team = "Neutral"
+        if name.startswith("Enemy"):
+            self.team = "Bravo"
+
+        # create unique IDs for the object
+        hash = rng.getrandbits(64)
+        while hash in ids["Hash"]:
+            hash = rng.getrandbits(64)
+        ids["Hash"].append(hash)
+        self.hash = hash
+
+        srt_hash = rng.getrandbits(32)
+        while srt_hash in ids["SRTHash"]:
+            srt_hash = rng.getrandbits(32)
+        ids["SRTHash"].append(srt_hash)
+        self.srt_hash = srt_hash
+
+        instance_id = secrets.token_hex(16)
+        while instance_id in ids["InstanceID"]:
+            instance_id = secrets.token_hex(16)
+        ids["InstanceID"].append(instance_id)
+        self.instance_id = instance_id
+
+
+    def pack(self):
+        objd = {}
+
+        objd["Name"] = self.name
+        objd["Gyaml"] = self.name
+        objd["Hash"] = oead.U64(self.hash)
+        objd["SRTHash"] = oead.U32(self.srt_hash)
+        objd["InstanceID"] = f"{self.instance_id[:8]}-{self.instance_id[8:12]}-{self.instance_id[12:16]}-{self.instance_id[16:20]}-{self.instance_id[20:]}"
+        objd["Phive"] = {"Placement": {"ID": oead.U64(self.hash)}}
+        # if self.rotation != [0.0, 0.0, 0.0]: # convert rotation to radians if the field is needed
+        #     objd['Rotate'] = oead.byml.Array([oead.F32(r * 3.141592 / 180) for r in self.rotation])
+        objd["Scale"] = oead.byml.Array([oead.F32(s) for s in self.scale])
+        objd["TeamCmp"] = {"Team": self.team}
+        objd["Translate"] = oead.byml.Array([oead.F32(t) for t in self.translate])
+
+        if self.name == "ItemIkuraBottle":
+            objd["spl__ItemIkuraBottleBancParam"] = {
+                "DropIkuraValue": oead.S32(10),
+                "DropNum": oead.S32(10)
+            }
+        
+        return objd
