@@ -115,15 +115,18 @@ class HeroMode_Process(QtCore.QThread):
 
             self.parent().saveToSarc(level_sarc, file_path, mission_data)
 
-            # scene bgm
             if self.settings['Music']:
                 music_shuffler.randomizeMusic(self.rng, msn, level_sarc)
 
             if self.settings['Skip Cutscenes']:
                 cutscene_edits.removeCutscenes(level_sarc)
 
-            if self.settings['Enemies'] or self.settings['Enemy Sizes']:
-                enemy_shuffler.randomizeEnemies(self, level_sarc)
+            if msn not in ('BigWorld', 'SmallWorld'):
+                if self.settings["Item Drops"]:
+                    item_shuffler.randomizeItems(self, level_sarc)
+
+                if self.settings['Enemies'] or self.settings['Enemy Sizes']:
+                    enemy_shuffler.randomizeEnemies(self, level_sarc)
 
             self.parent().saveFile("Pack/Scene", m, level_sarc)
 
