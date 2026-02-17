@@ -47,6 +47,8 @@ def randomizeWeapons(thread, hero_weapons: list[str]) -> dict:
     for k,v in LOGIC["Missions"].items():
         if not thread.thread_active:
             break
+        if "Special" in v: # ignore zipcaster & inkjet levels for now
+            continue
         weapons = []
         for i in range(3):
             if not thread.thread_active:
@@ -217,45 +219,47 @@ def editWeaponChoices(thread, mission_name: str, mission_data: BYAML) -> None:
             mission_data.info['OctaSupplyWeaponInfoArray'].append(
                 mission_data.info['OctaSupplyWeaponInfoArray'][-1])
 
-    for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
-        e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
+    # skip over editing data for levels that we keep vanilla (zipcaster and inkjet levels)
+    if mission_name in thread.weapon_placements:
+        for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
+            e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
 
-        if i == 0: # leave first option as vanilla if it is a hero weapon
-            try:
-                if e['SupplyWeaponType'] == 'Hero':
+            if i == 0: # leave first option as vanilla if it is a hero weapon
+                try:
+                    if e['SupplyWeaponType'] == 'Hero':
+                        continue
+                except KeyError:
                     continue
-            except KeyError:
+
+            weapon = thread.weapon_placements[mission_name][i]
+
+            if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
+                if '+' in weapon:
+                    special_weapon, main_weapon = weapon.split('+')
+                else:
+                    special_weapon = weapon
+                    main_weapon = "Free"
+                e['SubWeapon'] = ""
+                e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
+                if weapon.startswith("SpSuperHook_Mission"):
+                    e["SupplyWeaponType"] = "MainAndSpecial"
+                    e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+                    if main_weapon == "Free":
+                        e["WeaponMain"] = ""
+                else:
+                    e["SupplyWeaponType"] = "Special"
                 continue
 
-        weapon = thread.weapon_placements[mission_name][i]
+            e['SupplyWeaponType'] = "Normal"
+            main_weapon, sub_weapon = weapon.split('+')
+            e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
+            e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
+            if main_weapon == "Free":
+                e["WeaponMain"] = ""
+            if sub_weapon == "Free":
+                e["SubWeapon"] = ""
 
-        if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
-            if '+' in weapon:
-                special_weapon, main_weapon = weapon.split('+')
-            else:
-                special_weapon = weapon
-                main_weapon = "Free"
-            e['SubWeapon'] = ""
-            e['SpecialWeapon'] = f"Work/Gyml/{special_weapon}.spl__WeaponInfoSpecial.gyml"
-            if weapon.startswith("SpSuperHook_Mission"):
-                e["SupplyWeaponType"] = "MainAndSpecial"
-                e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
-                if main_weapon == "Free":
-                    e["WeaponMain"] = ""
-            else:
-                e["SupplyWeaponType"] = "Special"
-            continue
-
-        e['SupplyWeaponType'] = "Normal"
-        main_weapon, sub_weapon = weapon.split('+')
-        e['WeaponMain'] = f"Work/Gyml/{main_weapon}.spl__WeaponInfoMain.gyml"
-        e['SubWeapon'] = f"Work/Gyml/{sub_weapon}.spl__WeaponInfoSub.gyml"
-        if main_weapon == "Free":
-            e["WeaponMain"] = ""
-        if sub_weapon == "Free":
-            e["SubWeapon"] = ""
-
-    thread.ui_missions_info[mission_name] = mission_data.info
+    thread.ui_missions_info[mission_name] = mission_data.info['OctaSupplyWeaponInfoArray']
 
 
 def randomizeHeroWeapons(thread) -> list[str]:
@@ -294,9 +298,10 @@ def editLevelWeaponUI(thread) -> None:
     info_name, ui_info_file = thread.parent().loadFile("RSDB", "MissionMapInfo")
 
     for msn_info in ui_info_file.info:
-        if "MapNameLabel" in thread.ui_missions_info:
-            msn_name = msn_info["MapNameLabel"]
-            msn_info = thread.ui_missions_info[msn_name]
+        msn_name = msn_info["__RowId"]
+        if msn_name in thread.ui_missions_info:
+            print(msn_name + " is in ui_missions_info")
+            msn_info['OctaSupplyWeaponInfoArray'] = thread.ui_missions_info[msn_name]
 
     thread.ui_missions_info.clear()
     thread.parent().saveFile("RSDB", info_name, ui_info_file)
