@@ -180,7 +180,6 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
         if main_logic["Range"] < level_logic["Range"]:
             if sub_logic["Range"] < level_logic["Range"]:
                 result = False
-        if main == "Free": # all main weapons can paint floor and walls, so if main is nothing, check sub ability to paint
             if (not sub_logic["Floor_Paint"]) and (level_logic["Floor_Paint"]):
                 result = False
             if (not sub_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
@@ -214,13 +213,13 @@ def editWeaponChoices(thread, mission_name: str, mission_data: BYAML) -> None:
     if mission_name.split('_', 1)[1] not in LOGIC["Missions"]:
         return
 
-    if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
-        while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
-            mission_data.info['OctaSupplyWeaponInfoArray'].append(
-                mission_data.info['OctaSupplyWeaponInfoArray'][-1])
-
     # skip over editing data for levels that we keep vanilla (zipcaster and inkjet levels)
     if mission_name in thread.weapon_placements:
+        if len(mission_data.info['OctaSupplyWeaponInfoArray']) > 0:
+            while len(mission_data.info['OctaSupplyWeaponInfoArray']) < 3:
+                mission_data.info['OctaSupplyWeaponInfoArray'].append(
+                    mission_data.info['OctaSupplyWeaponInfoArray'][-1])
+
         for i in range(len(mission_data.info['OctaSupplyWeaponInfoArray'])):
             e = mission_data.info['OctaSupplyWeaponInfoArray'][i]
 
@@ -300,7 +299,6 @@ def editLevelWeaponUI(thread) -> None:
     for msn_info in ui_info_file.info:
         msn_name = msn_info["__RowId"]
         if msn_name in thread.ui_missions_info:
-            print(msn_name + " is in ui_missions_info")
             msn_info['OctaSupplyWeaponInfoArray'] = thread.ui_missions_info[msn_name]
 
     thread.ui_missions_info.clear()
