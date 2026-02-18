@@ -4,25 +4,25 @@ import oead, secrets
 # we only include one enemy entry because it gets removed if enemies arent randomized
 # enemies get randomized after the item drops, so it will turn into a different enemy anyway
 DROPS = {
-    "ItemArmor": 2,
-    "ItemCanSpecial_Blower": 1,
-    "ItemCanSpecial_Chariot": 1,
-    "ItemCanSpecial_InkStorm": 1,
-    "ItemCanSpecial_Jetpack": 1,
-    "ItemCanSpecial_MicroLaser": 1,
-    "ItemCanSpecial_MultiMissile": 1,
-    "ItemCanSpecial_ShockSonar": 1,
-    "ItemCanSpecial_Skewer": 1,
-    "ItemCanSpecial_SuperHook": 1,
-    "ItemCanSpecial_SuperLanding": 1,
-    "ItemCanSpecial_TripleTornado": 1,
-    "ItemCanSpecial_UltraShot": 1,
-    "ItemCanSpecial_UltraStamp": 1,
-    "ItemIkura": 1,
-    "ItemIkuraBottle": 5,
-    "ItemIkuraLarge": 4,
-    "ItemInkBottle": 2,
-    "EnemyTakopter": 3
+    "ItemArmor": 2.5,
+    "ItemCanSpecial_Blower": 0.2,
+    "ItemCanSpecial_Chariot": 0.3,
+    "ItemCanSpecial_InkStorm": 0.2,
+    "ItemCanSpecial_Jetpack": 0.3,
+    "ItemCanSpecial_MicroLaser": 0.2,
+    "ItemCanSpecial_MultiMissile": 0.2,
+    "ItemCanSpecial_ShockSonar": 0.2,
+    "ItemCanSpecial_Skewer": 0.2,
+    "ItemCanSpecial_SuperHook": 0.3,
+    "ItemCanSpecial_SuperLanding": 0.3,
+    "ItemCanSpecial_TripleTornado": 0.2,
+    "ItemCanSpecial_UltraShot": 0.2,
+    "ItemCanSpecial_UltraStamp": 0.2,
+    "ItemIkura": 2.5,
+    "ItemIkuraBottle": 5.0,
+    # "ItemIkuraLarge": 4.0,
+    # "ItemInkBottle": 2.0, # seems to crash the game
+    "EnemyTakopter": 4.0
 }
 
 
@@ -83,7 +83,7 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
             continue
         if "Links" in act:
             continue
-        if thread.rng.random() < (1 / 5): # 1/5 chance of no drop
+        if thread.rng.random() < (1 / 3): # 1/3 chance of no drop
             continue
         act["spl__WoodenBoxBancParam"] = {} # remove egg reward
         new_item = thread.rng.choices(list(valid_drops.keys()), list(valid_drops.values()))[0]
@@ -99,8 +99,10 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
     thread.parent().saveToSarc(level_sarc, file_path, banc)
 
 
-
+# Code taken from my old Splatoon 3 Only Up level creation code
 class DropItem:
+    """Represents a Splatoon 3 actor object"""
+
     def __init__(self, name: str, ids: dict, rng):
         self.name = name
         self.translate = [0.0, 0.0, 0.0]
@@ -130,7 +132,9 @@ class DropItem:
         self.instance_id = instance_id
 
 
-    def pack(self):
+    def pack(self) -> dict:
+        """Converts this object into a dict with oead typings"""
+
         objd = {}
 
         objd["Name"] = self.name
