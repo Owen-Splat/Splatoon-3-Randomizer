@@ -70,6 +70,12 @@ class HeroMode_Process(QtCore.QThread):
     def editLevels(self) -> None:
         """Iterates through all the level files and makes various changes based on settings"""
 
+        level_settings = ["Backgrounds", "Levels", "Ink Colors", "Enemy Ink Is Lava",
+                          "Weapons", "Music", "Skip Cutscenes", "Item Drops",
+                          "Enemies", "Enemy Sizes"]
+        if not any([self.settings[x] for x in level_settings]):
+            return
+
         self.status_update.emit('Editing Hero Mode levels...')
         time.sleep(1)
 
