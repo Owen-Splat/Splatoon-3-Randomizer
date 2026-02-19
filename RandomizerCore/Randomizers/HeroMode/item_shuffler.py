@@ -18,7 +18,7 @@ DROPS = {
     "ItemCanSpecial_TripleTornado": 0.2,
     "ItemCanSpecial_UltraShot": 0.2,
     "ItemCanSpecial_UltraStamp": 0.2,
-    "ItemIkura": 2.5,
+    # "ItemIkura": 2.5, # no physics and floating in the air looks weird
     "ItemIkuraBottle": 5.0,
     # "ItemIkuraLarge": 4.0,
     # "ItemInkBottle": 2.0, # seems to crash the game
@@ -79,13 +79,14 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
     for act in banc.info["Actors"]:
         if not thread.thread_active:
             break
-        if "WoodenBox" not in act["Name"]:
+        if "WoodenBox" not in act["Name"] and act["Name"] != "AirBallParent":
             continue
         if "Links" in act:
             continue
-        if thread.rng.random() < (1 / 3): # 1/3 chance of no drop
+        if thread.rng.random() < (1 / 5): # 1/5 chance of no drop
             continue
         act["spl__WoodenBoxBancParam"] = {} # remove egg reward
+        act["spl__AirBallBancParam"] = {} # remove egg reward
         new_item = thread.rng.choices(list(valid_drops.keys()), list(valid_drops.values()))[0]
         drop = DropItem(new_item, ids, thread.rng)
         act["Links"] = [{"Name": "ToDropItem", "Dst": oead.U64(drop.hash)}]
