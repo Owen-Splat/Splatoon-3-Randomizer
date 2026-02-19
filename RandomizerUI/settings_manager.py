@@ -1,21 +1,7 @@
-from RandomizerCore.Data.randomizer_data import *
-import yaml, os
-
-MAIN_ORDERS = {
-    'kettleCheck': True,
-    'lavaCheck': False,
-    'cutsceneCheck': True,
-    'backgroundCheck': False,
-    'inkCheck': True,
-    'musicCheck': True,
-    'gearCheck': False,
-    'oozeCheck': False,
-    'collectCheck': True
-}
-SIDE_ORDERS = {
-
-}
-ALL_ORDERS = {**MAIN_ORDERS, **SIDE_ORDERS}
+from PySide6.QtWidgets import QCheckBox
+from randomizer_paths import SETTINGS_PATH
+from pathlib import Path
+import random, yaml
 
 
 class MyDumper(yaml.Dumper):
@@ -23,61 +9,105 @@ class MyDumper(yaml.Dumper):
         return super(MyDumper, self).increase_indent(flow, False)
 
 
-def saveSettings(window):
-    seed = window.ui.lineEdit_4.text()
-    if len(seed) > 50:
-        seed = seed[:50]
-    
-    settings_dict = {
-        'RomFS_Folder': window.ui.lineEdit.text(),
-        'DLC_Folder': window.ui.lineEdit_2.text(),
-        'Output_Folder': window.ui.lineEdit_3.text(),
-        'Seed': seed,
-        'Platform': window.ui.platformComboBox.currentText()[10:],
-        'Season': window.ui.seasonSpinBox.value(),
-        'Return of the Mammalians': {},
-        'Spire of Order': {}
-    }
+class SettingsManager:
+    """A class for managing user settings"""
 
-    ldict = locals()
-    for k,v in MAIN_ORDERS.items():
-        exec(f"v = window.ui.{k}.isChecked()", globals(), ldict)
-        exec(f"k = window.ui.{k}.text()", globals(), ldict)
-        settings_dict['Return of the Mammalians'][ldict['k']] = ldict['v']
-    for k,v in SIDE_ORDERS.items():
-        exec(f"v = window.ui.{k}.isChecked()", globals(), ldict)
-        exec(f"k = window.ui.{k}.text()", globals(), ldict)
-        settings_dict['Spire of Order'][ldict['k']] = ldict['v']
-    
-    with open(SETTINGS_PATH, 'w') as settingsFile:
-        yaml.dump(settings_dict, settingsFile, Dumper=MyDumper, sort_keys=False)
+    def __init__(self, window) -> None:
+        self.window = window
+        self.saving = False
 
 
-def loadSettings(window, settings, checks):
-    for k,v in settings.items():
-        if isinstance(v, dict):
-            for k,v in v.items():
-                check = [c for c,x in checks.items() if x == k][0]
-                exec(f"window.ui.{check}.setChecked({v})")
+    def save(self) -> None:
+        """Saves the current settings to a file"""
+
+        self.saving = True
+        with open(SETTINGS_PATH, 'w') as f:
+            yaml.dump(self.fetch(), f, Dumper=MyDumper, sort_keys=False)
+        self.saving = False
+
+
+    def load(self) -> bool:
+        """Loads settings from a file. Returns if successful"""
+
+        try:
+            with open(SETTINGS_PATH, 'r') as f:
+                settings = yaml.safe_load(f)
+        except FileNotFoundError:
+            return False
+
+        for k,v in settings.items():
+            if isinstance(v, dict):
+                for k,v in v.items():
+                    check = self.window.ui.findCheckBox(k)
+                    if check is None:
+                        continue
+                    self.window.ui.findCheckBox(k).setChecked(v)
+            else:
+                if not isinstance(v, bool):
+                    try:
+                        match k:
+                            case 'RomFS':
+                                romfs_path = Path(settings[k])
+                                if romfs_path != Path() and romfs_path.exists():
+                                    self.window.ui.findLineEdit("BaseLine").setText(settings[k])
+                            case 'DLC':
+                                dlc_path = Path(settings[k])
+                                if dlc_path != Path() and dlc_path.exists():
+                                    self.window.ui.findLineEdit("DLCLine").setText(settings[k])
+                            case 'Output':
+                                out_path = Path(settings[k])
+                                if out_path != Path() and out_path.exists():
+                                    self.window.ui.findLineEdit("OutLine").setText(settings[k])
+                            case 'Seed':
+                                seed = str(settings[k])
+                                if len(seed) > 32:
+                                    seed = seed[:32]
+                                self.window.ui.findLineEdit("SeedLine").setText(seed)
+                            case 'Platform':
+                                self.window.ui.findComboBox("PlatformBox").setCurrentIndex(
+                                    1 if str(settings[k]).lower().strip() == 'emulator' else 0)
+                    except: # if it errors we dont really care why, ignore so it is left at the default value
+                        continue
+                else:
+                    self.window.ui.findCheckBox(k).setChecked(v)
+
+        return True
+
+
+    def fetch(self) -> dict:
+        """Fetches the current user settings"""
+
+        seed = self.window.ui.findLineEdit("SeedLine").text()
+        if len(seed) > 32:
+            seed = seed[:32]
         else:
-            if not isinstance(v, bool):
-                continue
-            check = [c for c,x in checks.items() if x == k][0]
-            exec(f"window.ui.{check}.setChecked({v})")
+            if (seed == "") and (not self.saving):
+                random.seed()
+                seed = str(random.getrandbits(32))
 
-    if 'RomFS_Folder' in settings:
-        if os.path.exists(settings['RomFS_Folder']):
-            window.ui.lineEdit.setText(settings['RomFS_Folder'])
-    if 'DLC_Folder' in settings:
-        if os.path.exists(settings['DLC_Folder']):
-            window.ui.lineEdit_2.setText(settings['DLC_Folder'])
-    if 'Output_Folder' in settings:
-        if os.path.exists(settings['Output_Folder']):
-            window.ui.lineEdit_3.setText(settings['Output_Folder'])
-    if 'Seed' in settings:
-        window.ui.lineEdit_4.setText(str(settings['Seed']))
-    if 'Platform' in settings:
-        window.ui.platformComboBox.setCurrentIndex(1 if str(settings['Platform']).lower().strip() == 'emulator' else 0)
-    if 'Season' in settings:
-        if isinstance(settings['Season'], int):
-            window.ui.seasonSpinBox.setValue(settings['Season'])
+        outdir = self.window.ui.findLineEdit("OutLine").text()
+        if not self.saving:
+            outdir = Path(outdir) / f"S3Rando-{seed}"
+            if self.window.ui.findComboBox("PlatformBox").currentText()[9:].strip() == 'Console':
+                outdir = outdir / 'atmosphere' / 'contents' / '0100C2500FC20000'
+            outdir = outdir / 'romfs'
+
+        settings = {
+            'RomFS': self.window.ui.findLineEdit("BaseLine").text(),
+            # 'DLC': window.ui.findLineEdit("DLCLine").text(),
+            'Output': outdir,
+            'Seed': seed,
+            'Platform': self.window.ui.findComboBox("PlatformBox").currentText()[9:].strip(),
+            'HeroMode': {},
+            'SideOrder': {}
+        }
+
+        hm_tab = self.window.ui.findTab("HeroModeTab")
+        for c in hm_tab.findChildren(QCheckBox):
+            settings['HeroMode'][c.text()] = c.isChecked()
+
+        so_tab = self.window.ui.findTab("SideOrderTab")
+        for c in so_tab.findChildren(QCheckBox):
+            settings['SideOrder'][c.text()] = c.isChecked()
+
+        return settings

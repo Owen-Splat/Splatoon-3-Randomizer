@@ -1,0 +1,34 @@
+on:
+  pull_request:
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
+
+jobs:
+  build:
+    if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: echo "Preparing '${{ github.event.ref }}' for release"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.8'
+          cache: 'pip' # caching pip dependencies
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: mkdir build
+      - run: python -m PyInstaller --log-level=WARN randomizer.spec
+      - run: python build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Splatoon 3 Randomizer-${{ matrix.os }}
+          path: dist/release_archive

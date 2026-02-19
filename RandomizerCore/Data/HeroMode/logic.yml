@@ -1,0 +1,680 @@
+Missions:
+  A01_01:
+    Range: 13.0 # Minimum range needed
+    Floor_Paint: False # Does the player need the ability to paint the floor
+    Wall_Paint: True # Does the player need the ability to paint walls | we dont want the player to have to use a bomb splatter to slowly climb up
+    Rail: True # Does the player need the ability to ride rails | most specials cant ride rails
+    Attack: True # Does the player need the ability to attack enemies or objects | we can replace the goal object if it's the only thing required
+  A01_02:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A01_03:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A01_04:
+    Range: 12.1
+    Floor_Paint: True # needed if you happen to get a heavy weapon
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A01_01C: # Explosion based weapons paint some of the inside, might need to reduce the required paint percentage
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: True
+    Attack: True
+  A01_02C:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Special: SpSuperHook_Mission
+  A01_03C:
+    Range: 13.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A01_04C:
+    Range: 22.5
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A01_05C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A01_06C:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+  A02_01:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A02_02:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A02_03:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A02_01C:
+    Range: 14.5
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: True
+    Attack: True
+  A02_02C:
+    Range: 12.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A02_03C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A02_04C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: True
+    Attack: True
+  A02_05C:
+    Range: 14.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A03_01:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A03_02:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+  A03_03:
+    Range: 14.5
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A03_01C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Sub: Bomb_Curling_Mission
+  A03_02C:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Main: True # also dont know for this, sub only is probably very hard
+  A03_03C:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A03_04C:
+    Range: 20.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: True
+    Attack: True
+  A04_01:
+    Range: 9.8
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A04_02:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A04_03:
+    Range: 5.0
+    Floor_Paint: True # technically only needed with the Enemy Ink Is Lava challenge
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A04_01C:
+    Range: 12.5
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A04_02C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Special: SpSuperHook_Mission
+  A04_03C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Main: True # although sub only is possible lets not force it
+  A04_04C:
+    Range: 18.5
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A04_05C:
+    Range: 15.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: True
+    Attack: True
+    Main: True
+  A04_06C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A04_07C:
+    Range: 15.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Main: True
+  A04_08C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A04_09C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Main: True
+  A05_01:
+    Range: 8.2
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A05_02:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A05_03:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A05_04:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A05_01C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+  A05_02C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Special: SpSuperHook_Mission
+  A05_03C:
+    Range: 14.5
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: True
+    Attack: True
+    Main: True
+  A05_04C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A05_05C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A05_06C:
+    Range: 18.0
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: True
+    Attack: False
+  A05_07C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Special: SpSuperHook_Mission
+  A05_08C:
+    Range: 12.9
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A05_09C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Sub: LineMarker
+  A06_01:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A06_02:
+    Range: 12.5
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A06_03:
+    Range: 9.8
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A06_01C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+  A06_02C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+    Sub: Bomb_Curling_Mission
+  A06_03C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A06_04C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: False
+  A06_05C:
+    Range: 12.5
+    Floor_Paint: False
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  A06_06C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+  A06_07C:
+    Range: 26.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Special: SpJetpack_Mission
+  A06_08C:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: True
+    Attack: True
+  A06_09C:
+    Range: 5.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Rail: False
+    Attack: False
+  MorayKing: # idk yet if it's possible to replace the treasures, if not then specials wont work for bosses
+    Range: 9.8
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+    Main: True
+  SharkKing:
+    Range: 11.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Main: True
+  MantaKing:
+    Range: 5.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Rail: False
+    Attack: True
+    Main: True
+
+Main_Weapons:
+  Shooter_Short: # sploosh
+    Range: 8.2
+  Shooter_First: # jr
+    Range: 11.3
+  Shooter_Precision: # splash
+    Range: 12.1
+  Shooter_Blaze: # aerospray
+    Range: 11.3
+  Shooter_Normal: # splattershot
+    Range: 12.9
+  Shooter_Gravity: # 52 gal
+    Range: 13.3
+  Shooter_QuickMiddle: # nzap
+    Range: 12.5
+  Shooter_Expert: # splattershot pro
+    Range: 17.0
+  Shooter_Heavy: # 96 gal
+    Range: 18.0
+  Shooter_Long: # jet
+    Range: 22.5
+  Shooter_QuickLong: # nova
+    Range: 16.0
+  Blaster_Short: # luna
+    Range: 11.2
+  Blaster_Bear: # grizzco blaster
+    Range: 11.2
+  Blaster_Middle: # blaster
+    Range: 13.3
+  Blaster_Long: # range blaster
+    Range: 17.0
+  Blaster_LightShort: # clash
+    Range: 11.0
+  Blaster_Light: # rapid
+    Range: 16.7
+  Blaster_LightLong: # rapid pro
+    Range: 19.2
+  Blaster_Precision: # s blast
+    Range: 16.5
+  Shooter_TripleQuick: # l3
+    Range: 13.5
+  Shooter_TripleMiddle: # h3
+    Range: 17.0
+  Shooter_Flash: # squeezer
+    Range: 20.0
+  Roller_Compact: # carbon
+    Range: 9.5
+  Roller_Normal: # splat roller
+    Range: 11.8
+  Roller_Heavy: # dynamo
+    Range: 18.5
+  Roller_Hunter: # flingza
+    Range: 14.0
+  Roller_Wide: # big swig
+    Range: 12.5
+  Brush_Mini: # ink brush
+    Range: 7.0
+  Brush_Normal: # octobrush
+    Range: 10.5
+  Brush_Heavy: # painbrush
+    Range: 13.1
+  Charger_Quick: # squiffer
+    Range: 18.5
+  Charger_Normal: # splat charger
+    Range: 26.0
+  Charger_NormalScope: # splatterscope
+    Range: 28.0
+  Charger_Long: # e-liter
+    Range: 31.0
+  Charger_LongScope: # e-liter scope
+    Range: 33.0
+  Charger_Bear: # grizzco charger
+    Range: 31.0
+  Charger_Light: # bamboozler
+    Range: 21.0
+  Charger_Keeper: # goo tuber
+    Range: 21.0
+  Charger_Pencil: # snipewriter
+    Range: 26.0
+  Slosher_Strong: # slosher
+    Range: 14.5
+  Slosher_Diffusion: # tri slosher
+    Range: 11.0
+  Slosher_Launcher: # sloshing machine
+    Range: 14.7
+  Slosher_Bathtub: # bloblobber
+    Range: 15.0
+  Slosher_Washtub: # explosher
+    Range: 20.7
+  Slosher_Bear: # grizzco slosher
+    Range: 20.7
+  Slosher_Double: # dread wringer
+    Range: 15.5
+  Spinner_Quick: # mini splatling
+    Range: 15.0
+  Spinner_Standard: # heavy splatling
+    Range: 21.0
+  Spinner_Hyper: # hydra
+    Range: 24.5
+  Spinner_Downpour: # ballpoint
+    Range: 24.5
+  Spinner_Serein: # nautilus
+    Range: 18.0
+  Spinner_HyperShort: # heavy edit
+    Range: 17.0
+  Maneuver_Short: # dapple dualies
+    Range: 9.8
+  Maneuver_Bear: # grizzco dualies
+    Range: 9.8
+  Maneuver_Normal: # splat dualies
+    Range: 12.5
+  Maneuver_Gallon: # glooga
+    Range: 16.0
+  Maneuver_Dual: # dualie squelchers
+    Range: 17.0
+  Maneuver_Stepper: # tetra
+    Range: 14.0
+  Maneuver_Long: # douser
+    Range: 19.1
+  Shelter_Normal: # brella
+    Range: 12.5
+  Shelter_Bear:
+    Range: 12.5
+  Shelter_Wide: # tenta
+    Range: 15.0
+  Shelter_Compact: # undercover
+    Range: 11.8
+  Shelter_Focus: # recycled
+    Range: 14.5
+  Stringer_Normal: # stringer
+    Range: 25.0
+  Stringer_Short: # reef lux
+    Range: 15.0
+  Stringer_Explosion: # wellstring
+    Range: 23.0
+  Stringer_Bear: # grizzco stringer
+    Range: 25.0
+  Saber_Normal: # splatana stamper
+    Range: 16.5
+  Saber_Lite: # wiper
+    Range: 13.0
+  Saber_Heavy: # decavitator
+    Range: 15.0
+  Saber_Bear: # grizzco splatana
+    Range: 9.8 # guessing around dapple range
+  Free:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Attack: false
+
+Sub_Weapons:
+  Beacon:
+    Range: 0.0
+    Floor_Paint: False # while technically it can paint, it's not useful enough to consider
+    Wall_Paint: False
+    Attack: False
+  Bomb_Curling_Mission:
+    Range: 0.0 # we can't throw it over gaps so it is considered 0 range
+    Floor_Paint: True
+    Wall_Paint: True
+    Attack: True
+  Bomb_Fizzy:
+    Range: 20.0 # guessing throw range
+    Floor_Paint: True
+    Wall_Paint: False # we don't want to force climbing up tiny ink splatters
+    Attack: True # unsure if this breaks the goal or not
+  Bomb_Quick_Mission:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Attack: True
+  Bomb_Robot_Mission:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Attack: True
+  Bomb_Splash_Mission:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Attack: True
+  Bomb_Suction_Mission:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Attack: True
+  Bomb_Torpedo:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Attack: True # unsure if this breaks the goal or not
+  LineMarker:
+    Range: 31.0
+    Floor_Paint: False # paints too little to consider
+    Wall_Paint: True
+    Attack: True
+  PointSensor:
+    Range: 20.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Attack: False
+  PoisonMist:
+    Range: 20.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Attack: False
+  SalmonBuddy:
+    Range: 20.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Attack: True
+  Shield:
+    Range: 9.8
+    Floor_Paint: False # paints too little to consider
+    Wall_Paint: False
+    Attack: False
+  Sprinkler:
+    Range: 20.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Attack: True
+  Trap_Mission:
+    Range: 0.0
+    Floor_Paint: True
+    Wall_Paint: False
+    Attack: True
+  Free:
+    Range: 0.0
+    Floor_Paint: False
+    Wall_Paint: False
+    Attack: False
+
+Special_Weapons:
+  SpChariot_Mission:
+    Range: 26.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  SpGachihoko:
+    Range: 26.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: True
+    Attack: True
+  SpJetpack_Mission:
+    Range: 26.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  SpSuperHook_Mission:
+    Range: 31.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  SpSuperLanding:
+    Range: 9.8
+    Floor_Paint: True
+    Wall_Paint: False # doesn't paint high and climbing up can be a pain
+    Rail: True
+    Attack: True
+  SpUltraStamp_Mission:
+    Range: 26.0
+    Floor_Paint: True
+    Wall_Paint: True
+    Rail: False
+    Attack: True
+  

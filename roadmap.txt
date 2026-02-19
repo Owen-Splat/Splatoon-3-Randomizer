@@ -1,8 +1,15 @@
-- shuffle ooze prices instead of (randrange(1, 30) * 100)
-maybe even do some weighted prices depending on core size
+v0.4
+- improve logic
+    zipcaster and inkjet levels currently have the weapon choices left as vanilla
+    they are designed too heavily on those specials
+    we will add map objects so that more weapons and specials can complete them
 
-- eventually, add some basic logic
-things like if a special can grab treasure/ride rails, if a weapon can paint floor/wall, etc
+- add proper icons for the randomized hero and grizzco weapons
 
-- side order rando
-randomize weapons, kits, biases, chip effects
+- add any new weapons we get
+
+v0.5
+- initial side order support (random weapons, kits, biases, chip effects, ink color, music, etc)
+
+v1.0
+whenever both modes are in a state im happy with :)

@@ -1,6 +1,6 @@
 __pycache__
-.qt_for_python
 /build
-/output
+/dist
 settings.txt
 log.txt
+TODO.txt
