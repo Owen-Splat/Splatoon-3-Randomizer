@@ -14,7 +14,8 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo "Preparing '${{ github.event.ref }}' for release"
