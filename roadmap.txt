@@ -1,12 +1,8 @@
-v0.3
-- implement randomized item drops
-
-- fix some misc things with weapon randomization & how they are assigned
-
-- improve/clean old code
-
 v0.4
 - improve logic
+    zipcaster and inkjet levels currently have the weapon choices left as vanilla
+    they are designed too heavily on those specials
+    we will add map objects so that more weapons and specials can complete them
 
 - add proper icons for the randomized hero and grizzco weapons
 
