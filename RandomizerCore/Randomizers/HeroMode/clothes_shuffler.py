@@ -11,7 +11,7 @@ def randomizeClothes(thread) -> None:
     file_name_shoes, shoes_info = thread.parent().loadFile("RSDB", "GearInfoShoes")
 
     hero_ids = [#27000, 27004, 27109, 27110, 27111, 27200,
-                27301, 27302, 27303, 27304, 27305, 27306] # 27310 captains clothes
+                27301, 27302, 27303, 27304, 27305] # 27306 hero gear replica? | 27310 captains clothes
     hero_ids = [oead.S32(i) for i in hero_ids]
 
     # get a dict of key Id and value [head, clothes, shoes]
@@ -47,21 +47,14 @@ def randomizeClothes(thread) -> None:
 
     # now get x unique ids to change to the hero ids
     ids = thread.rng.sample(list(gear_sets.keys()), len(hero_ids))
-    x = 0
-    for entry in head_info.info:
-        if int(entry["Id"]) in ids:
-            entry["Id"] = hero_ids[x]
-            x += 1
-    x = 0
-    for entry in clothes_info.info:
-        if int(entry["Id"]) in ids:
-            entry["Id"] = hero_ids[x]
-            x += 1
-    x = 0
-    for entry in shoes_info.info:
-        if int(entry["Id"]) in ids:
-            entry["Id"] = hero_ids[x]
-            x += 1
+
+    for i,id in enumerate(hero_ids):
+        head_entry = [e for e in head_info.info if int(e["Id"]) == ids[i]][0]
+        head_entry["Id"] = id
+        clothes_entry = [e for e in clothes_info.info if int(e["Id"]) == ids[i]][0]
+        clothes_entry["Id"] = id
+        shoes_entry = [e for e in shoes_info.info if int(e["Id"]) == ids[i]][0]
+        shoes_entry["Id"] = id
 
     # save gear datasheets
     thread.parent().saveFile("RSDB", file_name_head, head_info)
