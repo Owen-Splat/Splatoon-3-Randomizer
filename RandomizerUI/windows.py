@@ -47,13 +47,11 @@ class MainWindow(QMainWindow):
     def randomizeButtonClicked(self) -> None:
         # first we need to check all settings under each tab
         # if all of them are unchecked, skip over randomizing that mode
-        hm_tab = self.ui.findTab("HeroModeTab")
-        randomize_hm: bool = any([c.isChecked() for c in hm_tab.findChildren(QCheckBox)])
-        so_tab = self.ui.findTab("SideOrderTab")
-        randomize_so: bool = any([c.isChecked() for c in so_tab.findChildren(QCheckBox)]) # False until we add settings
+        randomize_hm = self.ui.getTabOnOffState("HeroModeTab")
+        randomize_so = self.ui.getTabOnOffState("SideOrderTab")
 
         if not randomize_hm and not randomize_so:
-            self.ui.showUserError("You need to select some settings first!")
+            self.ui.showUserError("You need to select some settings!")
             return
 
         if not self.validateFolders(randomize_hm, randomize_so):

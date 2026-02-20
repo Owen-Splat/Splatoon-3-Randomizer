@@ -301,6 +301,15 @@ class Ui_MainWindow(QObject):
         return self.window.findChild(QWidget, name)
 
 
+    def getTabOnOffState(self, tab_name) -> bool:
+        """Returns whether any widgets in the tab have been changed"""
+
+        tab = self.findTab(tab_name)
+        checks = [c.isChecked() for c in tab.findChildren(QCheckBox)]
+        boxes = [bool(b.currentIndex()) for b in tab.findChildren(RandoComboBox)]
+        return True if any(checks) or any(boxes) else False
+
+
     def getTabSettings(self, tab_name) -> dict:
         settings = {}
         tab = self.findTab(tab_name)
