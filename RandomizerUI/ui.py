@@ -79,6 +79,8 @@ class Ui_MainWindow(QObject):
 
         for c in tab_widget.findChildren(QCheckBox):
             c.setFixedWidth(self.spacing)
+        for b in tab_widget.findChildren(RandoComboBox):
+            b.setFixedWidth(self.spacing)
 
         label = QLabel(central_widget)
         label.setObjectName('ExplanationText')
@@ -149,8 +151,14 @@ class Ui_MainWindow(QObject):
         ohko_check.setWhatsThis('Adds the "Enemy Ink Is Lava" challenge to every Alterna level.\nHaving armor will negate the challenge.')
         items_check = QCheckBox("Item Drops", tab)
         items_check.setWhatsThis("Randomizes the items and enemies that drop from breaking boxes and balloons.\nCertain items are left vanilla.")
-        clothes_check = QCheckBox("Hero Clothes", tab)
-        clothes_check.setWhatsThis("Randomizes the hero clothes into any other piece of clothing.\nThis includes armor pieces.")
+        clothes_box = RandoComboBox(tab)
+        clothes_box.setWhatsThis("Randomizes the hero clothes into any other piece of clothing.\nThis includes armor pieces.")
+        clothes_box.setObjectName("Hero Clothes")
+        clothes_box.addItems((
+            "Hero Clothes: Vanilla",
+            "Hero Clothes: Random",
+            "Hero Clothes: Matching"
+        ))
         text_check = QCheckBox("Text", tab)
         text_check.setWhatsThis("Randomizes the text.")
 
@@ -190,9 +198,9 @@ class Ui_MainWindow(QObject):
         hl = QHBoxLayout()
         hl.addWidget(items_check)
         hl.addSpacerItem(self.createHorizontalSpacer())
-        hl.addWidget(clothes_check)
-        hl.addSpacerItem(self.createHorizontalSpacer())
         hl.addWidget(text_check)
+        hl.addSpacerItem(self.createHorizontalSpacer())
+        hl.addWidget(clothes_box)
         vl.addLayout(hl)
 
         tab.setLayout(vl)
@@ -291,6 +299,39 @@ class Ui_MainWindow(QObject):
 
     def findTab(self, name: str) -> QWidget:
         return self.window.findChild(QWidget, name)
+
+
+    def getTabSettings(self, tab_name) -> dict:
+        settings = {}
+        tab = self.findTab(tab_name)
+
+        for c in tab.findChildren(QCheckBox):
+            settings[c.text()] = c.isChecked()
+
+        for b in tab.findChildren(RandoComboBox):
+            k,v = b.currentText().split(':')
+            settings[k.strip()] = v.strip()
+
+        return settings
+
+
+    def setWidgetSetting(self, k, v) -> None:
+        check = self.findCheckBox(k)
+        if check is not None:
+            check.setChecked(v)
+            return
+
+        box = self.findComboBox(k)
+        if box is not None:
+            items = [box.itemText(i) for i in range(box.count())]
+            text = f"{k}: {v}"
+            print(text)
+            try:
+                index = items.index(text)
+            except ValueError:
+                pass
+            else:
+                box.setCurrentIndex(index)
 
 
     def addOptionDescriptions(self) -> None:
