@@ -334,7 +334,6 @@ class Ui_MainWindow(QObject):
         if box is not None:
             items = [box.itemText(i) for i in range(box.count())]
             text = f"{k}: {v}"
-            print(text)
             try:
                 index = items.index(text)
             except ValueError:
