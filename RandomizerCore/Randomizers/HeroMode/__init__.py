@@ -219,7 +219,7 @@ class HeroMode_Process(QtCore.QThread):
 
         if not any((self.settings["Weapons"],
                     self.settings["Ink Colors"],
-                    self.settings["Hero Clothes"])):
+                    self.settings["Hero Clothes"] != "Vanilla")):
             return
 
         self.status_update.emit("Editing datasheets...")
@@ -234,5 +234,5 @@ class HeroMode_Process(QtCore.QThread):
         if self.settings["Ink Colors"] and self.thread_active:
             color_shuffler.editColors(self)
 
-        if self.settings["Hero Clothes"] and self.thread_active:
-            clothes_shuffler.randomizeClothes(self)
+        if self.settings["Hero Clothes"] != "Vanilla" and self.thread_active:
+            clothes_shuffler.randomizeClothes(self, self.settings["Hero Clothes"] == "Matching")
