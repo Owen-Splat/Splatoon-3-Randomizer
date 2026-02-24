@@ -27,7 +27,6 @@ Sky_Sunset00
 Sky_Sunset02
 Sky_Sunset04
 Sky_Sunset06
-Sky_Dark00
 Sky_Nighttime03
 Sky_Space00
 Sky_Space02
