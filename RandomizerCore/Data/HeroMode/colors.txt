@@ -4,9 +4,6 @@ HeroOrange
 HeroBlue
 HeroLightBlue
 HeroSoda
-HeroBossManta
-HeroBossUtsuho
-HeroBossFuuka
 GreenPurple
 LimegreenPurple
 Orangelue

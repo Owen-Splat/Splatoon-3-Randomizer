@@ -107,7 +107,7 @@ class HeroMode_Process(QtCore.QThread):
             if self.settings['Levels']:
                 level_shuffler.fixMissionCompatibility(self.levels, msn, mission_data)
 
-            if self.settings['Ink Colors']:
+            if self.settings['Ink Colors'] and "King" not in msn:
                 color = color_shuffler.getRandomColor(self.rng)
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{color}.game__gfx__parameter__TeamColorDataSet.gyml"
