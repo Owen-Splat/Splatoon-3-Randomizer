@@ -20,5 +20,5 @@ def randomizeBackground(rng, msn: str, zs_data: SARC) -> None:
         render_data.info["Lighting"]["SkySphere"]["ActorName"] =\
             f"Work/Actor/{sky}.engine__actor__ActorParam.gyml"
         if "Crater" in sky:
-            render_data.info["lighting"]["SkySphere"]["Scale"] = oead.F32(5.0)
+            render_data.info["Lighting"]["SkySphere"]["Scale"] = oead.F32(5.0)
         zs_data.writer.files[renders[0]] = render_data.repack()
