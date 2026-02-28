@@ -167,7 +167,7 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
             result = False
         if (not weapon_logic["Rail"]) and (level_logic["Rail"]):
             result = False
-        if (not weapon_logic["Grate"]) and (level_logic["Grate"]):
+        if (not weapon_logic["Grate"]) and ("Grate" in level_logic):
             result = False
         return result
 
