@@ -1,8 +1,29 @@
+v0.3 beta issues to fix
+
+- double check that infinite zipcaster in rocket is properly being excluded
+
+- check grizz with randomized enemies
+    there was a crash, unsure if it was random, related to flexlion, or just a general rando issue
+    also check what happens if the barrier enemy is in grizz, it would be an issue if it blocks the weak points
+
+- make a list of cutscene actor hashes that can just deleted instead of skipping
+    even skipping cutscenes is a slight annoyance when it works to just delete entirely
+    also, skipping cutscenes can cause other weird issues anyway (blurred camera, clipping through ground)
+
+- text improvements
+    not all mission text is randomized
+    we should probably also create length groups for the text so that long text does not go where there should be short text
+
 v0.4
 - improve logic
     zipcaster and inkjet levels currently have the weapon choices left as vanilla
     they are designed too heavily on those specials
     we will add map objects so that more weapons and specials can complete them
+
+- add weapon selectors to every level possible
+    naturally, this will require adding logic to those levels
+
+- experiment with randomizing the base hero special
 
 - add proper icons for the randomized hero and grizzco weapons
 
