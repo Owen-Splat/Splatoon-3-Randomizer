@@ -150,7 +150,7 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
 
     result = True
 
-    # Unique case where the level is designed around curling bomb
+    # 2 unique cases where the level is designed around curling bomb/linemarker
     if "Sub" in level_logic:
         if not weapon.endswith(level_logic["Sub"]):
             result = False
@@ -167,6 +167,8 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
             result = False
         if (not weapon_logic["Rail"]) and (level_logic["Rail"]):
             result = False
+        if (not weapon_logic["Grate"]) and (level_logic["Grate"]):
+            result = False
         return result
 
     # Main + Sub
@@ -177,6 +179,9 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
         main = "_".join(main_without_last)
         main_logic = LOGIC["Main_Weapons"][main]
         sub_logic = LOGIC["Sub_Weapons"][sub]
+        if "Main" in level_logic: # only a couple levels include this param and its always true
+            if main == "Free":
+                result = False
         if main_logic["Range"] < level_logic["Range"]:
             if sub_logic["Range"] < level_logic["Range"]:
                 result = False
@@ -184,9 +189,9 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
                 result = False
             if (not sub_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
                 result = False
-        if level_logic["Attack"]:
-            if not sub_logic["Attack"]:
-                result = False
+            if level_logic["Attack"]:
+                if not sub_logic["Attack"]:
+                    result = False
         return result
 
     # Main only

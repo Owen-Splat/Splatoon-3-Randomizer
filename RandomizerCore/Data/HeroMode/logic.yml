@@ -23,6 +23,7 @@ Missions:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True
   A01_01C: # Explosion based weapons paint some of the inside, might need to reduce the required paint percentage
     Range: 0.0
     Floor_Paint: False
@@ -117,7 +118,7 @@ Missions:
   A03_02:
     Range: 5.0
     Floor_Paint: True
-    Wall_Paint: False
+    Wall_Paint: True
     Rail: False
     Attack: False
   A03_03:
@@ -196,6 +197,7 @@ Missions:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True # player needs to swim through a grate
   A04_05C:
     Range: 15.0
     Floor_Paint: False
@@ -209,6 +211,7 @@ Missions:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True # player needs to pass through a grate while climbing a wall
   A04_07C:
     Range: 15.0
     Floor_Paint: False
@@ -273,24 +276,28 @@ Missions:
     Rail: True
     Attack: True
     Main: True
+    Grate: True # player needs to swim through a grate, I believe anything that can ride rails can pass through already, but just in case
   A05_04C:
     Range: 5.0
     Floor_Paint: True
     Wall_Paint: False
     Rail: False
     Attack: True
+    Grate: True # player swims through a grate after taking a dash panel
   A05_05C:
     Range: 5.0
     Floor_Paint: True
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True # player needs to swim through a grate
   A05_06C:
     Range: 18.0
     Floor_Paint: False
     Wall_Paint: True
     Rail: True
     Attack: False
+    Grate: True # player needs to swim through a grate, I believe anything that can ride rails can pass through already, but just in case
   A05_07C:
     Range: 5.0
     Floor_Paint: False
@@ -304,6 +311,7 @@ Missions:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True # player needs to swim through a grate while climbing a wall
   A05_09C:
     Range: 5.0
     Floor_Paint: False
@@ -329,6 +337,7 @@ Missions:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: # player might just be able to walk off a grate and land on the platform below
   A06_01C:
     Range: 5.0
     Floor_Paint: True
@@ -385,6 +394,7 @@ Missions:
     Wall_Paint: False
     Rail: False
     Attack: False
+    FirstVanilla: True # special case where the stamp special cans do not spawn if the first option was chosen
   MorayKing: # idk yet if it's possible to replace the treasures, if not then specials wont work for bosses
     Range: 9.8
     Floor_Paint: True
@@ -647,34 +657,40 @@ Special_Weapons:
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: False
   SpGachihoko:
     Range: 26.0
     Floor_Paint: True
     Wall_Paint: True
     Rail: True
     Attack: True
+    Grate: True
   SpJetpack_Mission:
     Range: 26.0
     Floor_Paint: True
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True
   SpSuperHook_Mission:
     Range: 31.0
     Floor_Paint: True
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True
   SpSuperLanding:
     Range: 9.8
     Floor_Paint: True
     Wall_Paint: False # doesn't paint high and climbing up can be a pain
     Rail: True
     Attack: True
+    Grate: True
   SpUltraStamp_Mission:
     Range: 26.0
     Floor_Paint: True
     Wall_Paint: True
     Rail: False
     Attack: True
+    Grate: True
   
