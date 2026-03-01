@@ -1,5 +1,6 @@
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
-import oead, secrets
+from RandomizerCore.Tools.actor_tools import SplActor
+import oead
 
 # we only include one enemy entry because it gets removed if enemies arent randomized
 # enemies get randomized after the item drops, so it will turn into a different enemy anyway
@@ -93,7 +94,7 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
         act["spl__WoodenBoxBancParam"] = {} # remove egg reward
         act["spl__AirBallBancParam"] = {} # remove egg reward
         new_item = thread.rng.choices(list(valid_drops.keys()), list(valid_drops.values()))[0]
-        drop = DropItem(new_item, ids, thread.rng)
+        drop = SplActor(new_item, ids, thread.rng)
         act["Links"] = [{"Name": "ToDropItem", "Dst": oead.U64(drop.hash)}]
         act["spl__ItemDropBancParam"] = {"ToDropItem": oead.U64(drop.hash)}
         new_drops.append(drop)
@@ -103,62 +104,3 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
 
     # save banc file
     thread.parent().saveToSarc(level_sarc, file_path, banc)
-
-
-# Code taken from my old Splatoon 3 Only Up level creation code
-class DropItem:
-    """Represents a Splatoon 3 actor object"""
-
-    def __init__(self, name: str, ids: dict, rng):
-        self.name = name
-        self.translate = [0.0, 0.0, 0.0]
-        self.rotation = [0.0, 0.0, 0.0]
-        self.scale = [1.0, 1.0, 1.0]
-        self.team = "Neutral"
-        if name.startswith("Enemy"):
-            self.team = "Bravo"
-
-        # create unique IDs for the object
-        hash = rng.getrandbits(64)
-        while hash in ids["Hash"]:
-            hash = rng.getrandbits(64)
-        ids["Hash"].append(hash)
-        self.hash = hash
-
-        srt_hash = rng.getrandbits(32)
-        while srt_hash in ids["SRTHash"]:
-            srt_hash = rng.getrandbits(32)
-        ids["SRTHash"].append(srt_hash)
-        self.srt_hash = srt_hash
-
-        instance_id = secrets.token_hex(16)
-        while instance_id in ids["InstanceID"]:
-            instance_id = secrets.token_hex(16)
-        ids["InstanceID"].append(instance_id)
-        self.instance_id = instance_id
-
-
-    def pack(self) -> dict:
-        """Converts this object into a dict with oead typings"""
-
-        objd = {}
-
-        objd["Name"] = self.name
-        objd["Gyaml"] = self.name
-        objd["Hash"] = oead.U64(self.hash)
-        objd["SRTHash"] = oead.U32(self.srt_hash)
-        objd["InstanceID"] = f"{self.instance_id[:8]}-{self.instance_id[8:12]}-{self.instance_id[12:16]}-{self.instance_id[16:20]}-{self.instance_id[20:]}"
-        objd["Phive"] = {"Placement": {"ID": oead.U64(self.hash)}}
-        # if self.rotation != [0.0, 0.0, 0.0]: # convert rotation to radians if the field is needed
-        #     objd['Rotate'] = oead.byml.Array([oead.F32(r * 3.141592 / 180) for r in self.rotation])
-        objd["Scale"] = oead.byml.Array([oead.F32(s) for s in self.scale])
-        objd["TeamCmp"] = {"Team": self.team}
-        objd["Translate"] = oead.byml.Array([oead.F32(t) for t in self.translate])
-
-        if self.name == "ItemIkuraBottle":
-            objd["spl__ItemIkuraBottleBancParam"] = {
-                "DropIkuraValue": oead.S32(10),
-                "DropNum": oead.S32(10)
-            }
-        
-        return objd
