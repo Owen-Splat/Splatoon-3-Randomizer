@@ -97,6 +97,11 @@ def randomizeItems(thread, level_sarc: SARC) -> None:
         drop = SplActor(new_item, ids, thread.rng)
         act["Links"] = [{"Name": "ToDropItem", "Dst": oead.U64(drop.hash)}]
         act["spl__ItemDropBancParam"] = {"ToDropItem": oead.U64(drop.hash)}
+        if new_item == "ItemIkuraBottle":
+            drop.parameters["spl__ItemIkuraBottleBancParam"] = {
+                "DropIkuraValue": oead.S32(10),
+                "DropNum": oead.S32(10)
+            }
         new_drops.append(drop)
 
     for drop in new_drops:

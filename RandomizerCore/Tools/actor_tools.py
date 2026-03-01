@@ -33,6 +33,9 @@ class SplActor:
         ids["InstanceID"].append(instance_id)
         self.instance_id = instance_id
 
+        # add support for adding parameters
+        self.parameters = {}
+
 
     def pack(self) -> dict:
         """Converts this object into a dict with oead typings"""
@@ -51,10 +54,7 @@ class SplActor:
         objd["TeamCmp"] = {"Team": self.team}
         objd["Translate"] = oead.byml.Array([oead.F32(t) for t in self.translate])
 
-        if self.name == "ItemIkuraBottle":
-            objd["spl__ItemIkuraBottleBancParam"] = {
-                "DropIkuraValue": oead.S32(10),
-                "DropNum": oead.S32(10)
-            }
-        
+        for k,v in self.parameters.items():
+            objd[k] = v
+
         return objd
