@@ -1,10 +1,27 @@
 from RandomizerCore.Tools.zs_tools import BYAML, SARC
 from RandomizerCore.Tools import event_tools
 from randomizer_paths import DATA_PATH
+import oead
 
 with open(DATA_PATH / "HeroMode" / "cutscenes.txt", "r") as f:
     cutscene_list = f.read().splitlines()
 CUTSCENES = [c for c in cutscene_list if not c.startswith('#')]
+
+TRIGGERS = [
+    16970736995762144716, # Mission_FirstKebaInk (avoidable cutscene before C-1)
+    11962471988276804966, # Mission_BigWorldTutorial
+    12843054140135150154, # Mission_IntroduceTrinity
+    14943589567981613895, # Mission_Area02First
+    12555581493902236706, # Mission_Area03First
+    6613581452132380588, # Mission_Area04First
+    7291832044079309458, # Mission_Area04FirstB
+    166864154025753383, # Mission_Area05First
+    11252923247412202095, # Mission_Area05FirstB
+    3117382206393141444, # Mission_Area06First
+    16437576962706687477, # Mission_TrinityBecomeFriend
+    1935498473693935787, # Mission_TrinityBecomeFriend (small 2nd trigger)
+    12309113695328486721, # TESTING - Rocket intermission between R-1 and R-2 (not set up like the other triggers but positioned like it is)
+]
 
 
 def addSkipButton(zs_data: SARC) -> None:
@@ -42,7 +59,7 @@ def removeCutscenes(zs_data: SARC) -> None:
 
     So we edit every instance of the rest of the cutscenes that we want to speed up or delete entirely"""
 
-    unneeded_events = ['Mission_IntroduceComrade', 'Mission_BigWorldTutorial', 'Mission_IntroduceTrinity']
+    unneeded_events = ['Mission_IntroduceComrade']#, 'Mission_BigWorldTutorial', 'Mission_IntroduceTrinity']
     event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
     for f in event_files:
         if any(s in f for s in unneeded_events):
@@ -59,3 +76,13 @@ def removeCutscenes(zs_data: SARC) -> None:
             flow = event_tools.readFlow(zs_data.writer.files[f])
             zs_data.writer.files[f] =\
                 skipCutscene(flow, 'EntryPoint0', 'Event12')
+
+
+# TODO: Some events might not work without triggering for a frame
+# An example is the first cutscene in Alterna where you meet the squid sisters
+def removeCutsceneTriggers(banc: BYAML) -> None:
+    """Removes the LocatorAreaSwitch actors that serve to trigger events"""
+
+    for act in list(banc.info["Actors"]):
+        if int(act["Hash"]) in TRIGGERS:
+            banc.info["Actors"].remove(act)

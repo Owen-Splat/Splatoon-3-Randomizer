@@ -97,7 +97,7 @@ class HeroMode_Process(QtCore.QThread):
             if self.settings['Backgrounds']:
                 background_shuffler.randomizeBackground(self.rng, msn, level_sarc)
 
-            if msn in ('BigWorld', 'SmallWorld'):
+            if msn in ('BigWorld', 'SmallWorld', "LaunchPadWorld"):
                 self.editHubs(msn, level_sarc)
 
             # mission info
@@ -153,6 +153,9 @@ class HeroMode_Process(QtCore.QThread):
 
         if self.settings['Collectables']:
             collectable_shuffler.randomizeCollectables(self.rng, banc)
+
+        if self.settings["Skip Cutscenes"]:
+            cutscene_edits.removeCutsceneTriggers(banc)
 
         self.parent().saveToSarc(hub_sarc, file_path, banc)
 
