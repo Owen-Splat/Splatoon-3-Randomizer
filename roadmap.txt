@@ -1,4 +1,4 @@
-v0.3 beta issues to fix
+v0.3 beta issues/qol
 
 - double check that infinite zipcaster in rocket is properly being excluded
 
@@ -13,6 +13,18 @@ v0.3 beta issues to fix
 - text improvements
     not all mission text is randomized
     we should probably also create length groups for the text so that long text does not go where there should be short text
+
+- collectable randomization has a flaw: it doesnt globally keep track of collectables, only per hub
+    crater has 2 collectables, so it is possible to have up to 2 duplicates aka 2 missing collectables
+
+- add separate rng object for cosmetics
+    this is so that people can race the same seed but use different cosmetic settings to their liking
+
+- since hub worlds are big, increase the skybox scale so that there arent objects going into the level
+    we could apply this to regular levels too and see how it looks
+
+- ultra stamp level needs first option to stay vanilla because the special cans wont spawn
+    alternatively we can probably just remove the ai group on them
 
 v0.4
 - improve logic
