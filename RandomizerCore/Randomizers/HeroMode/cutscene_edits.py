@@ -9,7 +9,7 @@ CUTSCENES = [c for c in cutscene_list if not c.startswith('#')]
 
 TRIGGERS = [
     16970736995762144716, # Mission_FirstKebaInk (avoidable cutscene before C-1)
-    11962471988276804966, # Mission_BigWorldTutorial
+    # 11962471988276804966, # Mission_BigWorldTutorial - this needs to play for a frame so that the player can use the menu
     12843054140135150154, # Mission_IntroduceTrinity
     14943589567981613895, # Mission_Area02First
     12555581493902236706, # Mission_Area03First
@@ -45,13 +45,6 @@ def addSkipButton(zs_data: SARC) -> None:
     zs_data.writer.files[skip_file] = skip_table.repack()
 
 
-def skipCutscene(flow, before, after) -> bytes:
-    """Edits the flowchart to skip events and returns the data"""
-
-    event_tools.insertEventAfter(flow.flowchart, before, after)
-    return event_tools.writeFlow(flow)
-
-
 def removeCutscenes(zs_data: SARC) -> None:
     """Most cutscenes we allow to be skipped through a DemoSkipTable. But some either don't work or give issues.
 
@@ -59,23 +52,23 @@ def removeCutscenes(zs_data: SARC) -> None:
 
     So we edit every instance of the rest of the cutscenes that we want to speed up or delete entirely"""
 
-    unneeded_events = ['Mission_IntroduceComrade']#, 'Mission_BigWorldTutorial', 'Mission_IntroduceTrinity']
+    unneeded_events = ['Mission_IntroduceComrade', 'Mission_BigWorldTutorial']#, 'Mission_IntroduceTrinity']
     event_files = [str(f) for f in zs_data.reader.get_files() if f.name.endswith('.bfevfl')]
     for f in event_files:
         if any(s in f for s in unneeded_events):
             del zs_data.writer.files[f]
         if 'Mission_AppearSmallWorldBoss' in f:
             flow = event_tools.readFlow(zs_data.writer.files[f])
-            zs_data.writer.files[f] =\
-                skipCutscene(flow, 'EntryPoint0', 'Event46')
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event46")
+            zs_data.writer.files[f] = event_tools.writeFlow(flow)
         if 'Mission_TreasureMarge' in f:
             flow = event_tools.readFlow(zs_data.writer.files[f])
-            zs_data.writer.files[f] =\
-                skipCutscene(flow, 'EntryPoint0', 'Event49')
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event49")
+            zs_data.writer.files[f] = event_tools.writeFlow(flow)
         if 'Mission_DestroyLaunchPadKebaInk' in f:
             flow = event_tools.readFlow(zs_data.writer.files[f])
-            zs_data.writer.files[f] =\
-                skipCutscene(flow, 'EntryPoint0', 'Event12')
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event12")
+            zs_data.writer.files[f] = event_tools.writeFlow(flow)
 
 
 # TODO: Some events might not work without triggering for a frame
@@ -86,3 +79,67 @@ def removeCutsceneTriggers(banc: BYAML) -> None:
     for act in list(banc.info["Actors"]):
         if int(act["Hash"]) in TRIGGERS:
             banc.info["Actors"].remove(act)
+
+
+def editTutorialCutscenes(tutorial_sarc: SARC) -> None:
+    event_files = [str(f) for f in tutorial_sarc.reader.get_files() if f.name.endswith('.bfevfl')]
+    for f in event_files:
+        if "PlayerMake_WeaponGet" in f:
+            flow = event_tools.readFlow(tutorial_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event18")
+            event_tools.insertEventAfter(flow.flowchart, "Event18", None)
+            tutorial_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "PlayerMake_TrainArrival" in f:
+            flow = event_tools.readFlow(tutorial_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event6")
+            tutorial_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "PlayerMake_ToPlaza" in f:
+            flow = event_tools.readFlow(tutorial_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event27")
+            tutorial_sarc.writer.files[f] = event_tools.writeFlow(flow)
+
+
+def editNewsCutscenes(news_sarc: SARC) -> None:
+    event_files = [str(f) for f in news_sarc.reader.get_files() if f.name.endswith('.bfevfl')]
+    for f in event_files:
+        if "/Plaza_Overview." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint", "Event19")
+            event_tools.insertEventAfter(flow.flowchart, "Event19", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/Plaza_Intro." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint", "Event15")
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/Plaza_IntroStation." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", "Event11")
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_Opening." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_Ending." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_FirstBoot." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_FirstBootSdodr." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_IntroFsodr." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_IntroSdodr." in f:
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
+        if "/News_VersionUp." in f: # qol speed up
+            flow = event_tools.readFlow(news_sarc.writer.files[f])
+            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
+            news_sarc.writer.files[f] = event_tools.writeFlow(flow)

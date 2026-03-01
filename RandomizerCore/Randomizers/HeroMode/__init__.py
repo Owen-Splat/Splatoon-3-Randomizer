@@ -1,5 +1,6 @@
 from PySide6 import QtCore
-import random, time, traceback
+from RandomizerCore.Tools.actor_tools import SplActor
+import random, time, traceback, oead
 
 from . import background_shuffler
 from . import clothes_shuffler
@@ -43,6 +44,7 @@ class HeroMode_Process(QtCore.QThread):
                 self.ui_missions_info = {}
 
             if self.thread_active: self.editLevels()
+            if self.thread_active: self.skipTutorial()
             if self.thread_active: self.updateMissionParameters()
             if self.thread_active: self.editDatasheets()
 
@@ -239,3 +241,40 @@ class HeroMode_Process(QtCore.QThread):
 
         if self.settings["Hero Clothes"] != "Vanilla" and self.thread_active:
             clothes_shuffler.randomizeClothes(self, self.settings["Hero Clothes"] == "Matching")
+
+
+    def skipTutorial(self) -> None:
+        """Forces the game to load the plaza immediately after confirming player customization
+
+        This also skips the news"""
+
+        # --- PlayerMake
+        file_name, tutorial_sarc = self.parent().loadFile("Pack/Scene", "PlayerMake.pack.zs")
+
+        # remove the train cutscenes from the tutorial level
+        # also gives the player the weapon right after customization
+        # this is because the finish trigger checks for weapon
+        cutscene_edits.editTutorialCutscenes(tutorial_sarc)
+
+        banc_path = "Banc/PlayerMake.bcett.byml"
+        banc = self.parent().loadFromSarc(tutorial_sarc, banc_path)
+
+        # move the trigger for the edited WeaponGet cutscene to where the player starts walking
+        trigger1 = [a for a in banc.info["Actors"] if int(a["Hash"]) == 18107586323658635840][0]
+        trigger1["Translate"] = oead.byml.Array([oead.F32(t) for t in [4.0, 6.0, 128.0]])
+        trigger1["Scale"] = oead.byml.Array([oead.F32(t) for t in [15.0, 10.0, 20.0]])
+
+        # move the trigger for finishing tutorial to where the player starts walking
+        trigger2 = [a for a in banc.info["Actors"] if a["Name"] == "LocatorTutorialStation"][0]
+        trigger2["Translate"] = oead.byml.Array([oead.F32(t) for t in [4.0, 6.0, 128.0]])
+        trigger2["Scale"] = oead.byml.Array([oead.F32(t) for t in [15.0, 10.0, 20.0]])
+
+        # save PlayerMake
+        self.parent().saveToSarc(tutorial_sarc, banc_path, banc)
+        self.parent().saveFile("Pack/Scene", file_name, tutorial_sarc)
+
+        # --- Plaza/News
+        file_name, news_sarc = self.parent().loadFile("Pack", "News.pack.zs")
+        cutscene_edits.editNewsCutscenes(news_sarc)
+        self.parent().saveFile("Pack", file_name, news_sarc)
+
