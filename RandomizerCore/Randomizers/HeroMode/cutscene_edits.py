@@ -139,7 +139,3 @@ def editNewsCutscenes(news_sarc: SARC) -> None:
             flow = event_tools.readFlow(news_sarc.writer.files[f])
             event_tools.insertEventAfter(flow.flowchart, "EntryPoint", None)
             news_sarc.writer.files[f] = event_tools.writeFlow(flow)
-        if "/News_VersionUp." in f: # qol speed up
-            flow = event_tools.readFlow(news_sarc.writer.files[f])
-            event_tools.insertEventAfter(flow.flowchart, "EntryPoint0", None)
-            news_sarc.writer.files[f] = event_tools.writeFlow(flow)
