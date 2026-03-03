@@ -194,22 +194,6 @@ class HeroMode_Process(QtCore.QThread):
 
         file_name, param_sarc = self.parent().loadFile("Pack", file_name)
 
-        # So currently using the map only allows you to jump to kettles that happen to be in their original site
-        # I thought this would fix that, but nope
-
-        # if self.settings['Levels']:
-        #     table_file = 'Gyml/Singleton/spl__MissionStageTable.spl__MissionStageTable.bgyml'
-        #     stage_table = BYAML(zs_data.writer.files[table_file])
-        #     for stage in stage_table.info['Rows']:
-        #         if stage['StageName'].startswith('Msn_A'):
-        #             loc = [i for i in self.levels if self.levels[i] == stage['StageName']][0]
-        #             site_num = loc[6]
-        #             nums = {'r': '2', 'a': '4', 'n': '6', 'S': '1'}
-        #             if site_num in nums:
-        #                 site_num = nums[site_num]
-        #             stage['WorldAreaType'] = 'BigWorld' + site_num
-        #     zs_data.writer.files[table_file] = stage_table.repack()
-
         if self.settings['Hero Gear Upgrades']:
             upgrade_shuffler.randomizeUpgrades(self.rng, param_sarc)
 
