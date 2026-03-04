@@ -142,6 +142,8 @@ class HeroMode_Process(QtCore.QThread):
 
             self.parent().saveFile("Pack/Scene", m, level_sarc)
 
+        self.removeLogicGates() # removes logic elements that would gate out weapons
+
 
     def editHubs(self, msn: str, hub_sarc) -> None:
         """Makes changes to the hub worlds
@@ -150,6 +152,11 @@ class HeroMode_Process(QtCore.QThread):
 
         file_path = f"Banc/{msn}.bcett.byml"
         banc = self.parent().loadFromSarc(hub_sarc, file_path)
+
+        # # DEBUG - REMOVE ALL OOZE SO WE CAN EASIER TEST STUFF
+        # for act in list(banc.info["Actors"]):
+        #     if act["Name"].startswith("KebaInk"):
+        #         banc.info["Actors"].remove(act)
 
         if self.settings['Levels']:
             level_shuffler.changeKettleDestinations(banc, self.levels)
@@ -266,3 +273,24 @@ class HeroMode_Process(QtCore.QThread):
         cutscene_edits.editNewsCutscenes(news_sarc)
         self.parent().saveFile("Pack", file_name, news_sarc)
 
+
+    # TODO: We need to do the same for Rocket 1 since it requires using smallfry to hit 2 buttons at once
+    def removeLogicGates(self) -> None:
+        """Removes logic from levels that otherwise force specific weapons"""
+
+        # we will first edit the ultra stamp level
+        file_name, level_sarc = self.parent().loadFile("Pack/Scene", "Msn_A06_09C.pack.zs")
+
+        file_path = [f.name for f in list(level_sarc.reader.get_files())
+                    if f.name.startswith("Banc/")][0]
+        banc = self.parent().loadFromSarc(level_sarc, file_path)
+
+        # go through the Ai Groups and remove every CanBuildMachine
+        # these normally only work if you dont choose the first weapon choice
+        # removing logic from them will make them always spawn the ultra stamps
+        for ref in list(banc.info["AiGroups"][0]["References"]):
+            if ref["Id"].startswith("CanBuildMachine_"):
+                banc.info["AiGroups"][0]["References"].remove(ref)
+
+        self.parent().saveToSarc(level_sarc, file_path, banc)
+        self.parent().saveFile("Pack/Scene", file_name, level_sarc)
