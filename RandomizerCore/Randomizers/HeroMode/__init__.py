@@ -28,6 +28,7 @@ class HeroMode_Process(QtCore.QThread):
     def __init__(self, parent, seed: str, settings: dict) -> None:
         QtCore.QThread.__init__(self, parent)
         self.rng = random.Random(seed)
+        self.cosmetic_rng = random.Random(seed)
         self.settings = settings
         self.thread_active = True
 
@@ -100,7 +101,7 @@ class HeroMode_Process(QtCore.QThread):
             m, level_sarc = self.parent().loadFile("Pack/Scene", m)
 
             if self.settings['Backgrounds']:
-                background_shuffler.randomizeBackground(self.rng, msn, level_sarc)
+                background_shuffler.randomizeBackground(self.cosmetic_rng, msn, level_sarc)
 
             if msn in ('BigWorld', 'SmallWorld', "LaunchPadWorld"):
                 self.editHubs(msn, level_sarc)
@@ -113,7 +114,7 @@ class HeroMode_Process(QtCore.QThread):
                 level_shuffler.fixMissionCompatibility(self.levels, msn, mission_data)
 
             if self.settings['Ink Colors'] and "King" not in msn:
-                color = color_shuffler.getRandomColor(self.rng)
+                color = color_shuffler.getRandomColor(self.cosmetic_rng)
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{color}.game__gfx__parameter__TeamColorDataSet.gyml"
 
@@ -127,7 +128,7 @@ class HeroMode_Process(QtCore.QThread):
             self.parent().saveToSarc(level_sarc, file_path, mission_data)
 
             if self.settings['Music']:
-                music_shuffler.randomizeMusic(self.rng, msn, level_sarc)
+                music_shuffler.randomizeMusic(self.cosmetic_rng, msn, level_sarc)
 
             if self.settings['Skip Cutscenes']:
                 cutscene_edits.removeCutscenes(level_sarc)

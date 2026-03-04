@@ -41,7 +41,7 @@ def randomizeText(thread) -> None:
         text_entries = []
         for text_file in mission_text_files:
             text_entries.extend(text_tools.getText(zs_data.writer.files[text_file]))
-        thread.rng.shuffle(text_entries)
+        thread.cosmetic_rng.shuffle(text_entries)
         for text_file in mission_text_files:
             zs_data.writer.files[text_file] =\
                 text_tools.randomizeText(zs_data.writer.files[text_file], text_entries)

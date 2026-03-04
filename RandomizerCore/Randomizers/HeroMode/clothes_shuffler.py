@@ -53,7 +53,7 @@ def makeMatching(thread, head_info, clothes_info, shoes_info) -> None:
             del gear_sets[k]
 
     # now get len(HERO_IDS) unique ids to change to the hero ids
-    ids = thread.rng.sample(list(gear_sets.keys()), len(HERO_IDS))
+    ids = thread.cosmetic_rng.sample(list(gear_sets.keys()), len(HERO_IDS))
 
     for i,id in enumerate(HERO_IDS):
         head_entry = [e for e in head_info.info if int(e["Id"]) == ids[i]][0]
@@ -68,11 +68,11 @@ def makeRandom(thread, head_info, clothes_info, shoes_info) -> None:
     """Assigns gear with no regard for matching or how it looks"""
 
     head_ids = [e["Id"] for e in head_info.info]
-    head_ids = thread.rng.sample(head_ids, len(HERO_IDS))
+    head_ids = thread.cosmetic_rng.sample(head_ids, len(HERO_IDS))
     clothes_ids = [e["Id"] for e in clothes_info.info]
-    clothes_ids = thread.rng.sample(clothes_ids, len(HERO_IDS))
+    clothes_ids = thread.cosmetic_rng.sample(clothes_ids, len(HERO_IDS))
     shoe_ids = [e["Id"] for e in shoes_info.info]
-    shoe_ids = thread.rng.sample(shoe_ids, len(HERO_IDS))
+    shoe_ids = thread.cosmetic_rng.sample(shoe_ids, len(HERO_IDS))
 
     for i,id in enumerate(HERO_IDS):
         head_entry = [e for e in head_info.info if e["Id"] == head_ids[i]][0]

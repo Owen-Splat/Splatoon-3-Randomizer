@@ -68,9 +68,9 @@ def editColors(thread) -> None:
             bravo = Color(200, 30, 180)
 
         # make sure the player ink color is not too similar to the enemy ink
-        alpha = createRandomColor(thread.rng)
+        alpha = createRandomColor(thread.cosmetic_rng)
         while checkColorSimilarity(bravo, alpha):
-            alpha = createRandomColor(thread.rng)
+            alpha = createRandomColor(thread.cosmetic_rng)
 
         # change player color
         color_type["AlphaTeamColor"] = alpha.pack()
