@@ -43,6 +43,9 @@ class HeroMode_Process(QtCore.QThread):
                 self.weapon_placements = weapon_shuffler.randomizeWeapons(self, self.hero_weapons)
                 self.ui_missions_info = {}
 
+            if self.settings["Collectables"]:
+                self.collectables = collectable_shuffler.CollectableShuffler(self.rng)
+
             if self.thread_active: self.editLevels()
             if self.thread_active: self.skipTutorial()
             if self.thread_active: self.updateMissionParameters()
@@ -153,8 +156,8 @@ class HeroMode_Process(QtCore.QThread):
         if msn == 'BigWorld' and self.settings['Fuzzy Ooze Costs']:
             ooze_shuffler.shuffleCosts(self.rng, banc)
 
-        if self.settings['Collectables']:
-            collectable_shuffler.randomizeCollectables(self.rng, banc)
+        if msn != "LaunchPadWorld" and self.settings['Collectables']:
+            self.collectables.randomizeCollectables(banc)
 
         if self.settings["Skip Cutscenes"]:
             cutscene_edits.removeCutsceneTriggers(banc)
