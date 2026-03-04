@@ -1,0 +1,13 @@
+<b>Issues:</b>
+<br></br><br></br>
+- Zipcaster and Inkjet levels have their vanilla weapon choices
+<br></br><br></br>
+- Logic is NOT perfect. While it is solid, some weapon choices may still be unbeatable
+<br></br><br></br>
+- Specials cannot interact with the treasure in the Alterna boss levels, making it unbeatable
+<br></br><br></br>
+- Picking up a special while holding the Rainmaker results in not being able to use your weapon
+<br></br><br></br>
+- Randomized backgrounds may make it hard to see stage elements
+<br></br><br></br>
+- Using Flexlion alongside the randomizer may result in weird visuals and crashes

@@ -2,13 +2,16 @@ from PySide6.QtCore import Qt, QEvent, QObject
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import (QMainWindow, QLabel, QLineEdit, QPushButton, QCheckBox, QSpinBox,
                                QProgressBar, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget,
-                               QSpacerItem, QSizePolicy, QApplication, QFileDialog)
+                               QSpacerItem, QSizePolicy, QApplication, QFileDialog, QMenuBar)
 from RandomizerUI.custom_widgets import *
 from randomizer_paths import RESOURCE_PATH
 from version import VERSION
 
-with open(RESOURCE_PATH / 'changelog.txt', 'r') as f:
+with open(RESOURCE_PATH / "changelog.txt", "r") as f:
     CHANGES = f.read()
+
+with open(RESOURCE_PATH / "issues.txt", "r") as f:
+    ISSUES = f.read()
 
 
 class Ui_MainWindow(QObject):
@@ -16,7 +19,8 @@ class Ui_MainWindow(QObject):
         window.setWindowTitle(f"Splatoon 3 Randomizer v{VERSION}")
         self.window = window
         self.spacing = 175
-
+        self.createMenuBar()
+        
         central_widget = QWidget()
         vl = QVBoxLayout()
 
@@ -117,6 +121,19 @@ class Ui_MainWindow(QObject):
         geo = window.frameGeometry()
         geo.moveCenter(center)
         window.move(geo.topLeft())
+
+
+    def createMenuBar(self) -> None:
+        menu_bar = QMenuBar()
+
+        am = menu_bar.addMenu("About")
+        nb = am.addAction("What's New")
+        nb.triggered.connect(self.showChangelog)
+        am.addSeparator()
+        ib = am.addAction("Known Issues")
+        ib.triggered.connect(self.showIssues)
+
+        self.window.setMenuBar(menu_bar)
 
 
     def createTabHM(self) -> QWidget:
@@ -252,6 +269,12 @@ class Ui_MainWindow(QObject):
         self.createMessageWindow("Changelog", CHANGES, with_scroll=True)
 
 
+    def showIssues(self) -> None:
+        """Display a new window listing every known issue"""
+
+        self.createMessageWindow("Known Issues", ISSUES, with_scroll=True)
+
+
     def showUserError(self, msg) -> None:
         """Display new window to let the user know what went wrong - missing paths, bad logic, etc."""
 
@@ -259,9 +282,7 @@ class Ui_MainWindow(QObject):
 
 
     def createMessageWindow(self, title: str, text: str, with_scroll: bool = False) -> None:
-        """Creates a new QMessageBox with the given window title and text
-
-        This also matches the current Light/Dark Mode"""
+        """Creates a new QMessageBox with the given window title and text"""
 
         box = RandoHelpWindow(f"{self.window.windowTitle().split(" v")[0]} - {title}", text, with_scroll)
         box.exec()
