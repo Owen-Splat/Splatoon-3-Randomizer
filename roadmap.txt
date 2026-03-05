@@ -1,30 +1,8 @@
 v0.3 beta issues/qol
 
-- double check that infinite zipcaster in rocket is properly being excluded
-
-- check grizz with randomized enemies
-    there was a crash, unsure if it was random, related to flexlion, or just a general rando issue
-    also check what happens if the barrier enemy is in grizz, it would be an issue if it blocks the weak points
-
-- make a list of cutscene actor hashes that can just deleted instead of skipping
-    even skipping cutscenes is a slight annoyance when it works to just delete entirely
-    also, skipping cutscenes can cause other weird issues anyway (blurred camera, clipping through ground)
-
 - text improvements
     not all mission text is randomized
     we should probably also create length groups for the text so that long text does not go where there should be short text
-
-- collectable randomization has a flaw: it doesnt globally keep track of collectables, only per hub
-    crater has 2 collectables, so it is possible to have up to 2 duplicates aka 2 missing collectables
-
-- add separate rng object for cosmetics
-    this is so that people can race the same seed but use different cosmetic settings to their liking
-
-- since hub worlds are big, increase the skybox scale so that there arent objects going into the level
-    we could apply this to regular levels too and see how it looks
-
-- ultra stamp level needs first option to stay vanilla because the special cans wont spawn
-    alternatively we can probably just remove the ai group on them
 
 v0.4
 - improve logic
