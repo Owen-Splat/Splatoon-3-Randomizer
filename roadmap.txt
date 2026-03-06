@@ -1,9 +1,3 @@
-v0.3 beta issues/qol
-
-- text improvements
-    not all mission text is randomized
-    we should probably also create length groups for the text so that long text does not go where there should be short text
-
 v0.4
 - improve logic
     zipcaster and inkjet levels currently have the weapon choices left as vanilla
