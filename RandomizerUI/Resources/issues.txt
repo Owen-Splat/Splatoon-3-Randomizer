@@ -4,10 +4,12 @@
 <br></br><br></br>
 - Logic is NOT perfect. While it is solid, some weapon choices may still be unbeatable
 <br></br><br></br>
-- Specials cannot interact with the treasure in the Alterna boss levels, making it unbeatable
+- Most specials cannot interact with the treasure in the Alterna boss levels, making it unbeatable
 <br></br><br></br>
 - Picking up a special while holding the Rainmaker results in not being able to use your weapon
 <br></br><br></br>
 - Randomized backgrounds may make it hard to see stage elements
+<br></br><br></br>
+- Some text will not be randomized
 <br></br><br></br>
 - Using Flexlion alongside the randomizer may result in weird visuals and crashes
