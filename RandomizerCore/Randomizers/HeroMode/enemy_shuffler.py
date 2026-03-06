@@ -17,16 +17,22 @@ def randomizeEnemies(thread, zs_data: SARC) -> None:
             break
         if act["Name"] in ENEMIES:
             if thread.settings["Enemies"]:
-                enemy = thread.rng.choice(ENEMIES)
+                valid_enemies = ENEMIES.copy()
+                if "Links" in act: # limit to enemies that support the ToParent link
+                    if act["Links"][0]["Name"] == "ToParent":
+                        valid_enemies = [e for e in valid_enemies
+                                         if e.startswith("Spl")
+                                         or "Takolien" in e]
+                enemy = thread.rng.choice(valid_enemies)
                 while not checkIfEnemyIsValid(thread.rng, act["Name"], enemy):
-                    enemy = thread.rng.choice(ENEMIES)
+                    enemy = thread.rng.choice(valid_enemies)
                 act["Name"] = enemy
                 act["Gyaml"] = enemy
             size = 1.0
             if thread.settings["Enemy Sizes"]:
                 size = thread.rng.uniform(0.5, 2.0)
                 act["Scale"] = oead.byml.Array([oead.F32(size) for s in range(3)])
-            if enemy.endswith("Takopter"):
+            if act["Name"].endswith("Takopter"):
                 act["Translate"][1] = oead.F32(float(act["Translate"][1]) + (1.5 * size))
     zs_data.writer.files[banc_file] = banc.repack()
 
