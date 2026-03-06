@@ -11,6 +11,7 @@
 <li>The "Kettles" option has been renamed to "Levels" for better clarity</li>
 <li>The "Beatable" setting has been removed, the randomizer now has proper logic</li>
 <li>The randomizer app can now be resized</li>
+<li>The randomizer now compiles to both Windows and Linux</li>
 </ul>
 <br></br>
 
