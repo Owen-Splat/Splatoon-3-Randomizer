@@ -153,11 +153,13 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
     # 2 unique cases where the level is designed around curling bomb/linemarker
     if "Sub" in level_logic:
         if not weapon.endswith(level_logic["Sub"]):
-            result = False
+            return False
 
     # Special
     if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
         special = weapon.split('+')[0]
+        if special == "SpChariot_Mission" and "Timed" in level_logic: # special case where crab is too slow
+            return False
         weapon_logic = LOGIC["Special_Weapons"][special]
         if weapon_logic["Range"] < level_logic["Range"]:
             result = False
@@ -168,6 +170,8 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
         if (not weapon_logic["Rail"]) and (level_logic["Rail"]):
             result = False
         if (not weapon_logic["Grate"]) and ("Grate" in level_logic):
+            result = False
+        if (not weapon_logic["Treasure"] and "Boss" in level_logic):
             result = False
         return result
 

@@ -375,6 +375,7 @@ Missions:
     Wall_Paint: False
     Rail: False
     Attack: True
+    Timed: True
   A06_07C:
     Range: 26.0
     Floor_Paint: False
@@ -402,6 +403,7 @@ Missions:
     Rail: False
     Attack: True
     Main: True
+    Boss: True
   SharkKing:
     Range: 11.0
     Floor_Paint: True
@@ -409,6 +411,7 @@ Missions:
     Rail: False
     Attack: True
     Main: True
+    Boss: True
   MantaKing:
     Range: 5.0
     Floor_Paint: True
@@ -416,6 +419,7 @@ Missions:
     Rail: False
     Attack: True
     Main: True
+    Boss: True
 
 Main_Weapons:
   Shooter_Short: # sploosh
@@ -658,6 +662,7 @@ Special_Weapons:
     Rail: False
     Attack: True
     Grate: False
+    Treasure: False # If it can grab the treasure in the boss levels
   SpGachihoko:
     Range: 26.0
     Floor_Paint: True
@@ -665,6 +670,7 @@ Special_Weapons:
     Rail: True
     Attack: True
     Grate: True
+    Treasure: True
   SpJetpack_Mission:
     Range: 26.0
     Floor_Paint: True
@@ -672,6 +678,7 @@ Special_Weapons:
     Rail: False
     Attack: True
     Grate: True
+    Treasure: False
   SpSuperHook_Mission:
     Range: 31.0
     Floor_Paint: True
@@ -679,6 +686,7 @@ Special_Weapons:
     Rail: False
     Attack: True
     Grate: True
+    Treasure: False
   SpSuperLanding:
     Range: 9.8
     Floor_Paint: True
@@ -686,6 +694,7 @@ Special_Weapons:
     Rail: True
     Attack: True
     Grate: True
+    Treasure: True
   SpUltraStamp_Mission:
     Range: 26.0
     Floor_Paint: True
@@ -693,4 +702,5 @@ Special_Weapons:
     Rail: False
     Attack: True
     Grate: True
+    Treasure: True
   
