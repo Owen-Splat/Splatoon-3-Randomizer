@@ -29,7 +29,8 @@ def randomizeText(thread) -> None:
             "Rogaining",
             "MainTV",
             "SelectWeapon",
-            "Clear"
+            "Clear",
+            "Menu"
         )
 
         for text_file in reversed(mission_text_files):
