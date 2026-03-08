@@ -11,17 +11,6 @@ def randomizeClothes(thread, matching: bool) -> None:
     file_name_clothes, clothes_info = thread.parent().loadFile("RSDB", "GearInfoClothes")
     file_name_shoes, shoes_info = thread.parent().loadFile("RSDB", "GearInfoShoes")
 
-    # delete hero entries from the datasheets
-    for entry in list(head_info.info):
-        if int(entry["Id"]) in HERO_IDS:
-            head_info.info.remove(entry)
-    for entry in list(clothes_info.info):
-        if int(entry["Id"]) in HERO_IDS:
-            clothes_info.info.remove(entry)
-    for entry in list(shoes_info.info):
-        if int(entry["Id"]) in HERO_IDS:
-            shoes_info.info.remove(entry)
-
     if matching:
         makeMatching(thread, head_info, clothes_info, shoes_info)
     else:
@@ -56,12 +45,15 @@ def makeMatching(thread, head_info, clothes_info, shoes_info) -> None:
     ids = thread.cosmetic_rng.sample(list(gear_sets.keys()), len(HERO_IDS))
 
     for i,id in enumerate(HERO_IDS):
-        head_entry = [e for e in head_info.info if int(e["Id"]) == ids[i]][0]
-        head_entry["Id"] = oead.S32(id)
-        clothes_entry = [e for e in clothes_info.info if int(e["Id"]) == ids[i]][0]
-        clothes_entry["Id"] = oead.S32(id)
-        shoes_entry = [e for e in shoes_info.info if int(e["Id"]) == ids[i]][0]
-        shoes_entry["Id"] = oead.S32(id)
+        hero_head = [e for e in head_info.info if int(e["Id"]) == id][0]
+        new_head = [e for e in head_info.info if int(e["Id"]) == ids[i]][0]
+        copyEntryInfo(new_head, hero_head)
+        hero_clothes = [e for e in clothes_info.info if int(e["Id"]) == id][0]
+        new_clothes = [e for e in clothes_info.info if int(e["Id"]) == ids[i]][0]
+        copyEntryInfo(new_clothes, hero_clothes)
+        hero_shoes = [e for e in shoes_info.info if int(e["Id"]) == id][0]
+        new_shoes = [e for e in shoes_info.info if int(e["Id"]) == ids[i]][0]
+        copyEntryInfo(new_shoes, hero_shoes)
 
 
 def makeRandom(thread, head_info, clothes_info, shoes_info) -> None:
@@ -75,9 +67,22 @@ def makeRandom(thread, head_info, clothes_info, shoes_info) -> None:
     shoe_ids = thread.cosmetic_rng.sample(shoe_ids, len(HERO_IDS))
 
     for i,id in enumerate(HERO_IDS):
-        head_entry = [e for e in head_info.info if e["Id"] == head_ids[i]][0]
-        head_entry["Id"] = oead.S32(id)
-        clothes_entry = [e for e in clothes_info.info if e["Id"] == clothes_ids[i]][0]
-        clothes_entry["Id"] = oead.S32(id)
-        shoes_entry = [e for e in shoes_info.info if e["Id"] == shoe_ids[i]][0]
-        shoes_entry["Id"] = oead.S32(id)
+        hero_head = [e for e in head_info.info if int(e["Id"]) == id][0]
+        new_head = [e for e in head_info.info if e["Id"] == head_ids[i]][0]
+        copyEntryInfo(new_head, hero_head)
+        hero_clothes = [e for e in clothes_info.info if int(e["Id"]) == id][0]
+        new_clothes = [e for e in clothes_info.info if e["Id"] == clothes_ids[i]][0]
+        copyEntryInfo(new_clothes, hero_clothes)
+        hero_shoes = [e for e in shoes_info.info if int(e["Id"]) == id][0]
+        new_shoes = [e for e in shoes_info.info if e["Id"] == shoe_ids[i]][0]
+        copyEntryInfo(new_shoes, hero_shoes)
+
+
+def copyEntryInfo(info_entry, target_entry) -> None:
+    """Copies the first entry's key:values to the target entry
+
+    Excludes 'Id' and '__RowId' to keep the entries unique"""
+
+    for k,v in info_entry.items():
+        if k != "Id":
+            target_entry[k] = v
