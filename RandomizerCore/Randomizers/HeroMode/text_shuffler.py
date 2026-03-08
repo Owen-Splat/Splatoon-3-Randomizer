@@ -1,4 +1,3 @@
-from RandomizerCore.Tools.zs_tools import SARC
 from RandomizerCore.Tools import text_tools
 
 
@@ -30,18 +29,24 @@ def randomizeText(thread) -> None:
             "Rogaining",
             "MainTV",
             "SelectWeapon",
-            "Clear"
+            "Clear",
+            "Menu"
         )
 
         for text_file in reversed(mission_text_files):
             if any(sub in text_file for sub in exclusions):
                 mission_text_files.remove(text_file)
 
-        # store the messages in an array, shuffle it, then replace old messages with shuffled ones
-        text_entries = []
+        # store the messages by length
+        text_entries = [[], [], [], [], []]
         for text_file in mission_text_files:
-            text_entries.extend(text_tools.getText(zs_data.writer.files[text_file]))
-        thread.rng.shuffle(text_entries)
+            text_list = text_tools.getText(zs_data.writer.files[text_file])
+            for entry in text_list:
+                text_entries[text_tools.getTextLengthGroup(entry)].append(entry)
+
+        # shuffle the text and replace old messages with the shuffled ones
+        for group in text_entries:
+            thread.cosmetic_rng.shuffle(group)
         for text_file in mission_text_files:
             zs_data.writer.files[text_file] =\
                 text_tools.randomizeText(zs_data.writer.files[text_file], text_entries)

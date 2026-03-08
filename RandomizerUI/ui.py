@@ -2,13 +2,16 @@ from PySide6.QtCore import Qt, QEvent, QObject
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import (QMainWindow, QLabel, QLineEdit, QPushButton, QCheckBox, QSpinBox,
                                QProgressBar, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget,
-                               QSpacerItem, QSizePolicy, QApplication, QFileDialog)
+                               QSpacerItem, QSizePolicy, QApplication, QFileDialog, QMenuBar)
 from RandomizerUI.custom_widgets import *
 from randomizer_paths import RESOURCE_PATH
 from version import VERSION
 
-with open(RESOURCE_PATH / 'changelog.txt', 'r') as f:
+with open(RESOURCE_PATH / "changelog.txt", "r") as f:
     CHANGES = f.read()
+
+with open(RESOURCE_PATH / "issues.txt", "r") as f:
+    ISSUES = f.read()
 
 
 class Ui_MainWindow(QObject):
@@ -16,7 +19,8 @@ class Ui_MainWindow(QObject):
         window.setWindowTitle(f"Splatoon 3 Randomizer v{VERSION}")
         self.window = window
         self.spacing = 175
-
+        self.createMenuBar()
+        
         central_widget = QWidget()
         vl = QVBoxLayout()
 
@@ -79,6 +83,8 @@ class Ui_MainWindow(QObject):
 
         for c in tab_widget.findChildren(QCheckBox):
             c.setFixedWidth(self.spacing)
+        for b in tab_widget.findChildren(RandoComboBox):
+            b.setFixedWidth(self.spacing)
 
         label = QLabel(central_widget)
         label.setObjectName('ExplanationText')
@@ -117,6 +123,19 @@ class Ui_MainWindow(QObject):
         window.move(geo.topLeft())
 
 
+    def createMenuBar(self) -> None:
+        menu_bar = QMenuBar()
+
+        am = menu_bar.addMenu("About")
+        nb = am.addAction("What's New")
+        nb.triggered.connect(self.showChangelog)
+        am.addSeparator()
+        ib = am.addAction("Known Issues")
+        ib.triggered.connect(self.showIssues)
+
+        self.window.setMenuBar(menu_bar)
+
+
     def createTabHM(self) -> QWidget:
         tab = QWidget()
         tab.setObjectName("HeroModeTab")
@@ -149,8 +168,14 @@ class Ui_MainWindow(QObject):
         ohko_check.setWhatsThis('Adds the "Enemy Ink Is Lava" challenge to every Alterna level.\nHaving armor will negate the challenge.')
         items_check = QCheckBox("Item Drops", tab)
         items_check.setWhatsThis("Randomizes the items and enemies that drop from breaking boxes and balloons.\nCertain items are left vanilla.")
-        clothes_check = QCheckBox("Hero Clothes", tab)
-        clothes_check.setWhatsThis("Randomizes the hero clothes into any other piece of clothing.\nThis includes armor pieces.")
+        clothes_box = RandoComboBox(tab)
+        clothes_box.setWhatsThis("Randomizes the hero clothes into any other piece of clothing.\nThis includes armor pieces.")
+        clothes_box.setObjectName("Hero Clothes")
+        clothes_box.addItems((
+            "Hero Clothes: Vanilla",
+            "Hero Clothes: Random",
+            "Hero Clothes: Matching"
+        ))
         text_check = QCheckBox("Text", tab)
         text_check.setWhatsThis("Randomizes the text.")
 
@@ -190,9 +215,9 @@ class Ui_MainWindow(QObject):
         hl = QHBoxLayout()
         hl.addWidget(items_check)
         hl.addSpacerItem(self.createHorizontalSpacer())
-        hl.addWidget(clothes_check)
-        hl.addSpacerItem(self.createHorizontalSpacer())
         hl.addWidget(text_check)
+        hl.addSpacerItem(self.createHorizontalSpacer())
+        hl.addWidget(clothes_box)
         vl.addLayout(hl)
 
         tab.setLayout(vl)
@@ -244,6 +269,12 @@ class Ui_MainWindow(QObject):
         self.createMessageWindow("Changelog", CHANGES, with_scroll=True)
 
 
+    def showIssues(self) -> None:
+        """Display a new window listing every known issue"""
+
+        self.createMessageWindow("Known Issues", ISSUES, with_scroll=True)
+
+
     def showUserError(self, msg) -> None:
         """Display new window to let the user know what went wrong - missing paths, bad logic, etc."""
 
@@ -251,9 +282,7 @@ class Ui_MainWindow(QObject):
 
 
     def createMessageWindow(self, title: str, text: str, with_scroll: bool = False) -> None:
-        """Creates a new QMessageBox with the given window title and text
-
-        This also matches the current Light/Dark Mode"""
+        """Creates a new QMessageBox with the given window title and text"""
 
         box = RandoHelpWindow(f"{self.window.windowTitle().split(" v")[0]} - {title}", text, with_scroll)
         box.exec()
@@ -291,6 +320,47 @@ class Ui_MainWindow(QObject):
 
     def findTab(self, name: str) -> QWidget:
         return self.window.findChild(QWidget, name)
+
+
+    def getTabOnOffState(self, tab_name) -> bool:
+        """Returns whether any widgets in the tab have been changed"""
+
+        tab = self.findTab(tab_name)
+        checks = [c.isChecked() for c in tab.findChildren(QCheckBox)]
+        boxes = [bool(b.currentIndex()) for b in tab.findChildren(RandoComboBox)]
+        return True if any(checks) or any(boxes) else False
+
+
+    def getTabSettings(self, tab_name) -> dict:
+        settings = {}
+        tab = self.findTab(tab_name)
+
+        for c in tab.findChildren(QCheckBox):
+            settings[c.text()] = c.isChecked()
+
+        for b in tab.findChildren(RandoComboBox):
+            k,v = b.currentText().split(':')
+            settings[k.strip()] = v.strip()
+
+        return settings
+
+
+    def setWidgetSetting(self, k, v) -> None:
+        check = self.findCheckBox(k)
+        if check is not None:
+            check.setChecked(v)
+            return
+
+        box = self.findComboBox(k)
+        if box is not None:
+            items = [box.itemText(i) for i in range(box.count())]
+            text = f"{k}: {v}"
+            try:
+                index = items.index(text)
+            except ValueError:
+                pass
+            else:
+                box.setCurrentIndex(index)
 
 
     def addOptionDescriptions(self) -> None:

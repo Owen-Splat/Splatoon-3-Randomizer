@@ -150,14 +150,16 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
 
     result = True
 
-    # Unique case where the level is designed around curling bomb
+    # 2 unique cases where the level is designed around curling bomb/linemarker
     if "Sub" in level_logic:
         if not weapon.endswith(level_logic["Sub"]):
-            result = False
+            return False
 
     # Special
     if weapon.startswith("Sp") and not weapon.startswith("Spinner"):
         special = weapon.split('+')[0]
+        if special == "SpChariot_Mission" and "Timed" in level_logic: # special case where crab is too slow
+            return False
         weapon_logic = LOGIC["Special_Weapons"][special]
         if weapon_logic["Range"] < level_logic["Range"]:
             result = False
@@ -166,6 +168,10 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
         if (not weapon_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
             result = False
         if (not weapon_logic["Rail"]) and (level_logic["Rail"]):
+            result = False
+        if (not weapon_logic["Grate"]) and ("Grate" in level_logic):
+            result = False
+        if (not weapon_logic["Treasure"] and "Boss" in level_logic):
             result = False
         return result
 
@@ -177,6 +183,9 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
         main = "_".join(main_without_last)
         main_logic = LOGIC["Main_Weapons"][main]
         sub_logic = LOGIC["Sub_Weapons"][sub]
+        if "Main" in level_logic: # only a couple levels include this param and its always true
+            if main == "Free":
+                result = False
         if main_logic["Range"] < level_logic["Range"]:
             if sub_logic["Range"] < level_logic["Range"]:
                 result = False
@@ -184,9 +193,9 @@ def checkIfWeaponIsValid(weapon: str, level_logic: dict) -> bool:
                 result = False
             if (not sub_logic["Wall_Paint"]) and (level_logic["Wall_Paint"]):
                 result = False
-        if level_logic["Attack"]:
-            if not sub_logic["Attack"]:
-                result = False
+            if level_logic["Attack"]:
+                if not sub_logic["Attack"]:
+                    result = False
         return result
 
     # Main only
@@ -268,23 +277,21 @@ def randomizeHeroWeapons(thread) -> list[str]:
 
 
 def replaceHeroWeaponEntries(core, hero_weps: list[str]) -> None:
-    """Deletes the hero weapon entries and assigns their IDs to each entry in hero_weps"""
+    """Replaces the hero weapon entries with the corresponding entry in hero_weps
+
+    Id and __RowId are left vanilla so that the entries are kept separate"""
 
     file_name, weapons_info = core.loadFile("RSDB", "WeaponInfoMain")
 
     hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
+    hero_entries = [e for e in list(weapons_info.info) if e["Id"] in hero_ids]
+    new_entries = [e for e in list(weapons_info.info) if e["__RowId"] in hero_weps]
 
-    for entry in list(weapons_info.info):
-        if entry["Id"] in hero_ids:
-            weapons_info.info.remove(entry)
-
-    i = 0
-    for entry in weapons_info.info:
-        if i > 2:
-            break
-        if entry["__RowId"] in hero_weps:
-            entry["Id"] = hero_ids[hero_weps.index(entry["__RowId"])]
-            i += 1
+    for i in range(len(hero_entries)):
+        for k,v in new_entries[i].items():
+            if k in ("Id", "__RowId"):
+                continue
+            hero_entries[i][k] = v
 
     core.saveFile("RSDB", file_name, weapons_info)
 

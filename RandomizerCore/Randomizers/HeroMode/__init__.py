@@ -1,5 +1,6 @@
 from PySide6 import QtCore
-import random, time, traceback
+from RandomizerCore.Tools.actor_tools import SplActor
+import random, time, traceback, oead
 
 from . import background_shuffler
 from . import clothes_shuffler
@@ -27,6 +28,7 @@ class HeroMode_Process(QtCore.QThread):
     def __init__(self, parent, seed: str, settings: dict) -> None:
         QtCore.QThread.__init__(self, parent)
         self.rng = random.Random(seed)
+        self.cosmetic_rng = random.Random(seed)
         self.settings = settings
         self.thread_active = True
 
@@ -42,7 +44,11 @@ class HeroMode_Process(QtCore.QThread):
                 self.weapon_placements = weapon_shuffler.randomizeWeapons(self, self.hero_weapons)
                 self.ui_missions_info = {}
 
+            if self.settings["Collectables"]:
+                self.collectables = collectable_shuffler.CollectableShuffler(self.rng)
+
             if self.thread_active: self.editLevels()
+            if self.thread_active: self.skipTutorial()
             if self.thread_active: self.updateMissionParameters()
             if self.thread_active: self.editDatasheets()
 
@@ -95,9 +101,9 @@ class HeroMode_Process(QtCore.QThread):
             m, level_sarc = self.parent().loadFile("Pack/Scene", m)
 
             if self.settings['Backgrounds']:
-                background_shuffler.randomizeBackground(self.rng, msn, level_sarc)
+                background_shuffler.randomizeBackground(self.cosmetic_rng, msn, level_sarc)
 
-            if msn in ('BigWorld', 'SmallWorld'):
+            if msn in ('BigWorld', 'SmallWorld', "LaunchPadWorld"):
                 self.editHubs(msn, level_sarc)
 
             # mission info
@@ -107,8 +113,8 @@ class HeroMode_Process(QtCore.QThread):
             if self.settings['Levels']:
                 level_shuffler.fixMissionCompatibility(self.levels, msn, mission_data)
 
-            if self.settings['Ink Colors']:
-                color = color_shuffler.getRandomColor(self.rng)
+            if self.settings['Ink Colors'] and "King" not in msn:
+                color = color_shuffler.getRandomColor(self.cosmetic_rng)
                 mission_data.info['TeamColor'] =\
                     f"Work/Gyml/{color}.game__gfx__parameter__TeamColorDataSet.gyml"
 
@@ -122,7 +128,7 @@ class HeroMode_Process(QtCore.QThread):
             self.parent().saveToSarc(level_sarc, file_path, mission_data)
 
             if self.settings['Music']:
-                music_shuffler.randomizeMusic(self.rng, msn, level_sarc)
+                music_shuffler.randomizeMusic(self.cosmetic_rng, msn, level_sarc)
 
             if self.settings['Skip Cutscenes']:
                 cutscene_edits.removeCutscenes(level_sarc)
@@ -136,6 +142,8 @@ class HeroMode_Process(QtCore.QThread):
 
             self.parent().saveFile("Pack/Scene", m, level_sarc)
 
+        self.removeLogicGates() # removes logic elements that would gate out weapons
+
 
     def editHubs(self, msn: str, hub_sarc) -> None:
         """Makes changes to the hub worlds
@@ -145,14 +153,22 @@ class HeroMode_Process(QtCore.QThread):
         file_path = f"Banc/{msn}.bcett.byml"
         banc = self.parent().loadFromSarc(hub_sarc, file_path)
 
+        # # DEBUG - REMOVE ALL OOZE SO WE CAN EASIER TEST STUFF
+        # for act in list(banc.info["Actors"]):
+        #     if act["Name"].startswith("KebaInk"):
+        #         banc.info["Actors"].remove(act)
+
         if self.settings['Levels']:
             level_shuffler.changeKettleDestinations(banc, self.levels)
 
         if msn == 'BigWorld' and self.settings['Fuzzy Ooze Costs']:
             ooze_shuffler.shuffleCosts(self.rng, banc)
 
-        if self.settings['Collectables']:
-            collectable_shuffler.randomizeCollectables(self.rng, banc)
+        if msn != "LaunchPadWorld" and self.settings['Collectables']:
+            self.collectables.randomizeCollectables(banc)
+
+        if self.settings["Skip Cutscenes"]:
+            cutscene_edits.removeCutsceneTriggers(banc)
 
         self.parent().saveToSarc(hub_sarc, file_path, banc)
 
@@ -189,22 +205,6 @@ class HeroMode_Process(QtCore.QThread):
 
         file_name, param_sarc = self.parent().loadFile("Pack", file_name)
 
-        # So currently using the map only allows you to jump to kettles that happen to be in their original site
-        # I thought this would fix that, but nope
-
-        # if self.settings['Levels']:
-        #     table_file = 'Gyml/Singleton/spl__MissionStageTable.spl__MissionStageTable.bgyml'
-        #     stage_table = BYAML(zs_data.writer.files[table_file])
-        #     for stage in stage_table.info['Rows']:
-        #         if stage['StageName'].startswith('Msn_A'):
-        #             loc = [i for i in self.levels if self.levels[i] == stage['StageName']][0]
-        #             site_num = loc[6]
-        #             nums = {'r': '2', 'a': '4', 'n': '6', 'S': '1'}
-        #             if site_num in nums:
-        #                 site_num = nums[site_num]
-        #             stage['WorldAreaType'] = 'BigWorld' + site_num
-        #     zs_data.writer.files[table_file] = stage_table.repack()
-
         if self.settings['Hero Gear Upgrades']:
             upgrade_shuffler.randomizeUpgrades(self.rng, param_sarc)
 
@@ -219,7 +219,7 @@ class HeroMode_Process(QtCore.QThread):
 
         if not any((self.settings["Weapons"],
                     self.settings["Ink Colors"],
-                    self.settings["Hero Clothes"])):
+                    self.settings["Hero Clothes"] != "Vanilla")):
             return
 
         self.status_update.emit("Editing datasheets...")
@@ -234,5 +234,63 @@ class HeroMode_Process(QtCore.QThread):
         if self.settings["Ink Colors"] and self.thread_active:
             color_shuffler.editColors(self)
 
-        if self.settings["Hero Clothes"] and self.thread_active:
-            clothes_shuffler.randomizeClothes(self)
+        if self.settings["Hero Clothes"] != "Vanilla" and self.thread_active:
+            clothes_shuffler.randomizeClothes(self, self.settings["Hero Clothes"] == "Matching")
+
+
+    def skipTutorial(self) -> None:
+        """Forces the game to load the plaza immediately after confirming player customization
+
+        This also skips the news"""
+
+        # --- PlayerMake
+        file_name, tutorial_sarc = self.parent().loadFile("Pack/Scene", "PlayerMake.pack.zs")
+
+        # remove the train cutscenes from the tutorial level
+        # also gives the player the weapon right after customization
+        # this is because the finish trigger checks for weapon
+        cutscene_edits.editTutorialCutscenes(tutorial_sarc)
+
+        banc_path = "Banc/PlayerMake.bcett.byml"
+        banc = self.parent().loadFromSarc(tutorial_sarc, banc_path)
+
+        # move the trigger for the edited WeaponGet cutscene to where the player starts walking
+        trigger1 = [a for a in banc.info["Actors"] if int(a["Hash"]) == 18107586323658635840][0]
+        trigger1["Translate"] = oead.byml.Array([oead.F32(t) for t in [4.0, 6.0, 128.0]])
+        trigger1["Scale"] = oead.byml.Array([oead.F32(t) for t in [15.0, 10.0, 20.0]])
+
+        # move the trigger for finishing tutorial to where the player starts walking
+        trigger2 = [a for a in banc.info["Actors"] if a["Name"] == "LocatorTutorialStation"][0]
+        trigger2["Translate"] = oead.byml.Array([oead.F32(t) for t in [4.0, 6.0, 128.0]])
+        trigger2["Scale"] = oead.byml.Array([oead.F32(t) for t in [15.0, 10.0, 20.0]])
+
+        # save PlayerMake
+        self.parent().saveToSarc(tutorial_sarc, banc_path, banc)
+        self.parent().saveFile("Pack/Scene", file_name, tutorial_sarc)
+
+        # --- Plaza/News
+        file_name, news_sarc = self.parent().loadFile("Pack", "News.pack.zs")
+        cutscene_edits.editNewsCutscenes(news_sarc)
+        self.parent().saveFile("Pack", file_name, news_sarc)
+
+
+    # TODO: We need to do the same for Rocket 1 since it requires using smallfry to hit 2 buttons at once
+    def removeLogicGates(self) -> None:
+        """Removes logic from levels that otherwise force specific weapons"""
+
+        # we will first edit the ultra stamp level
+        file_name, level_sarc = self.parent().loadFile("Pack/Scene", "Msn_A06_09C.pack.zs")
+
+        file_path = [f.name for f in list(level_sarc.reader.get_files())
+                    if f.name.startswith("Banc/")][0]
+        banc = self.parent().loadFromSarc(level_sarc, file_path)
+
+        # go through the Ai Groups and remove every CanBuildMachine
+        # these normally only work if you dont choose the first weapon choice
+        # removing logic from them will make them always spawn the ultra stamps
+        for ref in list(banc.info["AiGroups"][0]["References"]):
+            if ref["Id"].startswith("CanBuildMachine_"):
+                banc.info["AiGroups"][0]["References"].remove(ref)
+
+        self.parent().saveToSarc(level_sarc, file_path, banc)
+        self.parent().saveFile("Pack/Scene", file_name, level_sarc)

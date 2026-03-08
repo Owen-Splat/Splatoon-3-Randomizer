@@ -4,6 +4,11 @@ v0.4
     they are designed too heavily on those specials
     we will add map objects so that more weapons and specials can complete them
 
+- add weapon selectors to every level possible
+    naturally, this will require adding logic to those levels
+
+- experiment with randomizing the base hero special
+
 - add proper icons for the randomized hero and grizzco weapons
 
 - add any new weapons we get
