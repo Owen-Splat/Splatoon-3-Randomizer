@@ -20,7 +20,7 @@ TRIGGERS = [
     3117382206393141444, # Mission_Area06First
     16437576962706687477, # Mission_TrinityBecomeFriend
     1935498473693935787, # Mission_TrinityBecomeFriend (small 2nd trigger)
-    12309113695328486721, # TESTING - Rocket intermission between R-1 and R-2 (not set up like the other triggers but positioned like it is)
+    # 12309113695328486721, # TESTING - Rocket intermission between R-1 and R-2 (not set up like the other triggers but positioned like it is)
 ]
 
 
