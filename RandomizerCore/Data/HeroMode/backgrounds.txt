@@ -4,11 +4,9 @@ Sky_MisCrater01
 Sky_MisCrater02
 Sky_MisWorld
 Sky_MsnBrutalism00
-Sky_MsnBrutalism01
 Sky_MsnBrutalism02
 Sky_MsnNostalgia00
 Sky_MsnMegalopolis00
-Sky_MsnMegalopolis02
 Sky_MsnMegalopolis03
 Sky_MsnSunlight00
 Sky_MsnBossRailKing00
