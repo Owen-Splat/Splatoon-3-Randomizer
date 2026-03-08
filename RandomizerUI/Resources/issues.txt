@@ -4,8 +4,6 @@
 <br></br><br></br>
 - Logic is NOT perfect. While it is solid, some weapon choices may still be unbeatable
 <br></br><br></br>
-- Most specials cannot interact with the treasure in the Alterna boss levels, making it unbeatable
-<br></br><br></br>
 - Picking up a special while holding the Rainmaker results in not being able to use your weapon
 <br></br><br></br>
 - Randomized backgrounds may make it hard to see stage elements
