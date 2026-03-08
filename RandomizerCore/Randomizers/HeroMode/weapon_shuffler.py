@@ -277,23 +277,21 @@ def randomizeHeroWeapons(thread) -> list[str]:
 
 
 def replaceHeroWeaponEntries(core, hero_weps: list[str]) -> None:
-    """Deletes the hero weapon entries and assigns their IDs to each entry in hero_weps"""
+    """Replaces the hero weapon entries with the corresponding entry in hero_weps
+
+    Id and __RowId are left vanilla so that the entries are kept separate"""
 
     file_name, weapons_info = core.loadFile("RSDB", "WeaponInfoMain")
 
     hero_ids = [oead.S32(10900), oead.S32(10910), oead.S32(10920)]
+    hero_entries = [e for e in list(weapons_info.info) if e["Id"] in hero_ids]
+    new_entries = [e for e in list(weapons_info.info) if e["__RowId"] in hero_weps]
 
-    for entry in list(weapons_info.info):
-        if entry["Id"] in hero_ids:
-            weapons_info.info.remove(entry)
-
-    i = 0
-    for entry in weapons_info.info:
-        if i > 2:
-            break
-        if entry["__RowId"] in hero_weps:
-            entry["Id"] = hero_ids[hero_weps.index(entry["__RowId"])]
-            i += 1
+    for i in range(len(hero_entries)):
+        for k,v in new_entries[i].items():
+            if k in ("Id", "__RowId"):
+                continue
+            hero_entries[i][k] = v
 
     core.saveFile("RSDB", file_name, weapons_info)
 
